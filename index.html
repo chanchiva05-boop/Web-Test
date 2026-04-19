@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>| TEVA |</title>
+    
+    <link rel="apple-touch-icon" href="teva.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="teva.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="teva.png">
+    
+    <meta name="theme-color" content="#0a0a2a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TEVA">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="TEVA">
+    <meta name="msapplication-TileColor" content="#0a0a2a">
+    
+    <style>
+        /* Import Khmer OS Battambang */
+        @font-face {
+            font-family: 'Khmer OS Battambang';
+            src: local('Khmer OS Battambang'), local('KhmerOSBattambang');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        @font-face {
+            font-family: 'Khmer OS Battambang';
+            src: local('Khmer OS Battambang Bold'), local('KhmerOSBattambang-Bold');
+            font-weight: bold;
+            font-style: normal;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            height: 100vh;
+            overflow: hidden;
+            background: #0a0a2a;
+            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
+        }
+        
+        .gradient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(25, 35, 70, 0.8), rgba(10, 10, 42, 0.95));
+            z-index: 0;
+        }
+        
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 8px),
+                repeating-linear-gradient(135deg, rgba(212,175,55,0.03) 0px, rgba(212,175,55,0.03) 1px, transparent 1px, transparent 12px);
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            z-index: 0;
+            animation: floatOrb 20s ease-in-out infinite;
+        }
+        
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(212,175,55,0.4), rgba(100,80,20,0.1));
+            top: -150px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+        
+        .orb-2 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(80,120,200,0.3), rgba(30,50,100,0.1));
+            bottom: -200px;
+            left: -150px;
+            animation-delay: -5s;
+        }
+        
+        .orb-3 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(245,226,140,0.3), rgba(150,120,50,0.1));
+            top: 40%;
+            left: 20%;
+            animation-delay: -10s;
+        }
+        
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -40px) scale(1.05); }
+            66% { transform: translate(-20px, 30px) scale(0.95); }
+        }
+        
+        .glass-panel {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            text-align: center;
+            width: 100%;
+            max-width: 480px;
+            padding: 0 20px;
+        }
+        
+        .header-badge {
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeSlideUp 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
+            animation-delay: 0.3s;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            background: rgba(15, 20, 35, 0.7);
+            backdrop-filter: blur(20px);
+            padding: 16px 32px;
+            border-radius: 120px;
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .badge:hover {
+            border-color: rgba(212, 175, 55, 0.7);
+            box-shadow: 0 16px 32px rgba(212, 175, 55, 0.15);
+            transform: scale(1.02);
+        }
+        
+        .badge-icon {
+            width: 10px;
+            height: 10px;
+            background: #d4af37;
+            border-radius: 50%;
+            box-shadow: 0 0 12px #d4af37;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.4); }
+        }
+        
+        .badge-text {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            color: #f0e9cf;
+            text-transform: uppercase;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        
+        .badge-text span {
+            color: #d4af37;
+            font-weight: 700;
+            font-size: 19px;
+        }
+        
+        .card {
+            background: rgba(12, 18, 28, 0.55);
+            backdrop-filter: blur(24px);
+            border-radius: 48px;
+            padding: 48px 32px;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+            opacity: 0;
+            animation: fadeSlideUp 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
+            animation-delay: 0.5s;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 40px 70px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+            border-color: rgba(212, 175, 55, 0.35);
+        }
+        
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        
+        .btn {
+            position: relative;
+            width: 100%;
+            padding: 18px 24px;
+            border: none;
+            border-radius: 40px;
+            font-size: 17px;
+            font-weight: 600;
+            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            overflow: hidden;
+            letter-spacing: 1px;
+            background: linear-gradient(105deg, #1e2a3a 0%, #0f1722 100%);
+            color: #e8e2c7;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            border-color: rgba(212, 175, 55, 0.6);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.2);
+            background: linear-gradient(105deg, #253544, #121a28);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .btn-glow {
+            position: absolute;
+            inset: 0;
+            border-radius: 40px;
+            background: radial-gradient(circle at 30% 50%, rgba(212,175,55,0.15), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        
+        .btn:hover .btn-glow {
+            opacity: 1;
+        }
+        
+        .toast-premium {
+            margin-top: 24px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: rgba(10, 20, 18, 0.85);
+            backdrop-filter: blur(16px);
+            padding: 12px 24px;
+            border-radius: 60px;
+            border: 1px solid rgba(74, 222, 128, 0.4);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+            animation: toastGlide 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
+        }
+        
+        .toast-premium .toast-icon {
+            font-size: 18px;
+            filter: drop-shadow(0 0 4px #4ade80);
+        }
+        
+        .toast-premium .toast-message {
+            font-size: 14px;
+            font-weight: 500;
+            color: #4ade80;
+            letter-spacing: 0.3px;
+            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
+        }
+        
+        @keyframes toastGlide {
+            from {
+                opacity: 0;
+                transform: translateY(15px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .line-decoration {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #d4af37, #f5e28c, #d4af37, transparent);
+            bottom: -25px;
+            border-radius: 2px;
+        }
+        
+        .card-footer {
+            margin-top: 28px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: rgba(212, 175, 55, 0.5);
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        
+        .card:hover .dot {
+            background: rgba(212, 175, 55, 0.9);
+            box-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
+        }
+        
+        .text-to-copy {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            height: 0;
+            overflow: hidden;
+        }
+        
+        .birds-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 15;
+            pointer-events: none;
+        }
+        
+        .bird {
+            position: absolute;
+            width: 40px;
+            height: 25px;
+            background: transparent;
+            opacity: 0.6;
+            filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.2));
+        }
+        
+        .bird-body {
+            position: absolute;
+            width: 30px;
+            height: 15px;
+            background: rgba(255, 245, 200, 0.8);
+            border-radius: 50%;
+            top: 5px;
+            left: 5px;
+        }
+        
+        .bird-wing {
+            position: absolute;
+            width: 20px;
+            height: 12px;
+            background: rgba(255, 240, 180, 0.8);
+            border-radius: 50%;
+        }
+        
+        .bird-wing.left {
+            top: 8px;
+            left: 0;
+            transform: rotate(-20deg);
+            animation: wingFlapLeft 0.8s infinite alternate ease-in-out;
+        }
+        
+        .bird-wing.right {
+            top: 8px;
+            right: 0;
+            transform: rotate(20deg);
+            animation: wingFlapRight 0.8s infinite alternate ease-in-out;
+        }
+        
+        .bird-tail {
+            position: absolute;
+            width: 15px;
+            height: 10px;
+            background: rgba(255, 235, 170, 0.8);
+            border-radius: 50%;
+            top: 10px;
+            left: 25px;
+            transform: rotate(30deg);
+        }
+        
+        .bird-eye {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #2a2418;
+            border-radius: 50%;
+            top: 8px;
+            left: 25px;
+        }
+        
+        @keyframes wingFlapLeft {
+            0% { transform: rotate(-20deg) translateY(0); }
+            100% { transform: rotate(-40deg) translateY(2px); }
+        }
+        
+        @keyframes wingFlapRight {
+            0% { transform: rotate(20deg) translateY(0); }
+            100% { transform: rotate(40deg) translateY(2px); }
+        }
+        
+        .bird1 { top: 12%; left: -10%; animation: flyPath1 28s linear infinite; }
+        .bird2 { top: 18%; left: -20%; animation: flyPath2 32s linear infinite; animation-delay: 2s; }
+        .bird3 { top: 8%; left: -40%; animation: flyPath3 30s linear infinite; animation-delay: 5s; }
+        .bird4 { top: 22%; left: -60%; animation: flyPath4 35s linear infinite; animation-delay: 7s; }
+        .bird5 { top: 15%; left: -80%; animation: flyPath5 26s linear infinite; animation-delay: 3s; }
+        
+        @keyframes flyPath1 { 0% { transform: translateX(0) translateY(0); } 100% { transform: translateX(130vw) translateY(20px); } }
+        @keyframes flyPath2 { 0% { transform: translateX(0) translateY(0); } 100% { transform: translateX(140vw) translateY(-15px); } }
+        @keyframes flyPath3 { 0% { transform: translateX(0) translateY(0); } 100% { transform: translateX(125vw) translateY(10px); } }
+        @keyframes flyPath4 { 0% { transform: translateX(0) translateY(0); } 100% { transform: translateX(150vw) translateY(-8px); } }
+        @keyframes flyPath5 { 0% { transform: translateX(0) translateY(0); } 100% { transform: translateX(120vw) translateY(15px); } }
+        
+        .mountain-scene {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 45%;
+            z-index: 5;
+            pointer-events: none;
+        }
+        
+        .peak {
+            position: absolute;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(8, 12, 22, 0.9), rgba(0, 0, 0, 0.7));
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+        
+        .peak-1 { left: 5%; width: 28%; height: 70%; opacity: 0.5; }
+        .peak-2 { left: 25%; width: 32%; height: 85%; opacity: 0.6; }
+        .peak-3 { left: 55%; width: 25%; height: 60%; opacity: 0.45; }
+        .peak-4 { left: 75%; width: 22%; height: 75%; opacity: 0.55; }
+        
+        .mist {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 35%;
+            background: linear-gradient(to top, rgba(255,255,245,0.08), transparent);
+            filter: blur(40px);
+            z-index: 6;
+            pointer-events: none;
+            animation: mistMove 22s ease-in-out infinite alternate;
+        }
+        
+        @keyframes mistMove {
+            0% { opacity: 0.4; transform: translateX(-5%); }
+            100% { opacity: 0.8; transform: translateX(5%); }
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            background: rgba(212, 175, 55, 0.3);
+            border-radius: 50%;
+            animation: floatParticle 12s infinite linear;
+        }
+        
+        @keyframes floatParticle {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.5; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
+        }
+        
+        .install-prompt {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(0);
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.95), rgba(180, 145, 35, 0.95));
+            backdrop-filter: blur(20px);
+            color: #0a0a2a;
+            padding: 14px 28px;
+            border-radius: 60px;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
+            cursor: pointer;
+            z-index: 100;
+            border: 1px solid rgba(255, 245, 180, 0.6);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 20px rgba(212, 175, 55, 0.3);
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            display: none;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        
+        .install-prompt:hover {
+            transform: translateX(-50%) translateY(-3px);
+            background: linear-gradient(135deg, #e5c458, #d4af37);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 28px rgba(212, 175, 55, 0.5);
+            border-color: rgba(255, 250, 200, 0.8);
+        }
+        
+        .install-prompt:active {
+            transform: translateX(-50%) translateY(2px);
+        }
+        
+        .install-prompt::before {
+            content: '📥';
+            margin-right: 10px;
+            font-size: 18px;
+            display: inline-block;
+            animation: bounce 1s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        
+        .status-badge {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(12px);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: 600;
+            z-index: 200;
+            pointer-events: none;
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            letter-spacing: 0.3px;
+            transition: all 0.3s ease;
+        }
+        
+        .status-badge.online {
+            color: #4ade80;
+            border-color: rgba(74, 222, 128, 0.4);
+        }
+        
+        .status-badge.offline {
+            color: #fbbf24;
+            border-color: rgba(251, 191, 36, 0.4);
+        }
+        
+        .update-notification {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #d4af37, #b8922a);
+            color: #0a0a2a;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: bold;
+            z-index: 1000;
+            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            animation: fadeInOut 3s ease forwards;
+            white-space: nowrap;
+        }
+        
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+        }
+        
+        @media (max-width: 500px) {
+            .glass-panel {
+                max-width: 380px;
+            }
+            .badge {
+                padding: 12px 24px;
+                gap: 10px;
+            }
+            .badge-text {
+                font-size: 14px;
+            }
+            .badge-text span {
+                font-size: 15px;
+            }
+            .card {
+                padding: 36px 24px;
+                border-radius: 40px;
+            }
+            .btn {
+                padding: 15px 20px;
+                font-size: 15px;
+            }
+            .install-prompt {
+                padding: 12px 22px;
+                font-size: 13px;
+                bottom: 18px;
+                white-space: nowrap;
+            }
+            .install-prompt::before {
+                font-size: 16px;
+                margin-right: 8px;
+            }
+            .update-notification {
+                font-size: 11px;
+                padding: 8px 16px;
+                white-space: nowrap;
+            }
+            .status-badge {
+                top: 8px;
+                right: 8px;
+                padding: 4px 10px;
+                font-size: 9px;
+            }
+        }
+        
+        @supports (display: standalone) {
+            body {
+                background: #0a0a2a;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="gradient-bg"></div>
+    <div class="animated-bg"></div>
+    
+    <div class="status-badge online" id="statusBadge">● Online</div>
+    
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    
+    <div class="particles" id="particles"></div>
+    
+    <div class="glass-panel">
+        <div class="header-badge">
+            <div class="badge">
+                <div class="badge-icon"></div>
+                <div class="badge-text" id="versionDate">កាលបរិច្ឆេទកំណែ : <span id="versionDateValue">កំពុងផ្ទុក...</span></div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="button-group">
+                <button class="btn" onclick="copyText()">
+                    <span>មេតហ្វូន</span>
+                    <div class="btn-glow"></div>
+                </button>
+                <button class="btn" onclick="copyCode()">
+                    <span>សែលកាត</span>
+                    <div class="btn-glow"></div>
+                </button>
+                <!-- NEW BUTTON: METFONE1 -->
+                <button class="btn" onclick="copyMetfone1()">
+                    <span>មេតហ្វូន ១</span>
+                    <div class="btn-glow"></div>
+                </button>
+            </div>
+            
+            <div style="display: flex; justify-content: center; margin-top: 28px; gap: 12px; flex-wrap: wrap;">
+                <div id="toast" class="toast-premium" style="display: none;">
+                    <span class="toast-icon">✔</span>
+                    <span class="toast-message">ចម្លងជោគជ័យ</span>
+                </div>
+                <div id="toastCode" class="toast-premium" style="display: none;">
+                    <span class="toast-icon">✔</span>
+                    <span class="toast-message">ចម្លងជោគជ័យ</span>
+                </div>
+                <div id="toastMetfone1" class="toast-premium" style="display: none;">
+                    <span class="toast-icon">✔</span>
+                    <span class="toast-message">ចម្លងជោគជ័យ</span>
+                </div>
+            </div>
+            
+            <div class="card-footer">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+            <div class="line-decoration"></div>
+        </div>
+    </div>
+    
+    <div class="text-to-copy" id="textToCopy">កំពុងផ្ទុកអត្ថបទ...</div>
+    <div class="text-to-copy" id="codeToCopy">កំពុងផ្ទុកកូដ...</div>
+    <div class="text-to-copy" id="metfone1ToCopy">កំពុងផ្ទុកអត្ថបទ METFONE1...</div>
+    
+    <div class="birds-container">
+        <div class="bird bird1"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
+        <div class="bird bird2"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
+        <div class="bird bird3"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
+        <div class="bird bird4"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
+        <div class="bird bird5"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
+    </div>
+    
+    <div class="mountain-scene">
+        <div class="peak peak-1"></div>
+        <div class="peak peak-2"></div>
+        <div class="peak peak-3"></div>
+        <div class="peak peak-4"></div>
+    </div>
+    
+    <div class="mist"></div>
+    
+    <button id="installBtn" class="install-prompt">ដំឡើងកម្មវិធី</button>
+    
+    <script>
+        // Store the last update time for version date
+        let lastUpdateTime = null;
+        
+        // Function to update version date display
+        function updateVersionDate() {
+            const versionSpan = document.getElementById('versionDateValue');
+            const now = new Date();
+            const formattedDate = `${now.getDate().toString().padStart(2, '0')} ${getKhmerMonth(now.getMonth())} ${now.getFullYear()}`;
+            versionSpan.textContent = formattedDate;
+            
+            // Store last update time
+            lastUpdateTime = now;
+            localStorage.setItem('last_version_update', now.toISOString());
+            console.log('📅 Version date updated to:', formattedDate);
+        }
+        
+        // Get Khmer month name
+        function getKhmerMonth(month) {
+            const khmerMonths = [
+                'មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា',
+                'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'
+            ];
+            return khmerMonths[month];
+        }
+        
+        // Load saved version date from localStorage
+        function loadSavedVersionDate() {
+            const savedDate = localStorage.getItem('last_version_update');
+            if (savedDate) {
+                try {
+                    const date = new Date(savedDate);
+                    const formattedDate = `${date.getDate().toString().padStart(2, '0')} ${getKhmerMonth(date.getMonth())} ${date.getFullYear()}`;
+                    document.getElementById('versionDateValue').textContent = formattedDate;
+                    lastUpdateTime = date;
+                    console.log('📅 Loaded saved version date:', formattedDate);
+                } catch(e) {
+                    updateVersionDate();
+                }
+            } else {
+                updateVersionDate();
+            }
+        }
+        
+        // Create particles animation
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 45; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 3 + 1;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = 8 + Math.random() * 12 + 's';
+                particle.style.opacity = Math.random() * 0.4 + 0.2;
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+        
+        // Track if this is the first load
+        let isFirstLoad = true;
+        
+        // Update status badge
+        function updateStatusBadge() {
+            const badge = document.getElementById('statusBadge');
+            if (navigator.onLine) {
+                badge.textContent = '● Online';
+                badge.className = 'status-badge online';
+            } else {
+                badge.textContent = '● Offline';
+                badge.className = 'status-badge offline';
+            }
+        }
+        
+        // Show update notification
+        function showUpdateNotification(title, message) {
+            const existingNotifications = document.querySelectorAll('.update-notification');
+            existingNotifications.forEach(notif => notif.remove());
+            
+            const notification = document.createElement('div');
+            notification.className = 'update-notification';
+            notification.textContent = `✨ ${title}: ${message}`;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+        
+        // Force update for METFONE1
+        async function forceUpdateMetfone1Content() {
+            const metfone1Element = document.getElementById('metfone1ToCopy');
+            const oldContent = localStorage.getItem('metfone1_text');
+            
+            try {
+                const response = await fetch('METFONE1.txt?' + Date.now(), {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                
+                if (response.ok) {
+                    const newContent = await response.text();
+                    
+                    if (oldContent !== newContent) {
+                        metfone1Element.textContent = newContent;
+                        localStorage.setItem('metfone1_text', newContent);
+                        console.log('🔄 METFONE1.txt UPDATED from network');
+                        showUpdateNotification('មេតហ្វូន ១', 'បានធ្វើបច្ចុប្បន្នភាពដោយស្វ័យប្រវត្តិ');
+                        return true;
+                    } else {
+                        console.log('✅ METFONE1.txt is up to date');
+                        return false;
+                    }
+                }
+            } catch(e) {
+                console.log('⚠️ Network failed for METFONE1.txt');
+            }
+            return false;
+        }
+        
+        // Load METFONE1 content
+        async function loadMetfone1Content() {
+            const metfone1Element = document.getElementById('metfone1ToCopy');
+            const oldContent = localStorage.getItem('metfone1_text');
+            let contentChanged = false;
+            
+            try {
+                const response = await fetch('METFONE1.txt?' + Date.now(), {
+                    cache: 'no-store'
+                });
+                if (response.ok) {
+                    const newContent = await response.text();
+                    metfone1Element.textContent = newContent;
+                    
+                    if (oldContent && oldContent !== newContent) {
+                        console.log('🔄 METFONE1.txt updated from network');
+                        if (!isFirstLoad) {
+                            showUpdateNotification('មេតហ្វូន ១', 'បានធ្វើបច្ចុប្បន្នភាព');
+                        }
+                        contentChanged = true;
+                    }
+                    
+                    localStorage.setItem('metfone1_text', newContent);
+                    console.log('✅ Loaded latest METFONE1.txt');
+                    return contentChanged;
+                }
+            } catch(e) {
+                console.log('⚠️ Network failed for METFONE1.txt');
+            }
+            
+            if (oldContent) {
+                metfone1Element.textContent = oldContent;
+                console.log('📦 Loaded METFONE1 from localStorage');
+            } else {
+                metfone1Element.textContent = 'កាកម៉េសហ្អា1';
+                console.log('💾 Loaded METFONE1 from fallback');
+            }
+            return false;
+        }
+        
+        // Existing load functions (keep original)
+        async function loadTextContent() {
+            const textElement = document.getElementById('textToCopy');
+            const oldText = localStorage.getItem('metfone_text');
+            let contentChanged = false;
+            try {
+                const response = await fetch('METFONE.txt?' + Date.now(), { cache: 'no-store' });
+                if (response.ok) {
+                    const newText = await response.text();
+                    textElement.textContent = newText;
+                    if (oldText && oldText !== newText) {
+                        if (!isFirstLoad) showUpdateNotification('មេតហ្វូន', 'បានធ្វើបច្ចុប្បន្នភាព');
+                        contentChanged = true;
+                    }
+                    localStorage.setItem('metfone_text', newText);
+                    return contentChanged;
+                }
+            } catch(e) {}
+            if (oldText) textElement.textContent = oldText;
+            else textElement.textContent = 'កាកម៉េសហ្អា';
+            return false;
+        }
+        
+        async function loadCodeContent() {
+            const codeElement = document.getElementById('codeToCopy');
+            const oldCode = localStorage.getItem('cellcard_code');
+            let contentChanged = false;
+            try {
+                const response = await fetch('CELLCARD.txt?' + Date.now(), { cache: 'no-store' });
+                if (response.ok) {
+                    const newCode = await response.text();
+                    codeElement.textContent = newCode;
+                    if (oldCode && oldCode !== newCode) {
+                        if (!isFirstLoad) showUpdateNotification('សែលកាត', 'បានធ្វើបច្ចុប្បន្នភាព');
+                        contentChanged = true;
+                    }
+                    localStorage.setItem('cellcard_code', newCode);
+                    return contentChanged;
+                }
+            } catch(e) {}
+            if (oldCode) codeElement.textContent = oldCode;
+            else codeElement.textContent = 'TEVA555';
+            return false;
+        }
+        
+        // Combined auto update check including METFONE1
+        async function autoUpdateCheck() {
+            if (!navigator.onLine) return;
+            if (isChecking) return;
+            const now = Date.now();
+            if (now - lastUpdateCheck < 30000) return;
+            lastUpdateCheck = now;
+            isChecking = true;
+            console.log('🔍 Auto checking for updates...');
+            try {
+                const [textUpdated, codeUpdated, metfone1Updated] = await Promise.all([
+                    forceUpdateTextContent(),
+                    forceUpdateCodeContent(),
+                    forceUpdateMetfone1Content()
+                ]);
+                if (textUpdated || codeUpdated || metfone1Updated) {
+                    updateVersionDate();
+                }
+            } catch(err) { console.log('⚠️ Auto update check error:', err); }
+            finally { isChecking = false; }
+        }
+        
+        async function forceUpdateTextContent() {
+            const textElement = document.getElementById('textToCopy');
+            const oldText = localStorage.getItem('metfone_text');
+            try {
+                const response = await fetch('METFONE.txt?' + Date.now(), { cache: 'no-store', headers: { 'Cache-Control': 'no-cache, no-store' } });
+                if (response.ok) {
+                    const newText = await response.text();
+                    if (oldText !== newText) {
+                        textElement.textContent = newText;
+                        localStorage.setItem('metfone_text', newText);
+                        showUpdateNotification('មេតហ្វូន', 'បានធ្វើបច្ចុប្បន្នភាពដោយស្វ័យប្រវត្តិ');
+                        return true;
+                    }
+                }
+            } catch(e) {}
+            return false;
+        }
+        
+        async function forceUpdateCodeContent() {
+            const codeElement = document.getElementById('codeToCopy');
+            const oldCode = localStorage.getItem('cellcard_code');
+            try {
+                const response = await fetch('CELLCARD.txt?' + Date.now(), { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
+                if (response.ok) {
+                    const newCode = await response.text();
+                    if (oldCode !== newCode) {
+                        codeElement.textContent = newCode;
+                        localStorage.setItem('cellcard_code', newCode);
+                        showUpdateNotification('សែលកាត', 'បានធ្វើបច្ចុប្បន្នភាពដោយស្វ័យប្រវត្តិ');
+                        return true;
+                    }
+                }
+            } catch(e) {}
+            return false;
+        }
+        
+        let lastUpdateCheck = 0;
+        let isChecking = false;
+        
+        // Service Worker and event listeners
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data.type === 'contentUpdated' || event.data.type === 'backgroundUpdate') {
+                    updateVersionDate();
+                    showUpdateNotification('ជូនដំណឹង', 'កូដត្រូវបានធ្វើបច្ចុប្បន្នភាព');
+                }
+                if (event.data.type === 'updatesChecked' && event.data.hasUpdates) updateVersionDate();
+            });
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration error:', err));
+            });
+        }
+        
+        window.addEventListener('online', () => {
+            updateStatusBadge();
+            showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត - កំពុងពិនិត្យមើលការធ្វើបច្ចុប្បន្នភាព');
+            setTimeout(() => {
+                Promise.all([forceUpdateTextContent(), forceUpdateCodeContent(), forceUpdateMetfone1Content()])
+                    .then(([u1,u2,u3]) => { if(u1||u2||u3) updateVersionDate(); });
+            }, 100);
+        });
+        window.addEventListener('offline', () => updateStatusBadge());
+        document.addEventListener('visibilitychange', () => { if (!document.hidden && navigator.onLine) autoUpdateCheck(); });
+        setInterval(() => { if (navigator.onLine) autoUpdateCheck(); }, 30000);
+        
+        loadSavedVersionDate();
+        Promise.all([loadTextContent(), loadCodeContent(), loadMetfone1Content()]).then(([ch1,ch2,ch3]) => {
+            if (ch1 || ch2 || ch3) updateVersionDate();
+        });
+        updateStatusBadge();
+        setTimeout(() => { isFirstLoad = false; }, 1000);
+        
+        // Toast helpers
+        function showToast(element) {
+            element.style.display = 'flex';
+            setTimeout(() => { element.style.display = 'none'; }, 1800);
+        }
+        
+        function copyText() {
+            const text = document.getElementById("textToCopy").textContent;
+            navigator.clipboard.writeText(text).then(() => showToast(document.getElementById("toast")))
+                .catch(() => fallbackCopyText(text, "toast"));
+        }
+        function copyCode() {
+            const code = document.getElementById("codeToCopy").textContent;
+            navigator.clipboard.writeText(code).then(() => showToast(document.getElementById("toastCode")))
+                .catch(() => fallbackCopyText(code, "toastCode"));
+        }
+        function copyMetfone1() {
+            const content = document.getElementById("metfone1ToCopy").textContent;
+            navigator.clipboard.writeText(content).then(() => showToast(document.getElementById("toastMetfone1")))
+                .catch(() => fallbackCopyText(content, "toastMetfone1"));
+        }
+        
+        function fallbackCopyText(text, toastId) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                if (document.execCommand('copy')) showToast(document.getElementById(toastId));
+                else alert("មិនអាចចម្លងអត្ថបទបានទេ។");
+            } catch (err) { alert("មិនអាចចម្លងអត្ថបទបានទេ។"); }
+            document.body.removeChild(textArea);
+        }
+        
+        // PWA manifest & install
+        function createManifest() {
+            const LOGO_FILE = "teva.png";
+            const manifestData = { name: "𝕊𝕂𝕐ℕ𝔼𝕋", short_name: "𝕊𝕂𝕐ℕ𝔼𝕋", description: "𝕊𝕂𝕐ℕ𝔼𝕋🟢", start_url: ".", display: "standalone", orientation: "portrait", theme_color: "#0a0a2a", background_color: "#0a0a2a", icons: [ { src: LOGO_FILE, sizes: "192x192", type: "image/png", purpose: "any maskable" }, { src: LOGO_FILE, sizes: "512x512", type: "image/png", purpose: "any maskable" } ] };
+            const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
+            const manifestURL = URL.createObjectURL(manifestBlob);
+            const existingLink = document.querySelector('link[rel="manifest"]');
+            if (existingLink) existingLink.remove();
+            const manifestLink = document.createElement('link');
+            manifestLink.rel = 'manifest';
+            manifestLink.href = manifestURL;
+            document.head.appendChild(manifestLink);
+        }
+        createManifest();
+        
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+        window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; installBtn.style.display = 'flex'; });
+        installBtn.addEventListener('click', async () => { if (deferredPrompt) { deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; deferredPrompt = null; installBtn.style.display = 'none'; } });
+        window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; deferredPrompt = null; showUpdateNotification('ជោគជ័យ', 'បានដំឡើងកម្មវិធី'); });
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) installBtn.style.display = 'none';
+        if ('connection' in navigator) navigator.connection.addEventListener('change', () => { if (navigator.onLine) autoUpdateCheck(); });
+    </script>
+</body>
+    </html>
