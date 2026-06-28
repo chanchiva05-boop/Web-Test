@@ -18,7 +18,6 @@
     <meta name="msapplication-TileColor" content="#0a0a2a">
     
     <style>
-        /* Import Khmer OS Battambang */
         @font-face {
             font-family: 'Khmer OS Battambang';
             src: local('Khmer OS Battambang'), local('KhmerOSBattambang');
@@ -231,9 +230,6 @@
             color: #e8e2c7;
             border: 1px solid rgba(212, 175, 55, 0.3);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            /* Disable default touch highlight */
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
         }
         
         .btn::before {
@@ -274,55 +270,6 @@
         
         .btn:hover .btn-glow {
             opacity: 1;
-        }
-        
-        /* Active state with ripple/vibration feedback */
-        .btn:active .btn-glow {
-            opacity: 0.6;
-            background: radial-gradient(circle at 30% 50%, rgba(212,175,55,0.3), transparent 70%);
-        }
-        
-        .toast-premium {
-            margin-top: 24px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            background: rgba(10, 20, 18, 0.85);
-            backdrop-filter: blur(16px);
-            padding: 12px 24px;
-            border-radius: 60px;
-            border: 1px solid rgba(74, 222, 128, 0.4);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-            animation: toastGlide 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            width: fit-content;
-            margin-left: auto;
-            margin-right: auto;
-            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
-        }
-        
-        .toast-premium .toast-icon {
-            font-size: 18px;
-            filter: drop-shadow(0 0 4px #4ade80);
-        }
-        
-        .toast-premium .toast-message {
-            font-size: 14px;
-            font-weight: 500;
-            color: #4ade80;
-            letter-spacing: 0.3px;
-            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
-        }
-        
-        @keyframes toastGlide {
-            from {
-                opacity: 0;
-                transform: translateY(15px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
         }
         
         .line-decoration {
@@ -541,8 +488,6 @@
             display: none;
             letter-spacing: 0.5px;
             white-space: nowrap;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
         }
         
         .install-prompt:hover {
@@ -698,33 +643,18 @@
         
         <div class="card">
             <div class="button-group">
-                <button class="btn" onclick="handleButtonClick('copyText')">
+                <button class="btn" onclick="openV2Box('metfone')">
                     <span>មេតហ្វូន</span>
                     <div class="btn-glow"></div>
                 </button>
-                <button class="btn" onclick="handleButtonClick('copyCode')">
+                <button class="btn" onclick="openV2Box('cellcard')">
                     <span>សែលកាត</span>
                     <div class="btn-glow"></div>
                 </button>
-                <button class="btn" onclick="handleButtonClick('copyMetfone1')">
+                <button class="btn" onclick="openV2Box('metfone1')">
                     <span>មេតហ្វូន ១</span>
                     <div class="btn-glow"></div>
                 </button>
-            </div>
-            
-            <div style="display: flex; justify-content: center; margin-top: 28px; gap: 12px; flex-wrap: wrap;">
-                <div id="toast" class="toast-premium" style="display: none;">
-                    <span class="toast-icon">✔</span>
-                    <span class="toast-message">ចម្លងជោគជ័យ</span>
-                </div>
-                <div id="toastCode" class="toast-premium" style="display: none;">
-                    <span class="toast-icon">✔</span>
-                    <span class="toast-message">ចម្លងជោគជ័យ</span>
-                </div>
-                <div id="toastMetfone1" class="toast-premium" style="display: none;">
-                    <span class="toast-icon">✔</span>
-                    <span class="toast-message">ចម្លងជោគជ័យ</span>
-                </div>
             </div>
             
             <div class="card-footer">
@@ -736,6 +666,7 @@
         </div>
     </div>
     
+    <!-- Hidden text storage (no longer used for copy, just for data) -->
     <div class="text-to-copy" id="textToCopy">កំពុងផ្ទុកអត្ថបទ...</div>
     <div class="text-to-copy" id="codeToCopy">កំពុងផ្ទុកកូដ...</div>
     <div class="text-to-copy" id="metfone1ToCopy">កំពុងផ្ទុកអត្ថបទ METFONE1...</div>
@@ -760,51 +691,21 @@
     <button id="installBtn" class="install-prompt">ដំឡើងកម្មវិធី</button>
     
     <script>
-        // ===== VIBRATION FUNCTION =====
-        function vibrateDevice(duration = 15) {
-            if (navigator.vibrate) {
-                navigator.vibrate(duration);
-            }
-        }
-        
-        // ===== HANDLE BUTTON CLICK WITH VIBRATION =====
-        function handleButtonClick(functionName) {
-            // Trigger vibration (short burst)
-            vibrateDevice(15);
-            
-            // Execute the actual function
-            switch(functionName) {
-                case 'copyText':
-                    copyText();
-                    break;
-                case 'copyCode':
-                    copyCode();
-                    break;
-                case 'copyMetfone1':
-                    copyMetfone1();
-                    break;
-                default:
-                    console.warn('Unknown function:', functionName);
-            }
-        }
-        
-        // Store the last update time for version date
+        // ============================================================
+        // 1. VERSION DATE MANAGEMENT
+        // ============================================================
         let lastUpdateTime = null;
         
-        // Function to update version date display
         function updateVersionDate() {
             const versionSpan = document.getElementById('versionDateValue');
             const now = new Date();
             const formattedDate = `${now.getDate().toString().padStart(2, '0')} ${getKhmerMonth(now.getMonth())} ${now.getFullYear()}`;
             versionSpan.textContent = formattedDate;
-            
-            // Store last update time
             lastUpdateTime = now;
             localStorage.setItem('last_version_update', now.toISOString());
             console.log('📅 Version date updated to:', formattedDate);
         }
         
-        // Get Khmer month name
         function getKhmerMonth(month) {
             const khmerMonths = [
                 'មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា',
@@ -813,7 +714,6 @@
             return khmerMonths[month];
         }
         
-        // Load saved version date from localStorage
         function loadSavedVersionDate() {
             const savedDate = localStorage.getItem('last_version_update');
             if (savedDate) {
@@ -822,7 +722,6 @@
                     const formattedDate = `${date.getDate().toString().padStart(2, '0')} ${getKhmerMonth(date.getMonth())} ${date.getFullYear()}`;
                     document.getElementById('versionDateValue').textContent = formattedDate;
                     lastUpdateTime = date;
-                    console.log('📅 Loaded saved version date:', formattedDate);
                 } catch(e) {
                     updateVersionDate();
                 }
@@ -831,7 +730,9 @@
             }
         }
         
-        // Create particles animation
+        // ============================================================
+        // 2. PARTICLES BACKGROUND
+        // ============================================================
         function createParticles() {
             const container = document.getElementById('particles');
             for (let i = 0; i < 45; i++) {
@@ -849,10 +750,9 @@
         }
         createParticles();
         
-        // Track if this is the first load
-        let isFirstLoad = true;
-        
-        // Update status badge
+        // ============================================================
+        // 3. STATUS BADGE
+        // ============================================================
         function updateStatusBadge() {
             const badge = document.getElementById('statusBadge');
             if (navigator.onLine) {
@@ -864,11 +764,9 @@
             }
         }
         
-        // Show update notification
         function showUpdateNotification(title, message) {
             const existingNotifications = document.querySelectorAll('.update-notification');
             existingNotifications.forEach(notif => notif.remove());
-            
             const notification = document.createElement('div');
             notification.className = 'update-notification';
             notification.textContent = `✨ ${title}: ${message}`;
@@ -876,96 +774,19 @@
             setTimeout(() => notification.remove(), 3000);
         }
         
-        // Force update for METFONE1
-        async function forceUpdateMetfone1Content() {
-            const metfone1Element = document.getElementById('metfone1ToCopy');
-            const oldContent = localStorage.getItem('metfone1_text');
-            
-            try {
-                const response = await fetch('METFONE1.txt?' + Date.now(), {
-                    cache: 'no-store',
-                    headers: {
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache'
-                    }
-                });
-                
-                if (response.ok) {
-                    const newContent = await response.text();
-                    
-                    if (oldContent !== newContent) {
-                        metfone1Element.textContent = newContent;
-                        localStorage.setItem('metfone1_text', newContent);
-                        console.log('🔄 METFONE1.txt UPDATED from network');
-                        showUpdateNotification('មេតហ្វូន ១', 'បានធ្វើបច្ចុប្បន្នភាពដោយស្វ័យប្រវត្តិ');
-                        return true;
-                    } else {
-                        console.log('✅ METFONE1.txt is up to date');
-                        return false;
-                    }
-                }
-            } catch(e) {
-                console.log('⚠️ Network failed for METFONE1.txt');
-            }
-            return false;
-        }
-        
-        // Load METFONE1 content
-        async function loadMetfone1Content() {
-            const metfone1Element = document.getElementById('metfone1ToCopy');
-            const oldContent = localStorage.getItem('metfone1_text');
-            let contentChanged = false;
-            
-            try {
-                const response = await fetch('METFONE1.txt?' + Date.now(), {
-                    cache: 'no-store'
-                });
-                if (response.ok) {
-                    const newContent = await response.text();
-                    metfone1Element.textContent = newContent;
-                    
-                    if (oldContent && oldContent !== newContent) {
-                        console.log('🔄 METFONE1.txt updated from network');
-                        if (!isFirstLoad) {
-                            showUpdateNotification('មេតហ្វូន ១', 'បានធ្វើបច្ចុប្បន្នភាព');
-                        }
-                        contentChanged = true;
-                    }
-                    
-                    localStorage.setItem('metfone1_text', newContent);
-                    console.log('✅ Loaded latest METFONE1.txt');
-                    return contentChanged;
-                }
-            } catch(e) {
-                console.log('⚠️ Network failed for METFONE1.txt');
-            }
-            
-            if (oldContent) {
-                metfone1Element.textContent = oldContent;
-                console.log('📦 Loaded METFONE1 from localStorage');
-            } else {
-                metfone1Element.textContent = 'កាកម៉េសហ្អា1';
-                console.log('💾 Loaded METFONE1 from fallback');
-            }
-            return false;
-        }
-        
-        // Existing load functions (keep original)
+        // ============================================================
+        // 4. LOAD CONTENT FROM TXT FILES
+        // ============================================================
         async function loadTextContent() {
             const textElement = document.getElementById('textToCopy');
             const oldText = localStorage.getItem('metfone_text');
-            let contentChanged = false;
             try {
                 const response = await fetch('METFONE.txt?' + Date.now(), { cache: 'no-store' });
                 if (response.ok) {
                     const newText = await response.text();
                     textElement.textContent = newText;
-                    if (oldText && oldText !== newText) {
-                        if (!isFirstLoad) showUpdateNotification('មេតហ្វូន', 'បានធ្វើបច្ចុប្បន្នភាព');
-                        contentChanged = true;
-                    }
                     localStorage.setItem('metfone_text', newText);
-                    return contentChanged;
+                    return true;
                 }
             } catch(e) {}
             if (oldText) textElement.textContent = oldText;
@@ -976,18 +797,13 @@
         async function loadCodeContent() {
             const codeElement = document.getElementById('codeToCopy');
             const oldCode = localStorage.getItem('cellcard_code');
-            let contentChanged = false;
             try {
                 const response = await fetch('CELLCARD.txt?' + Date.now(), { cache: 'no-store' });
                 if (response.ok) {
                     const newCode = await response.text();
                     codeElement.textContent = newCode;
-                    if (oldCode && oldCode !== newCode) {
-                        if (!isFirstLoad) showUpdateNotification('សែលកាត', 'បានធ្វើបច្ចុប្បន្នភាព');
-                        contentChanged = true;
-                    }
                     localStorage.setItem('cellcard_code', newCode);
-                    return contentChanged;
+                    return true;
                 }
             } catch(e) {}
             if (oldCode) codeElement.textContent = oldCode;
@@ -995,7 +811,81 @@
             return false;
         }
         
-        // Combined auto update check including METFONE1
+        async function loadMetfone1Content() {
+            const metfone1Element = document.getElementById('metfone1ToCopy');
+            const oldContent = localStorage.getItem('metfone1_text');
+            try {
+                const response = await fetch('METFONE1.txt?' + Date.now(), { cache: 'no-store' });
+                if (response.ok) {
+                    const newContent = await response.text();
+                    metfone1Element.textContent = newContent;
+                    localStorage.setItem('metfone1_text', newContent);
+                    return true;
+                }
+            } catch(e) {}
+            if (oldContent) metfone1Element.textContent = oldContent;
+            else metfone1Element.textContent = 'កាកម៉េសហ្អា1';
+            return false;
+        }
+        
+        // ============================================================
+        // 5. CORE FUNCTION: OPEN V2BOX WITH DEEP LINK
+        // ============================================================
+        function openV2Box(type) {
+            // Get the content based on button type
+            let content = '';
+            let name = '';
+            
+            if (type === 'metfone') {
+                content = document.getElementById('textToCopy').textContent;
+                name = 'METFONE';
+            } else if (type === 'cellcard') {
+                content = document.getElementById('codeToCopy').textContent;
+                name = 'CELLCARD';
+            } else if (type === 'metfone1') {
+                content = document.getElementById('metfone1ToCopy').textContent;
+                name = 'METFONE1';
+            }
+            
+            if (!content || content === 'កំពុងផ្ទុកអត្ថបទ...' || content === 'កំពុងផ្ទុកកូដ...' || content === 'កំពុងផ្ទុកអត្ថបទ METFONE1...') {
+                // If still loading, try again in 500ms
+                setTimeout(() => openV2Box(type), 500);
+                return;
+            }
+            
+            // Encode the content for URL
+            const encodedContent = encodeURIComponent(content);
+            const encodedName = encodeURIComponent(name);
+            
+            // Build V2Box deep link
+            const v2boxUrl = `v2box://install-sub?url=${encodedContent}&name=${encodedName}`;
+            
+            // Try to open V2Box
+            window.location.href = v2boxUrl;
+            
+            // Fallback: If V2Box is not installed, open Play Store (Android) or App Store (iOS)
+            setTimeout(() => {
+                // Check if we're still on the page (V2Box didn't open)
+                // Use a hidden technique to detect if app opened
+                // Simple approach: try to open store as fallback
+                const isAndroid = /android/i.test(navigator.userAgent);
+                const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+                
+                if (isAndroid) {
+                    window.location.href = 'https://play.google.com/store/apps/details?id=dev.hexasoftware.v2box';
+                } else if (isIOS) {
+                    window.location.href = 'https://apps.apple.com/app/v2box/id6446814670';
+                }
+            }, 2000);
+        }
+        
+        // ============================================================
+        // 6. SERVICE WORKER & AUTO UPDATE
+        // ============================================================
+        let isFirstLoad = true;
+        let lastUpdateCheck = 0;
+        let isChecking = false;
+        
         async function autoUpdateCheck() {
             if (!navigator.onLine) return;
             if (isChecking) return;
@@ -1003,60 +893,17 @@
             if (now - lastUpdateCheck < 30000) return;
             lastUpdateCheck = now;
             isChecking = true;
-            console.log('🔍 Auto checking for updates...');
             try {
-                const [textUpdated, codeUpdated, metfone1Updated] = await Promise.all([
-                    forceUpdateTextContent(),
-                    forceUpdateCodeContent(),
-                    forceUpdateMetfone1Content()
+                const [t1, t2, t3] = await Promise.all([
+                    loadTextContent(),
+                    loadCodeContent(),
+                    loadMetfone1Content()
                 ]);
-                if (textUpdated || codeUpdated || metfone1Updated) {
-                    updateVersionDate();
-                }
-            } catch(err) { console.log('⚠️ Auto update check error:', err); }
+                if (t1 || t2 || t3) updateVersionDate();
+            } catch(err) {}
             finally { isChecking = false; }
         }
         
-        async function forceUpdateTextContent() {
-            const textElement = document.getElementById('textToCopy');
-            const oldText = localStorage.getItem('metfone_text');
-            try {
-                const response = await fetch('METFONE.txt?' + Date.now(), { cache: 'no-store', headers: { 'Cache-Control': 'no-cache, no-store' } });
-                if (response.ok) {
-                    const newText = await response.text();
-                    if (oldText !== newText) {
-                        textElement.textContent = newText;
-                        localStorage.setItem('metfone_text', newText);
-                        showUpdateNotification('មេតហ្វូន', 'បានធ្វើបច្ចុប្បន្នភាពដោយស្វ័យប្រវត្តិ');
-                        return true;
-                    }
-                }
-            } catch(e) {}
-            return false;
-        }
-        
-        async function forceUpdateCodeContent() {
-            const codeElement = document.getElementById('codeToCopy');
-            const oldCode = localStorage.getItem('cellcard_code');
-            try {
-                const response = await fetch('CELLCARD.txt?' + Date.now(), { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
-                if (response.ok) {
-                    const newCode = await response.text();
-                    if (oldCode !== newCode) {
-                        codeElement.textContent = newCode;
-                        localStorage.setItem('cellcard_code', newCode);
-                        showUpdateNotification('សែលកាត', 'បានធ្វើបច្ចុប្បន្នភាពដោយស្វ័យប្រវត្តិ');
-                        return true;
-                    }
-                }
-            } catch(e) {}
-            return false;
-        }
-        
-        let lastUpdateCheck = 0;
-        let isChecking = false;
-        
-        // Service Worker and event listeners
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.addEventListener('message', (event) => {
                 if (event.data.type === 'contentUpdated' || event.data.type === 'backgroundUpdate') {
@@ -1074,7 +921,7 @@
             updateStatusBadge();
             showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត - កំពុងពិនិត្យមើលការធ្វើបច្ចុប្បន្នភាព');
             setTimeout(() => {
-                Promise.all([forceUpdateTextContent(), forceUpdateCodeContent(), forceUpdateMetfone1Content()])
+                Promise.all([loadTextContent(), loadCodeContent(), loadMetfone1Content()])
                     .then(([u1,u2,u3]) => { if(u1||u2||u3) updateVersionDate(); });
             }, 100);
         });
@@ -1082,6 +929,9 @@
         document.addEventListener('visibilitychange', () => { if (!document.hidden && navigator.onLine) autoUpdateCheck(); });
         setInterval(() => { if (navigator.onLine) autoUpdateCheck(); }, 30000);
         
+        // ============================================================
+        // 7. INITIALIZATION
+        // ============================================================
         loadSavedVersionDate();
         Promise.all([loadTextContent(), loadCodeContent(), loadMetfone1Content()]).then(([ch1,ch2,ch3]) => {
             if (ch1 || ch2 || ch3) updateVersionDate();
@@ -1089,46 +939,25 @@
         updateStatusBadge();
         setTimeout(() => { isFirstLoad = false; }, 1000);
         
-        // Toast helpers
-        function showToast(element) {
-            element.style.display = 'flex';
-            setTimeout(() => { element.style.display = 'none'; }, 1800);
-        }
-        
-        function copyText() {
-            const text = document.getElementById("textToCopy").textContent;
-            navigator.clipboard.writeText(text).then(() => showToast(document.getElementById("toast")))
-                .catch(() => fallbackCopyText(text, "toast"));
-        }
-        function copyCode() {
-            const code = document.getElementById("codeToCopy").textContent;
-            navigator.clipboard.writeText(code).then(() => showToast(document.getElementById("toastCode")))
-                .catch(() => fallbackCopyText(code, "toastCode"));
-        }
-        function copyMetfone1() {
-            const content = document.getElementById("metfone1ToCopy").textContent;
-            navigator.clipboard.writeText(content).then(() => showToast(document.getElementById("toastMetfone1")))
-                .catch(() => fallbackCopyText(content, "toastMetfone1"));
-        }
-        
-        function fallbackCopyText(text, toastId) {
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.style.position = "fixed";
-            textArea.style.opacity = "0";
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-                if (document.execCommand('copy')) showToast(document.getElementById(toastId));
-                else alert("មិនអាចចម្លងអត្ថបទបានទេ។");
-            } catch (err) { alert("មិនអាចចម្លងអត្ថបទបានទេ។"); }
-            document.body.removeChild(textArea);
-        }
-        
-        // PWA manifest & install
+        // ============================================================
+        // 8. PWA MANIFEST & INSTALL
+        // ============================================================
         function createManifest() {
             const LOGO_FILE = "teva.png";
-            const manifestData = { name: "𝕊𝕂𝕐ℕ𝔼𝕋", short_name: "𝕊𝕂𝕐ℕ𝔼𝕋", description: "𝕊𝕂𝕐ℕ𝔼𝕋🟢", start_url: ".", display: "standalone", orientation: "portrait", theme_color: "#0a0a2a", background_color: "#0a0a2a", icons: [ { src: LOGO_FILE, sizes: "192x192", type: "image/png", purpose: "any maskable" }, { src: LOGO_FILE, sizes: "512x512", type: "image/png", purpose: "any maskable" } ] };
+            const manifestData = { 
+                name: "𝕊𝕂𝕐ℕ𝔼𝕋", 
+                short_name: "𝕊𝕂𝕐ℕ𝔼𝕋", 
+                description: "𝕊𝕂𝕐ℕ𝔼𝕋🟢", 
+                start_url: ".", 
+                display: "standalone", 
+                orientation: "portrait", 
+                theme_color: "#0a0a2a", 
+                background_color: "#0a0a2a", 
+                icons: [ 
+                    { src: LOGO_FILE, sizes: "192x192", type: "image/png", purpose: "any maskable" }, 
+                    { src: LOGO_FILE, sizes: "512x512", type: "image/png", purpose: "any maskable" } 
+                ] 
+            };
             const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
             const manifestURL = URL.createObjectURL(manifestBlob);
             const existingLink = document.querySelector('link[rel="manifest"]');
@@ -1148,8 +977,6 @@
             installBtn.style.display = 'flex'; 
         });
         installBtn.addEventListener('click', async () => { 
-            // Add vibration for install button too
-            vibrateDevice(15);
             if (deferredPrompt) { 
                 deferredPrompt.prompt(); 
                 const { outcome } = await deferredPrompt.userChoice; 
@@ -1162,8 +989,14 @@
             deferredPrompt = null; 
             showUpdateNotification('ជោគជ័យ', 'បានដំឡើងកម្មវិធី'); 
         });
-        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) installBtn.style.display = 'none';
-        if ('connection' in navigator) navigator.connection.addEventListener('change', () => { if (navigator.onLine) autoUpdateCheck(); });
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            installBtn.style.display = 'none';
+        }
+        if ('connection' in navigator) {
+            navigator.connection.addEventListener('change', () => { 
+                if (navigator.onLine) autoUpdateCheck(); 
+            });
+        }
     </script>
 </body>
 </html>
