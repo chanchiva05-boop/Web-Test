@@ -1499,13 +1499,12 @@
             const div = document.createElement('div');
             div.id = 'fpDisplay';
             div.innerHTML = `
-                <div class="fp-title">🔐 DEVICE FINGERPRINT</div>
+                <div class="fp-title">🔐 ID DEVICE</div>
                 <div class="fp-code">${fp}</div>
                 <div class="fp-actions">
                     <button class="fp-btn fp-btn-copy" onclick="copyFingerprint()">📋 ចម្លង</button>
                     <button class="fp-btn fp-btn-close" onclick="this.parentElement.parentElement.remove()">✕ បិទ</button>
                 </div>
-                <div class="fp-hint">ចម្លងលេខនេះទៅដាក់ក្នុង TOOR.txt</div>
             `;
             document.body.appendChild(div);
             
