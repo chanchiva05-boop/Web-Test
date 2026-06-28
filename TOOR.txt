@@ -1,5 +1,24 @@
 [
   {"password":"TEVA","fingerprint":"FP_49f39f41"},
-  {"password":"YOUR","fingerprint":"FP_4a4e9d6c"}
-  {"password":"TEVA1","fingerprint":"FP_38eeae45"}
+  {"password":"YOU","fingerprint":""},
+  {"password":"TEVA1","fingerprint":"FP_38eeae45"},
+  {"password":"USER002","fingerprint":""},
+  {"password":"USER003","fingerprint":""},
+  {"password":"USER004","fingerprint":""},
+  {"password":"USER005","fingerprint":""},
+  {"password":"USER006","fingerprint":""},
+  {"password":"USER007","fingerprint":""},
+  {"password":"USER008","fingerprint":""},
+  {"password":"USER009","fingerprint":""},
+  {"password":"USER010","fingerprint":""},
+  {"password":"USER011","fingerprint":""},
+  {"password":"USER012","fingerprint":""},
+  {"password":"USER013","fingerprint":""},
+  {"password":"USER014","fingerprint":""},
+  {"password":"USER015","fingerprint":""},
+  {"password":"USER016","fingerprint":""},
+  {"password":"USER017","fingerprint":""},
+  {"password":"USER018","fingerprint":""},
+  {"password":"USER019","fingerprint":""},
+  {"password":"USER020","fingerprint":""}
 ]
