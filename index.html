@@ -568,6 +568,154 @@
             100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
         }
         
+        /* ===== LOGIN SCREEN STYLES ===== */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 42, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .login-overlay.active {
+            display: flex;
+        }
+        
+        .login-box {
+            background: rgba(12, 18, 28, 0.85);
+            backdrop-filter: blur(24px);
+            border-radius: 48px;
+            padding: 48px 32px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
+        }
+        
+        .login-title {
+            color: #f0e9cf;
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'Times New Roman', Times, serif;
+            margin-bottom: 4px;
+            letter-spacing: 3px;
+        }
+        
+        .login-subtitle {
+            color: rgba(212, 175, 55, 0.6);
+            font-size: 13px;
+            margin-bottom: 30px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        
+        .login-input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .login-input {
+            width: 100%;
+            padding: 16px 22px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 30px;
+            color: #f0e9cf;
+            font-size: 16px;
+            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
+            transition: all 0.3s ease;
+            outline: none;
+            letter-spacing: 1px;
+        }
+        
+        .login-input:focus {
+            border-color: #d4af37;
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.15);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .login-input::placeholder {
+            color: rgba(255, 255, 255, 0.25);
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #d4af37, #b8922a);
+            border: none;
+            border-radius: 30px;
+            color: #0a0a2a;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+            letter-spacing: 1px;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5);
+        }
+        
+        .login-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .login-error {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 14px;
+            min-height: 24px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .login-error.show {
+            opacity: 1;
+        }
+        
+        .login-device-info {
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 11px;
+            margin-top: 20px;
+            letter-spacing: 0.5px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 20px;
+        }
+        
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.15), transparent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #d4af37;
+            border: 2px solid rgba(212, 175, 55, 0.15);
+        }
+        
+        .login-shield {
+            font-size: 14px;
+            color: rgba(212, 175, 55, 0.4);
+            margin-top: 10px;
+            letter-spacing: 1px;
+        }
+        
         @media (max-width: 500px) {
             .glass-panel {
                 max-width: 380px;
@@ -611,6 +759,21 @@
                 padding: 4px 10px;
                 font-size: 9px;
             }
+            .login-box {
+                padding: 36px 24px;
+                border-radius: 40px;
+            }
+            .login-title {
+                font-size: 26px;
+            }
+            .login-input {
+                padding: 14px 18px;
+                font-size: 14px;
+            }
+            .login-btn {
+                padding: 14px;
+                font-size: 16px;
+            }
         }
         
         @supports (display: standalone) {
@@ -622,6 +785,22 @@
 </head>
 
 <body>
+    <!-- ===== LOGIN OVERLAY ===== -->
+    <div class="login-overlay active" id="loginOverlay">
+        <div class="login-box">
+            <div class="login-logo">🔐</div>
+            <div class="login-title">TEVA</div>
+            <div class="login-subtitle">• Secure Access •</div>
+            <div class="login-input-group">
+                <input type="password" class="login-input" id="loginPassword" placeholder="បញ្ចូលពាក្យសម្ងាត់..." autocomplete="off">
+            </div>
+            <button class="login-btn" id="loginBtn">ចូលប្រើប្រាស់</button>
+            <div class="login-error" id="loginError">ពាក្យសម្ងាត់មិនត្រឹមត្រូវ</div>
+            <div class="login-device-info">⚡ ពាក្យសម្ងាត់ប្រើបានតែមួយឧបករណ៍ប៉ុណ្ណោះ</div>
+            <div class="login-shield">🛡️ SECURE DEVICE LOCK</div>
+        </div>
+    </div>
+
     <div class="gradient-bg"></div>
     <div class="animated-bg"></div>
     
@@ -1010,6 +1189,214 @@
                 if (navigator.onLine) autoUpdateCheck(); 
             });
         }
+
+        // ============================================================
+        // 9. LOGIN SYSTEM WITH DEVICE FINGERPRINT
+        // ============================================================
+
+        // Generate device fingerprint
+        function getDeviceFingerprint() {
+            const components = [
+                navigator.userAgent,
+                navigator.language,
+                navigator.platform,
+                screen.width + 'x' + screen.height,
+                screen.colorDepth,
+                navigator.hardwareConcurrency || 0,
+                navigator.deviceMemory || 0,
+                new Date().getTimezoneOffset()
+            ];
+            
+            // Try to get more unique identifiers
+            try {
+                if (navigator.connection) {
+                    components.push(navigator.connection.effectiveType);
+                    components.push(navigator.connection.downlink);
+                }
+            } catch(e) {}
+            
+            // Try canvas fingerprint
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 200;
+                canvas.height = 50;
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#f60';
+                ctx.fillRect(125, 1, 62, 20);
+                ctx.fillStyle = '#069';
+                ctx.fillText('TEVA', 2, 15);
+                ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+                ctx.fillText('SECURE', 4, 17);
+                components.push(canvas.toDataURL());
+            } catch(e) {}
+            
+            // Generate hash
+            const str = components.join('|||');
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return 'FP_' + Math.abs(hash).toString(16).padStart(8, '0');
+        }
+
+        let deviceFingerprint = getDeviceFingerprint();
+        let isLoggedIn = false;
+
+        // Load TOOR.txt
+        async function loadTOOR() {
+            try {
+                const response = await fetch('TOOR.txt?' + Date.now(), { cache: 'no-store' });
+                if (response.ok) {
+                    const data = await response.text();
+                    try {
+                        const parsed = JSON.parse(data);
+                        return parsed;
+                    } catch(e) {
+                        // If not JSON, treat as single password
+                        return [{ password: data.trim(), fingerprint: '' }];
+                    }
+                }
+            } catch(e) {
+                console.log('⚠️ Failed to load TOOR.txt, using localStorage fallback');
+            }
+            
+            // Try localStorage fallback
+            const localData = localStorage.getItem('toor_data');
+            if (localData) {
+                try {
+                    return JSON.parse(localData);
+                } catch(e) {}
+            }
+            
+            // Default
+            return [{ password: 'TEVA2026', fingerprint: '' }];
+        }
+
+        // Save TOOR.txt
+        async function saveTOOR(data) {
+            try {
+                const response = await fetch('TOOR.txt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (response.ok) {
+                    localStorage.setItem('toor_data', JSON.stringify(data));
+                    return true;
+                }
+            } catch(e) {
+                console.log('⚠️ Failed to save TOOR.txt, saving to localStorage');
+            }
+            
+            // Save to localStorage as fallback
+            localStorage.setItem('toor_data', JSON.stringify(data));
+            return true;
+        }
+
+        async function checkLogin(password) {
+            const toorData = await loadTOOR();
+            const currentFP = deviceFingerprint;
+            
+            // Check if any password matches
+            for (let entry of toorData) {
+                if (entry.password === password) {
+                    // If no fingerprint assigned, assign current device
+                    if (!entry.fingerprint) {
+                        entry.fingerprint = currentFP;
+                        await saveTOOR(toorData);
+                        return true;
+                    }
+                    // If fingerprint matches, allow login
+                    if (entry.fingerprint === currentFP) {
+                        return true;
+                    }
+                    // Fingerprint doesn't match - device already used
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        // Initialize login system
+        async function initLogin() {
+            const overlay = document.getElementById('loginOverlay');
+            const input = document.getElementById('loginPassword');
+            const btn = document.getElementById('loginBtn');
+            const error = document.getElementById('loginError');
+            
+            // Check if already logged in this session
+            if (sessionStorage.getItem('teva_logged_in') === 'true') {
+                isLoggedIn = true;
+                overlay.classList.remove('active');
+                return;
+            }
+            
+            // Check if device is authorized
+            const toorData = await loadTOOR();
+            const currentFP = deviceFingerprint;
+            let deviceAuthorized = false;
+            
+            for (let entry of toorData) {
+                if (entry.fingerprint === currentFP) {
+                    deviceAuthorized = true;
+                    break;
+                }
+            }
+            
+            // If device already authorized, auto-login
+            if (deviceAuthorized) {
+                isLoggedIn = true;
+                sessionStorage.setItem('teva_logged_in', 'true');
+                overlay.classList.remove('active');
+                return;
+            }
+            
+            // Show login
+            overlay.classList.add('active');
+            
+            // Handle login
+            async function handleLogin() {
+                const password = input.value.trim();
+                if (!password) {
+                    error.textContent = 'សូមបញ្ចូលពាក្យសម្ងាត់';
+                    error.classList.add('show');
+                    return;
+                }
+                
+                const success = await checkLogin(password);
+                
+                if (success) {
+                    isLoggedIn = true;
+                    sessionStorage.setItem('teva_logged_in', 'true');
+                    overlay.classList.remove('active');
+                    error.classList.remove('show');
+                    showUpdateNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
+                } else {
+                    error.textContent = '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ ឬត្រូវបានប្រើរួចហើយ';
+                    error.classList.add('show');
+                    input.value = '';
+                    input.focus();
+                }
+            }
+            
+            btn.addEventListener('click', handleLogin);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
+            
+            // Focus input after a short delay
+            setTimeout(() => input.focus(), 500);
+        }
+
+        // Load and initialize login
+        setTimeout(initLogin, 100);
+
+        console.log('🔐 Device Fingerprint:', deviceFingerprint);
+        console.log('📱 TEVA App Loaded Successfully');
     </script>
 </body>
-</html>
+    </html>
