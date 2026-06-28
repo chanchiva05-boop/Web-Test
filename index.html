@@ -1008,10 +1008,9 @@
         }
         
         // ============================================================
-        // 5. CORE FUNCTION: OPEN V2BOX WITH DEEP LINK (NO COPY)
+        // 5. CORE FUNCTION: OPEN V2BOX WITH DEEP LINK
         // ============================================================
         function openV2Box(type) {
-            // Get the content based on button type
             let content = '';
             let name = '';
             
@@ -1026,7 +1025,6 @@
                 name = 'METFONE1';
             }
             
-            // If still loading, try again in 500ms
             if (!content || 
                 content === 'កំពុងផ្ទុកអត្ថបទ...' || 
                 content === 'កំពុងផ្ទុកកូដ...' || 
@@ -1035,17 +1033,12 @@
                 return;
             }
             
-            // Encode the content for URL
             const encodedContent = encodeURIComponent(content);
             const encodedName = encodeURIComponent(name);
-            
-            // Build V2Box deep link
             const v2boxUrl = `v2box://install-sub?url=${encodedContent}&name=${encodedName}`;
             
-            // Try to open V2Box
             window.location.href = v2boxUrl;
             
-            // Check if app opened by detecting page visibility change
             let appOpened = false;
             const checkAppOpened = () => {
                 appOpened = true;
@@ -1056,7 +1049,6 @@
             document.addEventListener('visibilitychange', checkAppOpened);
             window.addEventListener('blur', checkAppOpened);
             
-            // Fallback: If app didn't open after 2.5 seconds, go to store
             setTimeout(() => {
                 if (!appOpened) {
                     const isAndroid = /android/i.test(navigator.userAgent);
@@ -1191,7 +1183,7 @@
         }
 
         // ============================================================
-        // 9. LOGIN SYSTEM WITH DEVICE FINGERPRINT
+        // 9. LOGIN SYSTEM WITH DEVICE FINGERPRINT & AUTO-SAVE
         // ============================================================
 
         // Generate device fingerprint
@@ -1207,7 +1199,6 @@
                 new Date().getTimezoneOffset()
             ];
             
-            // Try to get more unique identifiers
             try {
                 if (navigator.connection) {
                     components.push(navigator.connection.effectiveType);
@@ -1215,7 +1206,6 @@
                 }
             } catch(e) {}
             
-            // Try canvas fingerprint
             try {
                 const canvas = document.createElement('canvas');
                 canvas.width = 200;
@@ -1232,7 +1222,6 @@
                 components.push(canvas.toDataURL());
             } catch(e) {}
             
-            // Generate hash
             const str = components.join('|||');
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
@@ -1256,7 +1245,6 @@
                         const parsed = JSON.parse(data);
                         return parsed;
                     } catch(e) {
-                        // If not JSON, treat as single password
                         return [{ password: data.trim(), fingerprint: '' }];
                     }
                 }
@@ -1264,7 +1252,6 @@
                 console.log('⚠️ Failed to load TOOR.txt, using localStorage fallback');
             }
             
-            // Try localStorage fallback
             const localData = localStorage.getItem('toor_data');
             if (localData) {
                 try {
@@ -1272,8 +1259,7 @@
                 } catch(e) {}
             }
             
-            // Default
-            return [{ password: 'TEVA2026', fingerprint: '' }];
+            return [{ password: 'TEVA', fingerprint: '' }];
         }
 
         // Save TOOR.txt
@@ -1292,50 +1278,121 @@
                 console.log('⚠️ Failed to save TOOR.txt, saving to localStorage');
             }
             
-            // Save to localStorage as fallback
             localStorage.setItem('toor_data', JSON.stringify(data));
             return true;
         }
 
+        // ============================================================
+        // FORCE SAVE FINGERPRINT - បង្ខំរក្សាទុក fingerprint
+        // ============================================================
+        
+        async function forceSaveFingerprint(password) {
+            try {
+                const toorData = await loadTOOR();
+                const currentFP = deviceFingerprint;
+                let updated = false;
+                
+                for (let entry of toorData) {
+                    if (entry.password === password && !entry.fingerprint) {
+                        entry.fingerprint = currentFP;
+                        updated = true;
+                        break;
+                    }
+                }
+                
+                if (updated) {
+                    const saved = await saveTOOR(toorData);
+                    if (saved) {
+                        console.log('✅ Fingerprint saved successfully:', currentFP);
+                        showUpdateNotification('🔒', 'បានចាក់សោរឧបករណ៍ដោយជោគជ័យ');
+                        return true;
+                    }
+                }
+                return false;
+            } catch (error) {
+                console.error('❌ Error saving fingerprint:', error);
+                return false;
+            }
+        }
+
+        // ============================================================
+        // AUTO CHECK FINGERPRINT ON PAGE LOAD
+        // ============================================================
+        
+        async function autoCheckAndSaveFingerprint() {
+            if (sessionStorage.getItem('teva_logged_in') === 'true') {
+                const toorData = await loadTOOR();
+                const currentFP = deviceFingerprint;
+                let needsUpdate = false;
+                
+                for (let entry of toorData) {
+                    if (!entry.fingerprint) {
+                        const allEntries = await loadTOOR();
+                        let foundMatch = false;
+                        for (let e of allEntries) {
+                            if (e.password === entry.password && e.fingerprint) {
+                                foundMatch = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!foundMatch) {
+                            entry.fingerprint = currentFP;
+                            needsUpdate = true;
+                        }
+                    }
+                }
+                
+                if (needsUpdate) {
+                    await saveTOOR(toorData);
+                    console.log('✅ Auto-saved fingerprint');
+                    showUpdateNotification('🔒', 'បានចាក់សោរឧបករណ៍ដោយស្វ័យប្រវត្តិ');
+                }
+            }
+        }
+
+        // ============================================================
+        // CHECK LOGIN
+        // ============================================================
+        
         async function checkLogin(password) {
             const toorData = await loadTOOR();
             const currentFP = deviceFingerprint;
             
-            // Check if any password matches
             for (let entry of toorData) {
                 if (entry.password === password) {
-                    // If no fingerprint assigned, assign current device
                     if (!entry.fingerprint) {
                         entry.fingerprint = currentFP;
                         await saveTOOR(toorData);
                         return true;
                     }
-                    // If fingerprint matches, allow login
                     if (entry.fingerprint === currentFP) {
                         return true;
                     }
-                    // Fingerprint doesn't match - device already used
                     return false;
                 }
             }
             return false;
         }
 
-        // Initialize login system
+        // ============================================================
+        // INITIALIZE LOGIN SYSTEM
+        // ============================================================
+        
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
             const input = document.getElementById('loginPassword');
             const btn = document.getElementById('loginBtn');
             const error = document.getElementById('loginError');
             
-            // Check if already logged in this session
             if (sessionStorage.getItem('teva_logged_in') === 'true') {
                 isLoggedIn = true;
                 overlay.classList.remove('active');
+                // Auto-check fingerprint
+                setTimeout(autoCheckAndSaveFingerprint, 1000);
                 return;
             }
             
-            // Check if device is authorized
             const toorData = await loadTOOR();
             const currentFP = deviceFingerprint;
             let deviceAuthorized = false;
@@ -1347,7 +1404,6 @@
                 }
             }
             
-            // If device already authorized, auto-login
             if (deviceAuthorized) {
                 isLoggedIn = true;
                 sessionStorage.setItem('teva_logged_in', 'true');
@@ -1355,10 +1411,8 @@
                 return;
             }
             
-            // Show login
             overlay.classList.add('active');
             
-            // Handle login
             async function handleLogin() {
                 const password = input.value.trim();
                 if (!password) {
@@ -1370,6 +1424,9 @@
                 const success = await checkLogin(password);
                 
                 if (success) {
+                    // Force save fingerprint after successful login
+                    await forceSaveFingerprint(password);
+                    
                     isLoggedIn = true;
                     sessionStorage.setItem('teva_logged_in', 'true');
                     overlay.classList.remove('active');
@@ -1388,7 +1445,6 @@
                 if (e.key === 'Enter') handleLogin();
             });
             
-            // Focus input after a short delay
             setTimeout(() => input.focus(), 500);
         }
 
@@ -1399,4 +1455,4 @@
         console.log('📱 TEVA App Loaded Successfully');
     </script>
 </body>
-    </html>
+</html>
