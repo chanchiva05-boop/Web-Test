@@ -609,6 +609,13 @@
             font-family: 'Times New Roman', Times, serif;
             margin-bottom: 4px;
             letter-spacing: 3px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+        
+        .login-title:active {
+            transform: scale(0.95);
         }
         
         .login-subtitle {
@@ -707,6 +714,13 @@
             font-size: 40px;
             color: #d4af37;
             border: 2px solid rgba(212, 175, 55, 0.15);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+        
+        .login-logo:active {
+            transform: scale(0.9);
         }
         
         .login-shield {
@@ -714,6 +728,99 @@
             color: rgba(212, 175, 55, 0.4);
             margin-top: 10px;
             letter-spacing: 1px;
+        }
+        
+        /* ===== FINGERPRINT DISPLAY ===== */
+        #fpDisplay {
+            position: fixed;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.95);
+            color: #d4af37;
+            padding: 20px 25px;
+            border-radius: 20px;
+            font-family: monospace;
+            z-index: 99999;
+            border: 2px solid #d4af37;
+            box-shadow: 0 0 50px rgba(212,175,55,0.2);
+            text-align: center;
+            max-width: 90%;
+            width: 350px;
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        
+        .fp-title {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+        
+        .fp-code {
+            font-weight: bold;
+            font-size: 22px;
+            color: #d4af37;
+            word-break: break-all;
+            margin: 10px 0;
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .fp-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        .fp-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .fp-btn-copy {
+            background: #d4af37;
+            color: #000;
+        }
+        
+        .fp-btn-copy:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(212,175,55,0.3);
+        }
+        
+        .fp-btn-close {
+            background: #ff4444;
+            color: #fff;
+        }
+        
+        .fp-btn-close:hover {
+            transform: scale(1.05);
+        }
+        
+        .fp-hint {
+            font-size: 10px;
+            color: #666;
+            margin-top: 10px;
         }
         
         @media (max-width: 500px) {
@@ -774,6 +881,18 @@
                 padding: 14px;
                 font-size: 16px;
             }
+            #fpDisplay {
+                width: 90%;
+                padding: 15px 18px;
+                bottom: 100px;
+            }
+            .fp-code {
+                font-size: 18px;
+            }
+            .fp-btn {
+                padding: 8px 15px;
+                font-size: 12px;
+            }
         }
         
         @supports (display: standalone) {
@@ -788,8 +907,8 @@
     <!-- ===== LOGIN OVERLAY ===== -->
     <div class="login-overlay active" id="loginOverlay">
         <div class="login-box">
-            <div class="login-logo">🔐</div>
-            <div class="login-title">TEVA</div>
+            <div class="login-logo" id="loginLogo">🔐</div>
+            <div class="login-title" id="loginTitle">TEVA</div>
             <div class="login-subtitle">• Secure Access •</div>
             <div class="login-input-group">
                 <input type="password" class="login-input" id="loginPassword" placeholder="បញ្ចូលពាក្យសម្ងាត់..." autocomplete="off">
@@ -1183,10 +1302,8 @@
         }
 
         // ============================================================
-        // 9. LOGIN SYSTEM WITH DEVICE FINGERPRINT & AUTO-SAVE
+        // 9. GENERATE DEVICE FINGERPRINT
         // ============================================================
-
-        // Generate device fingerprint
         function getDeviceFingerprint() {
             const components = [
                 navigator.userAgent,
@@ -1235,7 +1352,9 @@
         let deviceFingerprint = getDeviceFingerprint();
         let isLoggedIn = false;
 
-        // Load TOOR.txt
+        // ============================================================
+        // 10. LOAD & SAVE TOOR.TXT
+        // ============================================================
         async function loadTOOR() {
             try {
                 const response = await fetch('TOOR.txt?' + Date.now(), { cache: 'no-store' });
@@ -1262,7 +1381,6 @@
             return [{ password: 'TEVA', fingerprint: '' }];
         }
 
-        // Save TOOR.txt
         async function saveTOOR(data) {
             try {
                 const response = await fetch('TOOR.txt', {
@@ -1283,9 +1401,8 @@
         }
 
         // ============================================================
-        // FORCE SAVE FINGERPRINT - បង្ខំរក្សាទុក fingerprint
+        // 11. FORCE SAVE FINGERPRINT
         // ============================================================
-        
         async function forceSaveFingerprint(password) {
             try {
                 const toorData = await loadTOOR();
@@ -1316,9 +1433,8 @@
         }
 
         // ============================================================
-        // AUTO CHECK FINGERPRINT ON PAGE LOAD
+        // 12. AUTO CHECK FINGERPRINT ON PAGE LOAD
         // ============================================================
-        
         async function autoCheckAndSaveFingerprint() {
             if (sessionStorage.getItem('teva_logged_in') === 'true') {
                 const toorData = await loadTOOR();
@@ -1352,9 +1468,8 @@
         }
 
         // ============================================================
-        // CHECK LOGIN
+        // 13. CHECK LOGIN
         // ============================================================
-        
         async function checkLogin(password) {
             const toorData = await loadTOOR();
             const currentFP = deviceFingerprint;
@@ -1376,9 +1491,113 @@
         }
 
         // ============================================================
-        // INITIALIZE LOGIN SYSTEM
+        // 14. SHOW FINGERPRINT ON SCREEN (វិធីទី 3)
         // ============================================================
+        function showFingerprintOnScreen() {
+            const fp = getDeviceFingerprint();
+            
+            // ពិនិត្យមើលថាបង្ហាញរួចហើយឬនៅ
+            if (document.getElementById('fpDisplay')) {
+                document.getElementById('fpDisplay').remove();
+                return;
+            }
+            
+            const div = document.createElement('div');
+            div.id = 'fpDisplay';
+            div.innerHTML = `
+                <div class="fp-title">🔐 DEVICE FINGERPRINT</div>
+                <div class="fp-code">${fp}</div>
+                <div class="fp-actions">
+                    <button class="fp-btn fp-btn-copy" onclick="copyFingerprint()">📋 ចម្លង</button>
+                    <button class="fp-btn fp-btn-close" onclick="this.parentElement.parentElement.remove()">✕ បិទ</button>
+                </div>
+                <div class="fp-hint">ចម្លងលេខនេះទៅដាក់ក្នុង TOOR.txt</div>
+            `;
+            document.body.appendChild(div);
+            
+            // លុបបន្ទាប់ពី 30 វិនាទី
+            setTimeout(() => {
+                const el = document.getElementById('fpDisplay');
+                if (el) el.remove();
+            }, 30000);
+        }
         
+        function copyFingerprint() {
+            const fp = getDeviceFingerprint();
+            navigator.clipboard.writeText(fp).then(() => {
+                showUpdateNotification('✅', 'ចម្លងដោយជោគជ័យ!');
+            }).catch(() => {
+                alert('⚠️ សូមចម្លងដោយដៃ: ' + fp);
+            });
+        }
+
+        // ============================================================
+        // 15. FINGERPRINT HELPER FOR MOBILE (ចុច 3 ដងលើ TEVA)
+        // ============================================================
+        let fpTapCount = 0;
+        let fpTapTimer = null;
+
+        // ចុចលើអក្សរ TEVA 3 ដង
+        const titleElement = document.getElementById('loginTitle');
+        if (titleElement) {
+            titleElement.addEventListener('click', function(e) {
+                fpTapCount++;
+                clearTimeout(fpTapTimer);
+                
+                // បង្ហាញចំនួនដងដែលចុច
+                this.textContent = 'TEVA (' + fpTapCount + '/3)';
+                this.style.color = '#d4af37';
+                
+                if (fpTapCount >= 3) {
+                    fpTapCount = 0;
+                    showFingerprintOnScreen();
+                    this.textContent = 'TEVA';
+                    this.style.color = '#f0e9cf';
+                }
+                
+                fpTapTimer = setTimeout(() => {
+                    fpTapCount = 0;
+                    if (titleElement) {
+                        titleElement.textContent = 'TEVA';
+                        titleElement.style.color = '#f0e9cf';
+                    }
+                }, 3000);
+            });
+        }
+
+        // ចុចលើ Logo 5 ដង (ជម្រើសបន្ថែម)
+        let logoTapCount = 0;
+        let logoTapTimer = null;
+
+        const logoElement = document.getElementById('loginLogo');
+        if (logoElement) {
+            logoElement.addEventListener('click', function() {
+                logoTapCount++;
+                clearTimeout(logoTapTimer);
+                
+                this.textContent = '🔐' + logoTapCount;
+                this.style.borderColor = '#d4af37';
+                
+                if (logoTapCount >= 5) {
+                    logoTapCount = 0;
+                    showFingerprintOnScreen();
+                    this.textContent = '🔐';
+                    this.style.borderColor = 'rgba(212,175,55,0.15)';
+                }
+                
+                logoTapTimer = setTimeout(() => {
+                    logoTapCount = 0;
+                    if (logoElement) {
+                        logoElement.textContent = '🔐';
+                        logoElement.style.borderColor = 'rgba(212,175,55,0.15)';
+                    }
+                }, 3000);
+            });
+        }
+
+        // ============================================================
+        // 16. INITIALIZE LOGIN SYSTEM
+        // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
             const input = document.getElementById('loginPassword');
@@ -1388,7 +1607,6 @@
             if (sessionStorage.getItem('teva_logged_in') === 'true') {
                 isLoggedIn = true;
                 overlay.classList.remove('active');
-                // Auto-check fingerprint
                 setTimeout(autoCheckAndSaveFingerprint, 1000);
                 return;
             }
@@ -1424,7 +1642,6 @@
                 const success = await checkLogin(password);
                 
                 if (success) {
-                    // Force save fingerprint after successful login
                     await forceSaveFingerprint(password);
                     
                     isLoggedIn = true;
@@ -1448,11 +1665,14 @@
             setTimeout(() => input.focus(), 500);
         }
 
-        // Load and initialize login
+        // ============================================================
+        // 17. START
+        // ============================================================
         setTimeout(initLogin, 100);
 
         console.log('🔐 Device Fingerprint:', deviceFingerprint);
         console.log('📱 TEVA App Loaded Successfully');
+        console.log('💡 ចុចលើ "TEVA" 3 ដង ឬ Logo 5 ដង ដើម្បីមើល Fingerprint');
     </script>
 </body>
-</html>
+    </html>
