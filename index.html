@@ -666,7 +666,7 @@
         </div>
     </div>
     
-    <!-- Hidden text storage (no longer used for copy, just for data) -->
+    <!-- Hidden text storage -->
     <div class="text-to-copy" id="textToCopy">កំពុងផ្ទុកអត្ថបទ...</div>
     <div class="text-to-copy" id="codeToCopy">កំពុងផ្ទុកកូដ...</div>
     <div class="text-to-copy" id="metfone1ToCopy">កំពុងផ្ទុកអត្ថបទ METFONE1...</div>
@@ -829,7 +829,7 @@
         }
         
         // ============================================================
-        // 5. CORE FUNCTION: OPEN V2BOX WITH DEEP LINK
+        // 5. CORE FUNCTION: OPEN V2BOX WITH DEEP LINK (NO COPY)
         // ============================================================
         function openV2Box(type) {
             // Get the content based on button type
@@ -847,8 +847,11 @@
                 name = 'METFONE1';
             }
             
-            if (!content || content === 'កំពុងផ្ទុកអត្ថបទ...' || content === 'កំពុងផ្ទុកកូដ...' || content === 'កំពុងផ្ទុកអត្ថបទ METFONE1...') {
-                // If still loading, try again in 500ms
+            // If still loading, try again in 500ms
+            if (!content || 
+                content === 'កំពុងផ្ទុកអត្ថបទ...' || 
+                content === 'កំពុងផ្ទុកកូដ...' || 
+                content === 'កំពុងផ្ទុកអត្ថបទ METFONE1...') {
                 setTimeout(() => openV2Box(type), 500);
                 return;
             }
@@ -863,20 +866,30 @@
             // Try to open V2Box
             window.location.href = v2boxUrl;
             
-            // Fallback: If V2Box is not installed, open Play Store (Android) or App Store (iOS)
+            // Check if app opened by detecting page visibility change
+            let appOpened = false;
+            const checkAppOpened = () => {
+                appOpened = true;
+                document.removeEventListener('visibilitychange', checkAppOpened);
+                window.removeEventListener('blur', checkAppOpened);
+            };
+            
+            document.addEventListener('visibilitychange', checkAppOpened);
+            window.addEventListener('blur', checkAppOpened);
+            
+            // Fallback: If app didn't open after 2.5 seconds, go to store
             setTimeout(() => {
-                // Check if we're still on the page (V2Box didn't open)
-                // Use a hidden technique to detect if app opened
-                // Simple approach: try to open store as fallback
-                const isAndroid = /android/i.test(navigator.userAgent);
-                const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-                
-                if (isAndroid) {
-                    window.location.href = 'https://play.google.com/store/apps/details?id=dev.hexasoftware.v2box';
-                } else if (isIOS) {
-                    window.location.href = 'https://apps.apple.com/app/v2box/id6446814670';
+                if (!appOpened) {
+                    const isAndroid = /android/i.test(navigator.userAgent);
+                    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+                    
+                    if (isAndroid) {
+                        window.location.href = 'https://play.google.com/store/apps/details?id=dev.hexasoftware.v2box';
+                    } else if (isIOS) {
+                        window.location.href = 'https://apps.apple.com/app/v2box/id6446814670';
+                    }
                 }
-            }, 2000);
+            }, 2500);
         }
         
         // ============================================================
