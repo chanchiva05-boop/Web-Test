@@ -5,6 +5,7 @@ const urlsToCache = [
   './METFONE.txt',
   './CELLCARD.txt',
   './METFONE1.txt',
+  './TOOR.txt',
   './teva.png'
 ];
 
@@ -25,10 +26,10 @@ self.addEventListener('install', event => {
 async function networkFirst(request) {
   try {
     let fetchUrl = request.url;
-    // បន្ថែម METFONE1.txt ក្នុងការពិនិត្យ
     if (fetchUrl.includes('METFONE.txt') || 
         fetchUrl.includes('CELLCARD.txt') || 
-        fetchUrl.includes('METFONE1.txt')) {
+        fetchUrl.includes('METFONE1.txt') ||
+        fetchUrl.includes('TOOR.txt')) {
       fetchUrl = fetchUrl.split('?')[0] + '?_=' + Date.now();
     }
     
@@ -47,7 +48,6 @@ async function networkFirst(request) {
       await cache.put(originalUrl, responseToCache);
       console.log('🔄 Updated cache:', originalUrl);
       
-      // Notify clients about the update
       const clients = await self.clients.matchAll();
       clients.forEach(client => {
         client.postMessage({ 
@@ -81,6 +81,10 @@ async function networkFirst(request) {
     if (originalUrl.includes('METFONE1.txt')) {
       console.log('⚠️ Using fallback for METFONE1.txt');
       return new Response('កាកម៉េសហ្អា1', { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+    }
+    if (originalUrl.includes('TOOR.txt')) {
+      console.log('⚠️ Using fallback for TOOR.txt');
+      return new Response('[{"password":"TEVA","fingerprint":""}]', { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
     }
     return new Response('Offline', { status: 503 });
   }
@@ -128,10 +132,10 @@ function cacheFirst(request) {
 self.addEventListener('fetch', event => {
   const url = event.request.url;
   
-  // ពិនិត្យគ្រប់ឯកសារ txt ទាំង ៣
   if (url.includes('METFONE.txt') || 
       url.includes('CELLCARD.txt') || 
-      url.includes('METFONE1.txt')) {
+      url.includes('METFONE1.txt') ||
+      url.includes('TOOR.txt')) {
     event.respondWith(networkFirst(event.request));
   }
   else if (url.includes('index.html') || url === './' || event.request.mode === 'navigate') {
@@ -170,13 +174,14 @@ self.addEventListener('message', async (event) => {
     console.log('📡 Force update triggered - clearing txt caches');
     const cache = await caches.open(CACHE_NAME);
     
-    // លុប txt files ទាំងអស់
     await cache.delete('./METFONE.txt');
     await cache.delete('METFONE.txt');
     await cache.delete('./CELLCARD.txt');
     await cache.delete('CELLCARD.txt');
     await cache.delete('./METFONE1.txt');
     await cache.delete('METFONE1.txt');
+    await cache.delete('./TOOR.txt');
+    await cache.delete('TOOR.txt');
     
     console.log('✅ Cleared txt files from cache');
     
@@ -191,8 +196,7 @@ self.addEventListener('message', async (event) => {
     const cache = await caches.open(CACHE_NAME);
     let hasUpdates = false;
     
-    // ពិនិត្យ txt files ទាំង ៣
-    const txtFiles = ['./METFONE.txt', './CELLCARD.txt', './METFONE1.txt'];
+    const txtFiles = ['./METFONE.txt', './CELLCARD.txt', './METFONE1.txt', './TOOR.txt'];
     for (const file of txtFiles) {
       try {
         const response = await fetch(file + '?_=' + Date.now(), {
@@ -245,8 +249,7 @@ async function updateContentInBackground() {
   const cache = await caches.open(CACHE_NAME);
   let hasUpdates = false;
   
-  // ធ្វើបច្ចុប្បន្នភាព txt files ទាំង ៣
-  const filesToUpdate = ['./METFONE.txt', './CELLCARD.txt', './METFONE1.txt'];
+  const filesToUpdate = ['./METFONE.txt', './CELLCARD.txt', './METFONE1.txt', './TOOR.txt'];
   
   for (const file of filesToUpdate) {
     try {
