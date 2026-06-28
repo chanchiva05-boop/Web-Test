@@ -631,9 +631,15 @@
             margin-bottom: 20px;
         }
         
+        .login-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
         .login-input {
             width: 100%;
-            padding: 16px 22px;
+            padding: 16px 52px 16px 22px;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(212, 175, 55, 0.3);
             border-radius: 30px;
@@ -653,6 +659,33 @@
         
         .login-input::placeholder {
             color: rgba(255, 255, 255, 0.25);
+        }
+        
+        .toggle-password-btn {
+            position: absolute;
+            right: 14px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 6px;
+            transition: all 0.3s ease;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+        }
+        
+        .toggle-password-btn:hover {
+            color: #d4af37;
+            background: rgba(212, 175, 55, 0.1);
+        }
+        
+        .toggle-password-btn:active {
+            transform: scale(0.9);
         }
         
         .login-btn {
@@ -874,7 +907,7 @@
                 font-size: 26px;
             }
             .login-input {
-                padding: 14px 18px;
+                padding: 14px 52px 14px 18px;
                 font-size: 14px;
             }
             .login-btn {
@@ -893,6 +926,12 @@
                 padding: 8px 15px;
                 font-size: 12px;
             }
+            .toggle-password-btn {
+                right: 10px;
+                font-size: 18px;
+                width: 32px;
+                height: 32px;
+            }
         }
         
         @supports (display: standalone) {
@@ -908,10 +947,15 @@
     <div class="login-overlay active" id="loginOverlay">
         <div class="login-box">
             <div class="login-logo" id="loginLogo">🔐</div>
-            <div class="login-title" id="loginTitle">TEVA</div>
+            <div class="login-title" id="loginTitle">TE</div>
             <div class="login-subtitle">• Secure Access •</div>
             <div class="login-input-group">
-                <input type="password" class="login-input" id="loginPassword" placeholder="បញ្ចូលពាក្យសម្ងាត់..." autocomplete="off">
+                <div class="login-input-wrapper">
+                    <input type="password" class="login-input" id="loginPassword" placeholder="បញ្ចូលពាក្យសម្ងាត់..." autocomplete="off">
+                    <button class="toggle-password-btn" id="togglePasswordBtn" type="button" aria-label="បង្ហាញ/លាក់ពាក្យសម្ងាត់">
+                        👁️
+                    </button>
+                </div>
             </div>
             <button class="login-btn" id="loginBtn">ចូលប្រើប្រាស់</button>
             <div class="login-error" id="loginError">ពាក្យសម្ងាត់មិនត្រឹមត្រូវ</div>
@@ -1305,7 +1349,6 @@
         // 9. STABLE DEVICE FINGERPRINT (មិនផ្លាស់ប្តូរ)
         // ============================================================
         function getDeviceFingerprint() {
-            // ពិនិត្យមើលថាមាន Fingerprint ក្នុង localStorage ហើយឬនៅ
             let fp = localStorage.getItem('device_fingerprint');
             if (fp && fp.startsWith('FP_')) {
                 console.log('✅ Using saved fingerprint:', fp);
@@ -1314,7 +1357,6 @@
             
             console.log('🔐 Generating new stable fingerprint...');
             
-            // ប្រើតែអ្វីដែលមិនផ្លាស់ប្តូរ
             const components = [
                 navigator.userAgent,
                 screen.width + 'x' + screen.height,
@@ -1325,7 +1367,6 @@
                 new Date().getTimezoneOffset()
             ];
             
-            // Canvas Fingerprint (មិនផ្លាស់ប្តូរ)
             try {
                 const canvas = document.createElement('canvas');
                 canvas.width = 200;
@@ -1342,7 +1383,6 @@
                 components.push(canvas.toDataURL());
             } catch(e) {}
             
-            // បង្កើត hash
             const str = components.join('|||');
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
@@ -1352,7 +1392,6 @@
             }
             fp = 'FP_' + Math.abs(hash).toString(16).padStart(8, '0');
             
-            // រក្សាទុកក្នុង localStorage
             localStorage.setItem('device_fingerprint', fp);
             console.log('✅ New stable fingerprint saved:', fp);
             
@@ -1411,7 +1450,7 @@
         }
 
         // ============================================================
-        // 11. CHECK LOGIN (FIXED)
+        // 11. CHECK LOGIN
         // ============================================================
         async function checkLogin(password) {
             const toorData = await loadTOOR();
@@ -1425,11 +1464,9 @@
             for (let entry of toorData) {
                 console.log('🔍 Checking entry:', entry);
                 
-                // ពិនិត្យ password
                 if (entry.password === password) {
                     console.log('✅ Password matched!');
                     
-                    // ប្រសិនបើគ្មាន fingerprint រក្សាទុក
                     if (!entry.fingerprint) {
                         console.log('🔐 No fingerprint, saving current device...');
                         entry.fingerprint = currentFP;
@@ -1437,13 +1474,11 @@
                         return true;
                     }
                     
-                    // ប្រសិនបើ fingerprint ត្រូវគ្នា
                     if (entry.fingerprint === currentFP) {
                         console.log('✅ Fingerprint matched!');
                         return true;
                     }
                     
-                    // fingerprint មិនត្រូវគ្នា
                     console.log('❌ Fingerprint mismatch! Expected:', entry.fingerprint, 'Got:', currentFP);
                     return false;
                 }
@@ -1556,7 +1591,21 @@
         }
 
         // ============================================================
-        // 15. INITIALIZE LOGIN SYSTEM (FIXED)
+        // 15. TOGGLE PASSWORD VISIBILITY
+        // ============================================================
+        const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+        const loginPassword = document.getElementById('loginPassword');
+        let isPasswordVisible = false;
+
+        togglePasswordBtn.addEventListener('click', function() {
+            isPasswordVisible = !isPasswordVisible;
+            loginPassword.type = isPasswordVisible ? 'text' : 'password';
+            this.textContent = isPasswordVisible ? '🙈' : '👁️';
+            this.setAttribute('aria-label', isPasswordVisible ? 'លាក់ពាក្យសម្ងាត់' : 'បង្ហាញពាក្យសម្ងាត់');
+        });
+
+        // ============================================================
+        // 16. INITIALIZE LOGIN SYSTEM
         // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
@@ -1642,7 +1691,7 @@
         }
 
         // ============================================================
-        // 16. START
+        // 17. START
         // ============================================================
         setTimeout(initLogin, 100);
 
@@ -1652,4 +1701,4 @@
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
     </script>
 </body>
-</html>
+        </html>
