@@ -1,4 +1,4 @@
 [
-  {"password":"non","fingerprint":"FP_49f39f41"},
+  {"password":"TEVA","fingerprint":"FP_49f39f"},
   {"password":"YOU","fingerprint":""}
 ]
