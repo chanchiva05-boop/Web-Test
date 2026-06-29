@@ -575,7 +575,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(10, 10, 42, 0.95);
+            background: rgba(10, 10, 42, 0.96);
             backdrop-filter: blur(20px);
             z-index: 9999;
             display: none;
@@ -634,6 +634,7 @@
         .login-input {
             width: 100%;
             padding: 16px 22px;
+            padding-right: 50px;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(212, 175, 55, 0.3);
             border-radius: 30px;
@@ -653,6 +654,29 @@
         
         .login-input::placeholder {
             color: rgba(255, 255, 255, 0.25);
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.3s ease;
+            z-index: 10;
+        }
+        
+        .toggle-password:hover {
+            color: #d4af37;
+        }
+        
+        .toggle-password:active {
+            transform: translateY(-50%) scale(0.9);
         }
         
         .login-btn {
@@ -875,7 +899,12 @@
             }
             .login-input {
                 padding: 14px 18px;
+                padding-right: 45px;
                 font-size: 14px;
+            }
+            .toggle-password {
+                right: 14px;
+                font-size: 18px;
             }
             .login-btn {
                 padding: 14px;
@@ -912,6 +941,9 @@
             <div class="login-subtitle">• Secure Access •</div>
             <div class="login-input-group">
                 <input type="password" class="login-input" id="loginPassword" placeholder="បញ្ចូលពាក្យសម្ងាត់..." autocomplete="off">
+                <button class="toggle-password" id="togglePasswordBtn" type="button" aria-label="Toggle password visibility">
+                    👁️
+                </button>
             </div>
             <button class="login-btn" id="loginBtn">ចូលប្រើប្រាស់</button>
             <div class="login-error" id="loginError">ពាក្យសម្ងាត់មិនត្រឹមត្រូវ</div>
@@ -1305,7 +1337,6 @@
         // 9. STABLE DEVICE FINGERPRINT (មិនផ្លាស់ប្តូរ)
         // ============================================================
         function getDeviceFingerprint() {
-            // ពិនិត្យមើលថាមាន Fingerprint ក្នុង localStorage ហើយឬនៅ
             let fp = localStorage.getItem('device_fingerprint');
             if (fp && fp.startsWith('FP_')) {
                 console.log('✅ Using saved fingerprint:', fp);
@@ -1314,7 +1345,6 @@
             
             console.log('🔐 Generating new stable fingerprint...');
             
-            // ប្រើតែអ្វីដែលមិនផ្លាស់ប្តូរ
             const components = [
                 navigator.userAgent,
                 screen.width + 'x' + screen.height,
@@ -1325,7 +1355,6 @@
                 new Date().getTimezoneOffset()
             ];
             
-            // Canvas Fingerprint (មិនផ្លាស់ប្តូរ)
             try {
                 const canvas = document.createElement('canvas');
                 canvas.width = 200;
@@ -1342,7 +1371,6 @@
                 components.push(canvas.toDataURL());
             } catch(e) {}
             
-            // បង្កើត hash
             const str = components.join('|||');
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
@@ -1352,7 +1380,6 @@
             }
             fp = 'FP_' + Math.abs(hash).toString(16).padStart(8, '0');
             
-            // រក្សាទុកក្នុង localStorage
             localStorage.setItem('device_fingerprint', fp);
             console.log('✅ New stable fingerprint saved:', fp);
             
@@ -1411,7 +1438,7 @@
         }
 
         // ============================================================
-        // 11. CHECK LOGIN (FIXED)
+        // 11. CHECK LOGIN (NO AUTO-LOGIN)
         // ============================================================
         async function checkLogin(password) {
             const toorData = await loadTOOR();
@@ -1425,11 +1452,9 @@
             for (let entry of toorData) {
                 console.log('🔍 Checking entry:', entry);
                 
-                // ពិនិត្យ password
                 if (entry.password === password) {
                     console.log('✅ Password matched!');
                     
-                    // ប្រសិនបើគ្មាន fingerprint រក្សាទុក
                     if (!entry.fingerprint) {
                         console.log('🔐 No fingerprint, saving current device...');
                         entry.fingerprint = currentFP;
@@ -1437,13 +1462,11 @@
                         return true;
                     }
                     
-                    // ប្រសិនបើ fingerprint ត្រូវគ្នា
                     if (entry.fingerprint === currentFP) {
                         console.log('✅ Fingerprint matched!');
                         return true;
                     }
                     
-                    // fingerprint មិនត្រូវគ្នា
                     console.log('❌ Fingerprint mismatch! Expected:', entry.fingerprint, 'Got:', currentFP);
                     return false;
                 }
@@ -1556,7 +1579,23 @@
         }
 
         // ============================================================
-        // 15. INITIALIZE LOGIN SYSTEM (FIXED)
+        // 15. TOGGLE PASSWORD VISIBILITY
+        // ============================================================
+        const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+        const passwordInput = document.getElementById('loginPassword');
+        let passwordVisible = false;
+
+        if (togglePasswordBtn && passwordInput) {
+            togglePasswordBtn.addEventListener('click', function() {
+                passwordVisible = !passwordVisible;
+                passwordInput.type = passwordVisible ? 'text' : 'password';
+                this.textContent = passwordVisible ? '🙈' : '👁️';
+                this.setAttribute('aria-label', passwordVisible ? 'Hide password' : 'Show password');
+            });
+        }
+
+        // ============================================================
+        // 16. INITIALIZE LOGIN SYSTEM (NO AUTO-LOGIN)
         // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
@@ -1567,39 +1606,13 @@
             console.log('🔐 Initializing login system...');
             console.log('📱 Device Fingerprint:', deviceFingerprint);
             
-            // ពិនិត្យមើលថាបាន login រួចហើយឬនៅ
-            if (sessionStorage.getItem('teva_logged_in') === 'true') {
-                isLoggedIn = true;
-                overlay.classList.remove('active');
-                console.log('✅ Already logged in');
-                return;
-            }
+            // Clear any existing session
+            sessionStorage.removeItem('teva_logged_in');
+            isLoggedIn = false;
             
-            // ពិនិត្យមើលថាឧបករណ៍នេះត្រូវបានអនុញ្ញាតដោយស្វ័យប្រវត្តិឬអត់
-            const toorData = await loadTOOR();
-            const currentFP = deviceFingerprint;
-            let deviceAuthorized = false;
-            
-            console.log('📋 Checking if device is authorized...');
-            for (let entry of toorData) {
-                if (entry.fingerprint === currentFP) {
-                    deviceAuthorized = true;
-                    console.log('✅ Device authorized for:', entry.password);
-                    break;
-                }
-            }
-            
-            if (deviceAuthorized) {
-                isLoggedIn = true;
-                sessionStorage.setItem('teva_logged_in', 'true');
-                overlay.classList.remove('active');
-                console.log('✅ Auto-login successful');
-                return;
-            }
-            
-            // បង្ហាញ Login Screen
+            // Always show login screen
             overlay.classList.add('active');
-            console.log('🔐 Showing login screen');
+            console.log('🔐 Showing login screen (no auto-login)');
             
             // Handle Login
             async function handleLogin() {
@@ -1642,7 +1655,7 @@
         }
 
         // ============================================================
-        // 16. START
+        // 17. START
         // ============================================================
         setTimeout(initLogin, 100);
 
