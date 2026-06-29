@@ -1,5 +1,5 @@
 [
-  {"password":"TEV","fingerprint":"FP_49f39f41"},
+  {"password":"TEV","fingerprint":"FP_49f39f4"},
   {"password":"YOU","fingerprint":""},
   {"password":"TEVA1","fingerprint":"FP_38eeae45"},
   {"password":"USER002","fingerprint":""},
