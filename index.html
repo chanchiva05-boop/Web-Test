@@ -303,14 +303,6 @@
             box-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
         }
         
-        .text-to-copy {
-            position: absolute;
-            opacity: 0;
-            pointer-events: none;
-            height: 0;
-            overflow: hidden;
-        }
-        
         .birds-container {
             position: absolute;
             top: 0;
@@ -543,6 +535,29 @@
             border-color: rgba(251, 191, 36, 0.4);
         }
         
+        .user-badge {
+            position: fixed;
+            top: 50px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(12px);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: 600;
+            z-index: 200;
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            color: #d4af37;
+            display: none;
+            letter-spacing: 0.5px;
+        }
+        
+        .user-badge.show {
+            display: block;
+        }
+        
         .update-notification {
             position: fixed;
             bottom: 100px;
@@ -752,30 +767,6 @@
             color: rgba(212, 175, 55, 0.4);
             margin-top: 10px;
             letter-spacing: 1px;
-        }
-        
-        /* ===== USER BADGE ===== */
-        .user-badge {
-            position: fixed;
-            top: 50px;
-            right: 12px;
-            background: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(12px);
-            padding: 6px 14px;
-            border-radius: 30px;
-            font-size: 11px;
-            font-family: 'Times New Roman', Times, serif;
-            font-weight: 600;
-            z-index: 200;
-            border: 1px solid rgba(212, 175, 55, 0.35);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            color: #d4af37;
-            display: none;
-            letter-spacing: 0.5px;
-        }
-        
-        .user-badge.show {
-            display: block;
         }
         
         /* ===== FINGERPRINT DISPLAY ===== */
@@ -1027,11 +1018,6 @@
         </div>
     </div>
     
-    <!-- Hidden text storage -->
-    <div class="text-to-copy" id="textToCopy">កំពុងផ្ទុកអត្ថបទ...</div>
-    <div class="text-to-copy" id="codeToCopy">កំពុងផ្ទុកកូដ...</div>
-    <div class="text-to-copy" id="metfone1ToCopy">កំពុងផ្ទុកអត្ថបទ METFONE1...</div>
-    
     <div class="birds-container">
         <div class="bird bird1"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
         <div class="bird bird2"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
@@ -1136,7 +1122,7 @@
         }
         
         // ============================================================
-        // 4. LOAD CONTENT FROM TXT FILES (User-Specific Links)
+        // 4. USER-SPECIFIC LINKS SYSTEM
         // ============================================================
         let userLinksData = {
             metfone: {},
@@ -1153,7 +1139,7 @@
                     const response = await fetch(files[i] + '?' + Date.now(), { cache: 'no-store' });
                     if (response.ok) {
                         const data = await response.text();
-                        const lines = data.split('\n').filter(line => line.trim());
+                        const lines = data.split('\n').filter(line => line.trim() && line.includes(':'));
                         
                         const links = {};
                         for (let line of lines) {
@@ -1168,7 +1154,7 @@
                         }
                         
                         userLinksData[types[i]] = links;
-                        console.log(`✅ Loaded ${types[i]} links:`, links);
+                        console.log(`✅ Loaded ${types[i]} links:`, Object.keys(links).length, 'users');
                     }
                 } catch (error) {
                     console.error(`❌ Error loading ${files[i]}:`, error);
@@ -1191,11 +1177,13 @@
                 return null;
             }
             
+            // ស្វែងរក Link តាម Username
             if (typeData[username]) {
-                console.log(`✅ Found link for ${username} - ${typeKey}:`, typeData[username]);
+                console.log(`✅ Found link for ${username} - ${typeKey}`);
                 return typeData[username];
             }
             
+            // បើគ្មាន ប្រើ default
             if (typeData['default']) {
                 console.log(`ℹ️ Using default link for ${username} - ${typeKey}`);
                 return typeData['default'];
@@ -1206,7 +1194,53 @@
         }
         
         // ============================================================
-        // 5. SERVICE WORKER & AUTO UPDATE
+        // 5. OPEN V2BOX
+        // ============================================================
+        function openV2Box(type) {
+            if (!isLoggedIn) {
+                showUpdateNotification('⚠️', 'សូមចូលប្រើប្រាស់ជាមុន');
+                return;
+            }
+            
+            const username = sessionStorage.getItem('current_user') || currentUser;
+            if (!username) {
+                showUpdateNotification('⚠️', 'មិនអាចកំណត់អត្តសញ្ញាណ User');
+                return;
+            }
+            
+            const link = getUserLink(type, username);
+            
+            if (!link) {
+                showUpdateNotification('⚠️', `មិនមាន Link សម្រាប់ ${username}`);
+                console.warn(`⚠️ No link found for ${username} - ${type}`);
+                return;
+            }
+            
+            let buttonName = '';
+            if (type === 'metfone') buttonName = 'METFONE';
+            else if (type === 'cellcard') buttonName = 'CELLCARD';
+            else if (type === 'metfone1') buttonName = 'METFONE1';
+            
+            console.log(`🔗 Opening ${buttonName} for user ${username}:`, link);
+            
+            // បើក Link
+            window.location.href = link;
+            
+            // Fallback: បើ V2Box មិនបើក
+            setTimeout(() => {
+                const isAndroid = /android/i.test(navigator.userAgent);
+                const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+                
+                if (isAndroid) {
+                    window.location.href = 'https://play.google.com/store/apps/details?id=dev.hexasoftware.v2box';
+                } else if (isIOS) {
+                    window.location.href = 'https://apps.apple.com/app/v2box/id6446814670';
+                }
+            }, 2500);
+        }
+        
+        // ============================================================
+        // 6. SERVICE WORKER & AUTO UPDATE
         // ============================================================
         let isFirstLoad = true;
         let lastUpdateCheck = 0;
@@ -1255,7 +1289,7 @@
         setInterval(() => { if (navigator.onLine) autoUpdateCheck(); }, 30000);
         
         // ============================================================
-        // 6. INITIALIZATION
+        // 7. INITIALIZATION
         // ============================================================
         loadSavedVersionDate();
         loadUserLinksFromTxt().then(() => updateVersionDate());
@@ -1263,7 +1297,7 @@
         setTimeout(() => { isFirstLoad = false; }, 1000);
         
         // ============================================================
-        // 7. PWA MANIFEST & INSTALL
+        // 8. PWA MANIFEST & INSTALL
         // ============================================================
         function createManifest() {
             const LOGO_FILE = "teva.png";
@@ -1322,7 +1356,7 @@
         }
 
         // ============================================================
-        // 8. STABLE DEVICE FINGERPRINT
+        // 9. STABLE DEVICE FINGERPRINT
         // ============================================================
         function getDeviceFingerprint() {
             let fp = localStorage.getItem('device_fingerprint');
@@ -1379,7 +1413,7 @@
         let currentUser = null;
 
         // ============================================================
-        // 9. LOAD & SAVE TOOR.TXT
+        // 10. LOAD & SAVE TOOR.TXT
         // ============================================================
         async function loadTOOR() {
             try {
@@ -1390,7 +1424,8 @@
                         const parsed = JSON.parse(data);
                         return parsed;
                     } catch(e) {
-                        return [{ password: data.trim(), fingerprint: '' }];
+                        console.error('❌ Invalid JSON in TOOR.txt:', e);
+                        return [{ password: 'TEVA', fingerprint: '' }];
                     }
                 }
             } catch(e) {
@@ -1427,7 +1462,7 @@
         }
 
         // ============================================================
-        // 10. CHECK LOGIN
+        // 11. CHECK LOGIN
         // ============================================================
         async function checkLogin(password) {
             const toorData = await loadTOOR();
@@ -1436,6 +1471,7 @@
             console.log('🔍 Checking login...');
             console.log('📋 Password entered:', password);
             console.log('📋 Current FP:', currentFP);
+            console.log('📋 Total users in TOOR:', toorData.length);
             
             for (let entry of toorData) {
                 if (entry.password === password) {
@@ -1453,17 +1489,17 @@
                         return true;
                     }
                     
-                    console.log('❌ Fingerprint mismatch!');
+                    console.log('❌ Fingerprint mismatch! Expected:', entry.fingerprint, 'Got:', currentFP);
                     return false;
                 }
             }
             
-            console.log('❌ Password not found');
+            console.log('❌ Password not found in TOOR data');
             return false;
         }
 
         // ============================================================
-        // 11. FORCE SAVE FINGERPRINT
+        // 12. FORCE SAVE FINGERPRINT
         // ============================================================
         async function forceSaveFingerprint(password) {
             try {
@@ -1492,50 +1528,6 @@
                 console.error('❌ Error saving fingerprint:', error);
                 return false;
             }
-        }
-
-        // ============================================================
-        // 12. OPEN V2BOX WITH USER-SPECIFIC LINK
-        // ============================================================
-        function openV2Box(type) {
-            if (!isLoggedIn) {
-                showUpdateNotification('⚠️', 'សូមចូលប្រើប្រាស់ជាមុន');
-                return;
-            }
-            
-            const username = sessionStorage.getItem('current_user') || currentUser;
-            if (!username) {
-                showUpdateNotification('⚠️', 'មិនអាចកំណត់អត្តសញ្ញាណ User');
-                return;
-            }
-            
-            const link = getUserLink(type, username);
-            
-            if (!link) {
-                showUpdateNotification('⚠️', `មិនមាន Link សម្រាប់ ${username}`);
-                console.warn(`⚠️ No link found for ${username} - ${type}`);
-                return;
-            }
-            
-            let buttonName = '';
-            if (type === 'metfone') buttonName = 'METFONE';
-            else if (type === 'cellcard') buttonName = 'CELLCARD';
-            else if (type === 'metfone1') buttonName = 'METFONE1';
-            
-            console.log(`🔗 Opening ${buttonName} for user ${username}:`, link);
-            
-            window.location.href = link;
-            
-            setTimeout(() => {
-                const isAndroid = /android/i.test(navigator.userAgent);
-                const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-                
-                if (isAndroid) {
-                    window.location.href = 'https://play.google.com/store/apps/details?id=dev.hexasoftware.v2box';
-                } else if (isIOS) {
-                    window.location.href = 'https://apps.apple.com/app/v2box/id6446814670';
-                }
-            }, 2500);
         }
 
         // ============================================================
