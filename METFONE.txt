@@ -1,1 +1,5 @@
-https://raw.githubusercontent.com/sokc7618-boop/Kajabahagahbsbajajajsnanajajaj/main/a99285ed-30de-4a46-8064-52fbf5c7e09a.txt
+TEVA:v2box://install-sub?url=https://example.com/teva-metfone.json&name=TEVA-METFONE
+Samdyzinto9:v2box://install-sub?url=https://example.com/samdy-metfone.json&name=SAMDY-METFONE
+USER003:v2box://install-sub?url=https://example.com/user003-metfone.json&name=USER003-METFONE
+USER004:v2box://install-sub?url=https://example.com/user004-metfone.json&name=USER004-METFONE
+USER005:v2box://install-sub?url=https://example.com/user005-metfone.json&name=USER005-METFONE
