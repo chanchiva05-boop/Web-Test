@@ -1,1 +1,6 @@
-
+TEVA:v2box://install-sub?url=https://example.com/teva-cellcard.json&name=TEVA-CELLCARD
+Samdyzinto9:v2box://install-sub?url=https://example.com/samdy-cellcard.json&name=SAMDY-CELLCARD
+USER003:v2box://install-sub?url=https://example.com/user003-cellcard.json&name=USER003-CELLCARD
+USER004:v2box://install-sub?url=https://example.com/user004-cellcard.json&name=USER004-CELLCARD
+USER005:v2box://install-sub?url=https://example.com/user005-cellcard.json&name=USER005-CELLCARD
+default:v2box://install-sub?url=https://example.com/default-cellcard.json&name=DEFAULT-CELLCARD
