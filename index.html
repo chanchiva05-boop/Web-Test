@@ -754,6 +754,30 @@
             letter-spacing: 1px;
         }
         
+        /* ===== USER BADGE ===== */
+        .user-badge {
+            position: fixed;
+            top: 50px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(12px);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: 600;
+            z-index: 200;
+            border: 1px solid rgba(212, 175, 55, 0.35);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            color: #d4af37;
+            display: none;
+            letter-spacing: 0.5px;
+        }
+        
+        .user-badge.show {
+            display: block;
+        }
+        
         /* ===== FINGERPRINT DISPLAY ===== */
         #fpDisplay {
             position: fixed;
@@ -890,6 +914,12 @@
                 padding: 4px 10px;
                 font-size: 9px;
             }
+            .user-badge {
+                top: 45px;
+                right: 8px;
+                padding: 4px 10px;
+                font-size: 9px;
+            }
             .login-box {
                 padding: 36px 24px;
                 border-radius: 40px;
@@ -956,6 +986,7 @@
     <div class="animated-bg"></div>
     
     <div class="status-badge online" id="statusBadge">● Online</div>
+    <div class="user-badge" id="userBadge">👤 <span id="userNameDisplay">User</span></div>
     
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
@@ -974,15 +1005,15 @@
         <div class="card">
             <div class="button-group">
                 <button class="btn" onclick="openV2Box('metfone')">
-                    <span>មេតហ្វូន</span>
+                    <span>📡 METFONE</span>
                     <div class="btn-glow"></div>
                 </button>
                 <button class="btn" onclick="openV2Box('cellcard')">
-                    <span>❌️</span>
+                    <span>📱 CELLCARD</span>
                     <div class="btn-glow"></div>
                 </button>
                 <button class="btn" onclick="openV2Box('metfone1')">
-                    <span>❌️</span>
+                    <span>🌐 METFONE1</span>
                     <div class="btn-glow"></div>
                 </button>
             </div>
@@ -1105,117 +1136,77 @@
         }
         
         // ============================================================
-        // 4. LOAD CONTENT FROM TXT FILES
+        // 4. LOAD CONTENT FROM TXT FILES (User-Specific Links)
         // ============================================================
-        async function loadTextContent() {
-            const textElement = document.getElementById('textToCopy');
-            const oldText = localStorage.getItem('metfone_text');
-            try {
-                const response = await fetch('METFONE.txt?' + Date.now(), { cache: 'no-store' });
-                if (response.ok) {
-                    const newText = await response.text();
-                    textElement.textContent = newText;
-                    localStorage.setItem('metfone_text', newText);
-                    return true;
-                }
-            } catch(e) {}
-            if (oldText) textElement.textContent = oldText;
-            else textElement.textContent = 'កាកម៉េសហ្អា';
-            return false;
-        }
+        let userLinksData = {
+            metfone: {},
+            cellcard: {},
+            metfone1: {}
+        };
         
-        async function loadCodeContent() {
-            const codeElement = document.getElementById('codeToCopy');
-            const oldCode = localStorage.getItem('cellcard_code');
-            try {
-                const response = await fetch('CELLCARD.txt?' + Date.now(), { cache: 'no-store' });
-                if (response.ok) {
-                    const newCode = await response.text();
-                    codeElement.textContent = newCode;
-                    localStorage.setItem('cellcard_code', newCode);
-                    return true;
-                }
-            } catch(e) {}
-            if (oldCode) codeElement.textContent = oldCode;
-            else codeElement.textContent = 'TEVA555';
-            return false;
-        }
-        
-        async function loadMetfone1Content() {
-            const metfone1Element = document.getElementById('metfone1ToCopy');
-            const oldContent = localStorage.getItem('metfone1_text');
-            try {
-                const response = await fetch('METFONE1.txt?' + Date.now(), { cache: 'no-store' });
-                if (response.ok) {
-                    const newContent = await response.text();
-                    metfone1Element.textContent = newContent;
-                    localStorage.setItem('metfone1_text', newContent);
-                    return true;
-                }
-            } catch(e) {}
-            if (oldContent) metfone1Element.textContent = oldContent;
-            else metfone1Element.textContent = 'កាកម៉េសហ្អា1';
-            return false;
-        }
-        
-        // ============================================================
-        // 5. CORE FUNCTION: OPEN V2BOX WITH DEEP LINK
-        // ============================================================
-        function openV2Box(type) {
-            let content = '';
-            let name = '';
+        async function loadUserLinksFromTxt() {
+            const files = ['METFONE.txt', 'CELLCARD.txt', 'METFONE1.txt'];
+            const types = ['metfone', 'cellcard', 'metfone1'];
             
-            if (type === 'metfone') {
-                content = document.getElementById('textToCopy').textContent;
-                name = 'METFONE';
-            } else if (type === 'cellcard') {
-                content = document.getElementById('codeToCopy').textContent;
-                name = 'CELLCARD';
-            } else if (type === 'metfone1') {
-                content = document.getElementById('metfone1ToCopy').textContent;
-                name = 'METFONE1';
-            }
-            
-            if (!content || 
-                content === 'កំពុងផ្ទុកអត្ថបទ...' || 
-                content === 'កំពុងផ្ទុកកូដ...' || 
-                content === 'កំពុងផ្ទុកអត្ថបទ METFONE1...') {
-                setTimeout(() => openV2Box(type), 500);
-                return;
-            }
-            
-            const encodedContent = encodeURIComponent(content);
-            const encodedName = encodeURIComponent(name);
-            const v2boxUrl = `v2box://install-sub?url=${encodedContent}&name=${encodedName}`;
-            
-            window.location.href = v2boxUrl;
-            
-            let appOpened = false;
-            const checkAppOpened = () => {
-                appOpened = true;
-                document.removeEventListener('visibilitychange', checkAppOpened);
-                window.removeEventListener('blur', checkAppOpened);
-            };
-            
-            document.addEventListener('visibilitychange', checkAppOpened);
-            window.addEventListener('blur', checkAppOpened);
-            
-            setTimeout(() => {
-                if (!appOpened) {
-                    const isAndroid = /android/i.test(navigator.userAgent);
-                    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-                    
-                    if (isAndroid) {
-                        window.location.href = 'https://play.google.com/store/apps/details?id=dev.hexasoftware.v2box';
-                    } else if (isIOS) {
-                        window.location.href = 'https://apps.apple.com/app/v2box/id6446814670';
+            for (let i = 0; i < files.length; i++) {
+                try {
+                    const response = await fetch(files[i] + '?' + Date.now(), { cache: 'no-store' });
+                    if (response.ok) {
+                        const data = await response.text();
+                        const lines = data.split('\n').filter(line => line.trim());
+                        
+                        const links = {};
+                        for (let line of lines) {
+                            const colonIndex = line.indexOf(':');
+                            if (colonIndex > 0) {
+                                const username = line.substring(0, colonIndex).trim();
+                                const link = line.substring(colonIndex + 1).trim();
+                                if (username && link) {
+                                    links[username] = link;
+                                }
+                            }
+                        }
+                        
+                        userLinksData[types[i]] = links;
+                        console.log(`✅ Loaded ${types[i]} links:`, links);
                     }
+                } catch (error) {
+                    console.error(`❌ Error loading ${files[i]}:`, error);
                 }
-            }, 2500);
+            }
+            
+            localStorage.setItem('user_links_data', JSON.stringify(userLinksData));
+            return true;
+        }
+        
+        function getUserLink(type, username) {
+            let typeKey = '';
+            if (type === 'metfone') typeKey = 'metfone';
+            else if (type === 'cellcard') typeKey = 'cellcard';
+            else if (type === 'metfone1') typeKey = 'metfone1';
+            
+            const typeData = userLinksData[typeKey];
+            if (!typeData) {
+                console.warn(`⚠️ No data for type: ${typeKey}`);
+                return null;
+            }
+            
+            if (typeData[username]) {
+                console.log(`✅ Found link for ${username} - ${typeKey}:`, typeData[username]);
+                return typeData[username];
+            }
+            
+            if (typeData['default']) {
+                console.log(`ℹ️ Using default link for ${username} - ${typeKey}`);
+                return typeData['default'];
+            }
+            
+            console.warn(`⚠️ No link found for ${username} - ${typeKey}`);
+            return null;
         }
         
         // ============================================================
-        // 6. SERVICE WORKER & AUTO UPDATE
+        // 5. SERVICE WORKER & AUTO UPDATE
         // ============================================================
         let isFirstLoad = true;
         let lastUpdateCheck = 0;
@@ -1229,12 +1220,8 @@
             lastUpdateCheck = now;
             isChecking = true;
             try {
-                const [t1, t2, t3] = await Promise.all([
-                    loadTextContent(),
-                    loadCodeContent(),
-                    loadMetfone1Content()
-                ]);
-                if (t1 || t2 || t3) updateVersionDate();
+                await loadUserLinksFromTxt();
+                updateVersionDate();
             } catch(err) {}
             finally { isChecking = false; }
         }
@@ -1242,10 +1229,14 @@
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.addEventListener('message', (event) => {
                 if (event.data.type === 'contentUpdated' || event.data.type === 'backgroundUpdate') {
+                    loadUserLinksFromTxt();
                     updateVersionDate();
                     showUpdateNotification('ជូនដំណឹង', 'កូដត្រូវបានធ្វើបច្ចុប្បន្នភាព');
                 }
-                if (event.data.type === 'updatesChecked' && event.data.hasUpdates) updateVersionDate();
+                if (event.data.type === 'updatesChecked' && event.data.hasUpdates) {
+                    loadUserLinksFromTxt();
+                    updateVersionDate();
+                }
             });
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration error:', err));
@@ -1256,8 +1247,7 @@
             updateStatusBadge();
             showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត - កំពុងពិនិត្យមើលការធ្វើបច្ចុប្បន្នភាព');
             setTimeout(() => {
-                Promise.all([loadTextContent(), loadCodeContent(), loadMetfone1Content()])
-                    .then(([u1,u2,u3]) => { if(u1||u2||u3) updateVersionDate(); });
+                loadUserLinksFromTxt().then(() => updateVersionDate());
             }, 100);
         });
         window.addEventListener('offline', () => updateStatusBadge());
@@ -1265,17 +1255,15 @@
         setInterval(() => { if (navigator.onLine) autoUpdateCheck(); }, 30000);
         
         // ============================================================
-        // 7. INITIALIZATION
+        // 6. INITIALIZATION
         // ============================================================
         loadSavedVersionDate();
-        Promise.all([loadTextContent(), loadCodeContent(), loadMetfone1Content()]).then(([ch1,ch2,ch3]) => {
-            if (ch1 || ch2 || ch3) updateVersionDate();
-        });
+        loadUserLinksFromTxt().then(() => updateVersionDate());
         updateStatusBadge();
         setTimeout(() => { isFirstLoad = false; }, 1000);
         
         // ============================================================
-        // 8. PWA MANIFEST & INSTALL
+        // 7. PWA MANIFEST & INSTALL
         // ============================================================
         function createManifest() {
             const LOGO_FILE = "teva.png";
@@ -1334,7 +1322,7 @@
         }
 
         // ============================================================
-        // 9. STABLE DEVICE FINGERPRINT (មិនផ្លាស់ប្តូរ)
+        // 8. STABLE DEVICE FINGERPRINT
         // ============================================================
         function getDeviceFingerprint() {
             let fp = localStorage.getItem('device_fingerprint');
@@ -1388,9 +1376,10 @@
 
         let deviceFingerprint = getDeviceFingerprint();
         let isLoggedIn = false;
+        let currentUser = null;
 
         // ============================================================
-        // 10. LOAD & SAVE TOOR.TXT
+        // 9. LOAD & SAVE TOOR.TXT
         // ============================================================
         async function loadTOOR() {
             try {
@@ -1438,7 +1427,7 @@
         }
 
         // ============================================================
-        // 11. CHECK LOGIN (NO AUTO-LOGIN)
+        // 10. CHECK LOGIN
         // ============================================================
         async function checkLogin(password) {
             const toorData = await loadTOOR();
@@ -1447,11 +1436,8 @@
             console.log('🔍 Checking login...');
             console.log('📋 Password entered:', password);
             console.log('📋 Current FP:', currentFP);
-            console.log('📋 TOOR data:', toorData);
             
             for (let entry of toorData) {
-                console.log('🔍 Checking entry:', entry);
-                
                 if (entry.password === password) {
                     console.log('✅ Password matched!');
                     
@@ -1467,17 +1453,17 @@
                         return true;
                     }
                     
-                    console.log('❌ Fingerprint mismatch! Expected:', entry.fingerprint, 'Got:', currentFP);
+                    console.log('❌ Fingerprint mismatch!');
                     return false;
                 }
             }
             
-            console.log('❌ Password not found in TOOR data');
+            console.log('❌ Password not found');
             return false;
         }
 
         // ============================================================
-        // 12. FORCE SAVE FINGERPRINT
+        // 11. FORCE SAVE FINGERPRINT
         // ============================================================
         async function forceSaveFingerprint(password) {
             try {
@@ -1506,6 +1492,50 @@
                 console.error('❌ Error saving fingerprint:', error);
                 return false;
             }
+        }
+
+        // ============================================================
+        // 12. OPEN V2BOX WITH USER-SPECIFIC LINK
+        // ============================================================
+        function openV2Box(type) {
+            if (!isLoggedIn) {
+                showUpdateNotification('⚠️', 'សូមចូលប្រើប្រាស់ជាមុន');
+                return;
+            }
+            
+            const username = sessionStorage.getItem('current_user') || currentUser;
+            if (!username) {
+                showUpdateNotification('⚠️', 'មិនអាចកំណត់អត្តសញ្ញាណ User');
+                return;
+            }
+            
+            const link = getUserLink(type, username);
+            
+            if (!link) {
+                showUpdateNotification('⚠️', `មិនមាន Link សម្រាប់ ${username}`);
+                console.warn(`⚠️ No link found for ${username} - ${type}`);
+                return;
+            }
+            
+            let buttonName = '';
+            if (type === 'metfone') buttonName = 'METFONE';
+            else if (type === 'cellcard') buttonName = 'CELLCARD';
+            else if (type === 'metfone1') buttonName = 'METFONE1';
+            
+            console.log(`🔗 Opening ${buttonName} for user ${username}:`, link);
+            
+            window.location.href = link;
+            
+            setTimeout(() => {
+                const isAndroid = /android/i.test(navigator.userAgent);
+                const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+                
+                if (isAndroid) {
+                    window.location.href = 'https://play.google.com/store/apps/details?id=dev.hexasoftware.v2box';
+                } else if (isIOS) {
+                    window.location.href = 'https://apps.apple.com/app/v2box/id6446814670';
+                }
+            }, 2500);
         }
 
         // ============================================================
@@ -1547,7 +1577,7 @@
         }
 
         // ============================================================
-        // 14. FINGERPRINT HELPER FOR MOBILE (ចុច 3 ដងលើ TEVA)
+        // 14. FINGERPRINT HELPER (ចុច 3 ដងលើ TEVA)
         // ============================================================
         let fpTapCount = 0;
         let fpTapTimer = null;
@@ -1595,7 +1625,22 @@
         }
 
         // ============================================================
-        // 16. INITIALIZE LOGIN SYSTEM (NO AUTO-LOGIN)
+        // 16. SHOW CURRENT USER
+        // ============================================================
+        function showCurrentUser() {
+            const userBadge = document.getElementById('userBadge');
+            const userNameDisplay = document.getElementById('userNameDisplay');
+            
+            if (currentUser) {
+                userNameDisplay.textContent = currentUser;
+                userBadge.classList.add('show');
+            } else {
+                userBadge.classList.remove('show');
+            }
+        }
+
+        // ============================================================
+        // 17. INITIALIZE LOGIN SYSTEM
         // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
@@ -1606,13 +1651,18 @@
             console.log('🔐 Initializing login system...');
             console.log('📱 Device Fingerprint:', deviceFingerprint);
             
+            // Load links from TXT files
+            await loadUserLinksFromTxt();
+            
             // Clear any existing session
             sessionStorage.removeItem('teva_logged_in');
+            sessionStorage.removeItem('current_user');
             isLoggedIn = false;
+            currentUser = null;
             
             // Always show login screen
             overlay.classList.add('active');
-            console.log('🔐 Showing login screen (no auto-login)');
+            console.log('🔐 Showing login screen');
             
             // Handle Login
             async function handleLogin() {
@@ -1629,14 +1679,20 @@
                 console.log('📋 Login result:', success);
                 
                 if (success) {
+                    currentUser = password;
+                    sessionStorage.setItem('current_user', password);
+                    
                     await forceSaveFingerprint(password);
                     
                     isLoggedIn = true;
                     sessionStorage.setItem('teva_logged_in', 'true');
                     overlay.classList.remove('active');
                     error.classList.remove('show');
-                    showUpdateNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
-                    console.log('✅ Login successful!');
+                    
+                    showCurrentUser();
+                    
+                    showUpdateNotification('ជោគជ័យ', `បានចូលប្រើប្រាស់ដោយជោគជ័យ (User: ${password})`);
+                    console.log('✅ Login successful! User:', currentUser);
                 } else {
                     error.textContent = '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ ឬត្រូវបានប្រើរួចហើយ';
                     error.classList.add('show');
@@ -1655,7 +1711,7 @@
         }
 
         // ============================================================
-        // 17. START
+        // 18. START
         // ============================================================
         setTimeout(initLogin, 100);
 
