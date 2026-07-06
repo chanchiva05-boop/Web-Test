@@ -535,11 +535,12 @@
             border-color: rgba(251, 191, 36, 0.4);
         }
         
+        /* ===== FIXED NOTIFICATION - SMOOTH ===== */
         .update-notification {
             position: fixed;
             bottom: 100px;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%) translateY(0);
             background: linear-gradient(135deg, #d4af37, #b8922a);
             color: #0a0a2a;
             padding: 10px 20px;
@@ -549,15 +550,20 @@
             z-index: 1000;
             font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            animation: fadeInOut 3s ease forwards;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            pointer-events: none;
             white-space: nowrap;
         }
         
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
-            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+        .update-notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .update-notification.hide {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-15px);
         }
         
         /* ===== LOGIN SCREEN STYLES ===== */
@@ -875,6 +881,7 @@
                 font-size: 11px;
                 padding: 8px 16px;
                 white-space: nowrap;
+                bottom: 80px;
             }
             .status-badge {
                 top: 8px;
@@ -1081,18 +1088,65 @@
             }
         }
         
+        // ============================================================
+        // 4. FIXED: SMOOTH NOTIFICATION (មិនលោតញាក់)
+        // ============================================================
+        let notificationTimer = null;
+        let notificationTimeout = null;
+        let isNotificationShowing = false;
+
         function showUpdateNotification(title, message) {
-            const existingNotifications = document.querySelectorAll('.update-notification');
-            existingNotifications.forEach(notif => notif.remove());
+            // Clear any existing notification
+            if (notificationTimer) {
+                clearTimeout(notificationTimer);
+                notificationTimer = null;
+            }
+            if (notificationTimeout) {
+                clearTimeout(notificationTimeout);
+                notificationTimeout = null;
+            }
+            
+            // Remove existing notification
+            const existing = document.querySelector('.update-notification');
+            if (existing) {
+                existing.classList.remove('show');
+                existing.classList.add('hide');
+                setTimeout(() => {
+                    if (existing.parentNode) existing.remove();
+                }, 400);
+            }
+            
+            // Create new notification
             const notification = document.createElement('div');
             notification.className = 'update-notification';
             notification.textContent = `✨ ${title}: ${message}`;
             document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 3000);
+            
+            // Force reflow
+            notification.offsetHeight;
+            
+            // Show with smooth animation
+            requestAnimationFrame(() => {
+                notification.classList.add('show');
+            });
+            
+            isNotificationShowing = true;
+            
+            // Auto hide after 3 seconds
+            notificationTimer = setTimeout(() => {
+                notification.classList.remove('show');
+                notification.classList.add('hide');
+                notificationTimeout = setTimeout(() => {
+                    if (notification.parentNode) notification.remove();
+                    isNotificationShowing = false;
+                    notificationTimer = null;
+                    notificationTimeout = null;
+                }, 400);
+            }, 2800);
         }
         
         // ============================================================
-        // 4. LOAD USER-SPECIFIC CODES FROM TXT FILES
+        // 5. LOAD USER-SPECIFIC CODES FROM TXT FILES
         // ============================================================
         let userCodes = {
             metfone: '',
@@ -1100,28 +1154,48 @@
             metfone1: ''
         };
         let currentUser = '';
+        let isLoadingCodes = false;
+        let loadCodesPromise = null;
 
         async function loadUserCodes(password) {
+            if (isLoadingCodes) {
+                console.log('⏳ Codes are already loading, waiting...');
+                if (loadCodesPromise) {
+                    return await loadCodesPromise;
+                }
+                return null;
+            }
+            
+            isLoadingCodes = true;
             currentUser = password;
             
-            // Clear previous codes
             userCodes = { metfone: '', cellcard: '', metfone1: '' };
             
-            // Load all three files
-            await Promise.all([
-                loadUserCodeFromFile('METFONE.txt', password, 'metfone'),
-                loadUserCodeFromFile('CELLCARD.txt', password, 'cellcard'),
-                loadUserCodeFromFile('METFONE1.txt', password, 'metfone1')
-            ]);
+            loadCodesPromise = (async () => {
+                try {
+                    await Promise.all([
+                        loadUserCodeFromFile('METFONE.txt', password, 'metfone'),
+                        loadUserCodeFromFile('CELLCARD.txt', password, 'cellcard'),
+                        loadUserCodeFromFile('METFONE1.txt', password, 'metfone1')
+                    ]);
+                    
+                    try {
+                        localStorage.setItem('user_codes_' + password, JSON.stringify(userCodes));
+                        localStorage.setItem('current_user', password);
+                    } catch(e) {}
+                    
+                    console.log('✅ Loaded user codes for', password, ':', userCodes);
+                    return userCodes;
+                } catch(error) {
+                    console.error('❌ Error loading user codes:', error);
+                    return null;
+                } finally {
+                    isLoadingCodes = false;
+                    loadCodesPromise = null;
+                }
+            })();
             
-            // Save to localStorage for offline use
-            try {
-                localStorage.setItem('user_codes_' + password, JSON.stringify(userCodes));
-                localStorage.setItem('current_user', password);
-            } catch(e) {}
-            
-            console.log('✅ Loaded user codes for', password, ':', userCodes);
-            return userCodes;
+            return await loadCodesPromise;
         }
 
         async function loadUserCodeFromFile(filename, password, type) {
@@ -1139,7 +1213,6 @@
                 const content = await response.text();
                 const lines = content.split('\n');
                 
-                // Find the line that starts with the user's password
                 for (let line of lines) {
                     line = line.trim();
                     if (!line) continue;
@@ -1148,13 +1221,10 @@
                         const code = line.substring(password.length + 1).trim();
                         if (code) {
                             userCodes[type] = code;
-                            console.log(`✅ Found ${type} code for ${password}:`, code.substring(0, 30) + '...');
-                            
-                            // Save to localStorage for this specific file
+                            console.log(`✅ Found ${type} code for ${password}`);
                             try {
                                 localStorage.setItem(filename + '_' + password, code);
                             } catch(e) {}
-                            
                             return code;
                         }
                     }
@@ -1181,7 +1251,6 @@
                     }
                 }
                 
-                // Try individual file cache
                 const filename = type === 'metfone' ? 'METFONE.txt' : 
                                 type === 'cellcard' ? 'CELLCARD.txt' : 'METFONE1.txt';
                 const cachedCode = localStorage.getItem(filename + '_' + password);
@@ -1196,7 +1265,7 @@
         }
 
         // ============================================================
-        // 5. CORE FUNCTION: OPEN V2BOX WITH DEEP LINK
+        // 6. CORE FUNCTION: OPEN V2BOX WITH DEEP LINK
         // ============================================================
         function openV2Box(type) {
             let content = '';
@@ -1213,14 +1282,12 @@
                 name = 'METFONE1';
             }
             
-            // Check if content is valid
             if (!content || content === '' || content === 'undefined' || content === 'null') {
                 showUpdateNotification('កំហុស', 'មិនមានកូដសម្រាប់អ្នកប្រើប្រាស់នេះទេ');
                 console.log('❌ No content for type:', type);
                 return;
             }
             
-            // If content is a URL, use it directly
             let finalContent = content;
             if (content.startsWith('http://') || content.startsWith('https://')) {
                 finalContent = content;
@@ -1231,10 +1298,8 @@
             const v2boxUrl = `v2box://install-sub?url=${encodedContent}&name=${encodedName}`;
             
             console.log('🔗 Opening V2Box:', v2boxUrl);
-            console.log('📦 Content:', content);
             window.location.href = v2boxUrl;
             
-            // Check if app opened
             let appOpened = false;
             const checkAppOpened = () => {
                 appOpened = true;
@@ -1260,69 +1325,129 @@
         }
         
         // ============================================================
-        // 6. SERVICE WORKER & AUTO UPDATE
+        // 7. FIXED: SERVICE WORKER & AUTO UPDATE (ការពារការលោតញាក់)
         // ============================================================
         let isFirstLoad = true;
         let lastUpdateCheck = 0;
         let isChecking = false;
+        let updateCheckTimeout = null;
+        let swMessageTimeout = null;
         
         async function autoUpdateCheck() {
             if (!navigator.onLine) return;
             if (isChecking) return;
+            
             const now = Date.now();
-            if (now - lastUpdateCheck < 30000) return;
+            if (now - lastUpdateCheck < 60000) return;
             lastUpdateCheck = now;
             isChecking = true;
+            
             try {
                 const password = sessionStorage.getItem('teva_password');
                 if (password) {
                     await loadUserCodes(password);
                     updateVersionDate();
                 }
-            } catch(err) {}
-            finally { isChecking = false; }
+            } catch(err) {
+                console.log('⚠️ Auto update check error:', err);
+            } finally {
+                isChecking = false;
+            }
+        }
+
+        function debouncedAutoUpdateCheck() {
+            if (updateCheckTimeout) {
+                clearTimeout(updateCheckTimeout);
+            }
+            updateCheckTimeout = setTimeout(() => {
+                autoUpdateCheck();
+                updateCheckTimeout = null;
+            }, 1000);
         }
         
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.addEventListener('message', (event) => {
+                if (swMessageTimeout) {
+                    clearTimeout(swMessageTimeout);
+                    swMessageTimeout = null;
+                }
+                
                 if (event.data.type === 'contentUpdated' || event.data.type === 'backgroundUpdate') {
                     const password = sessionStorage.getItem('teva_password');
                     if (password) {
-                        loadUserCodes(password);
-                        updateVersionDate();
-                        showUpdateNotification('ជូនដំណឹង', 'កូដត្រូវបានធ្វើបច្ចុប្បន្នភាព');
+                        swMessageTimeout = setTimeout(() => {
+                            loadUserCodes(password);
+                            updateVersionDate();
+                            showUpdateNotification('ជូនដំណឹង', 'កូដត្រូវបានធ្វើបច្ចុប្បន្នភាព');
+                            swMessageTimeout = null;
+                        }, 500);
                     }
                 }
+                
                 if (event.data.type === 'updatesChecked' && event.data.hasUpdates) {
                     updateVersionDate();
                 }
             });
+            
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration error:', err));
             });
         }
         
+        // ============================================================
+        // 8. FIXED: EVENT LISTENERS (ការពារការលោតញាក់)
+        // ============================================================
+        let onlineTimeout = null;
+        let visibilityTimeout = null;
+
         window.addEventListener('online', () => {
             updateStatusBadge();
-            showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត - កំពុងពិនិត្យមើលការធ្វើបច្ចុប្បន្នភាព');
-            setTimeout(() => {
+            
+            if (onlineTimeout) clearTimeout(onlineTimeout);
+            onlineTimeout = setTimeout(() => {
+                showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត');
                 const password = sessionStorage.getItem('teva_password');
-                if (password) loadUserCodes(password);
-            }, 100);
+                if (password) {
+                    loadUserCodes(password);
+                }
+                onlineTimeout = null;
+            }, 800);
         });
-        window.addEventListener('offline', () => updateStatusBadge());
-        document.addEventListener('visibilitychange', () => { if (!document.hidden && navigator.onLine) autoUpdateCheck(); });
-        setInterval(() => { if (navigator.onLine) autoUpdateCheck(); }, 30000);
+
+        window.addEventListener('offline', () => {
+            updateStatusBadge();
+            if (onlineTimeout) {
+                clearTimeout(onlineTimeout);
+                onlineTimeout = null;
+            }
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && navigator.onLine) {
+                if (visibilityTimeout) clearTimeout(visibilityTimeout);
+                visibilityTimeout = setTimeout(() => {
+                    debouncedAutoUpdateCheck();
+                    visibilityTimeout = null;
+                }, 1500);
+            }
+        });
+
+        // Interval check - បង្កើនពេលវេលា
+        setInterval(() => {
+            if (navigator.onLine) {
+                debouncedAutoUpdateCheck();
+            }
+        }, 60000);
         
         // ============================================================
-        // 7. INITIALIZATION
+        // 9. INITIALIZATION
         // ============================================================
         loadSavedVersionDate();
         updateStatusBadge();
         setTimeout(() => { isFirstLoad = false; }, 1000);
         
         // ============================================================
-        // 8. PWA MANIFEST & INSTALL
+        // 10. PWA MANIFEST & INSTALL
         // ============================================================
         function createManifest() {
             const LOGO_FILE = "teva.png";
@@ -1376,12 +1501,12 @@
         }
         if ('connection' in navigator) {
             navigator.connection.addEventListener('change', () => { 
-                if (navigator.onLine) autoUpdateCheck(); 
+                if (navigator.onLine) debouncedAutoUpdateCheck(); 
             });
         }
 
         // ============================================================
-        // 9. STABLE DEVICE FINGERPRINT
+        // 11. STABLE DEVICE FINGERPRINT
         // ============================================================
         function getDeviceFingerprint() {
             let fp = localStorage.getItem('device_fingerprint');
@@ -1437,7 +1562,7 @@
         let isLoggedIn = false;
 
         // ============================================================
-        // 10. LOAD & SAVE TOOR.TXT
+        // 12. LOAD & SAVE TOOR.TXT
         // ============================================================
         async function loadTOOR() {
             try {
@@ -1485,15 +1610,13 @@
         }
 
         // ============================================================
-        // 11. CHECK LOGIN
+        // 13. CHECK LOGIN
         // ============================================================
         async function checkLogin(password) {
             const toorData = await loadTOOR();
             const currentFP = deviceFingerprint;
             
             console.log('🔍 Checking login...');
-            console.log('📋 Password entered:', password);
-            console.log('📋 Current FP:', currentFP);
             
             for (let entry of toorData) {
                 if (entry.password === password) {
@@ -1521,7 +1644,7 @@
         }
 
         // ============================================================
-        // 12. FORCE SAVE FINGERPRINT
+        // 14. FORCE SAVE FINGERPRINT
         // ============================================================
         async function forceSaveFingerprint(password) {
             try {
@@ -1553,7 +1676,7 @@
         }
 
         // ============================================================
-        // 13. SHOW FINGERPRINT ON SCREEN
+        // 15. SHOW FINGERPRINT ON SCREEN
         // ============================================================
         function showFingerprintOnScreen() {
             const fp = getDeviceFingerprint();
@@ -1591,7 +1714,7 @@
         }
 
         // ============================================================
-        // 14. FINGERPRINT HELPER FOR MOBILE
+        // 16. FINGERPRINT HELPER FOR MOBILE
         // ============================================================
         let fpTapCount = 0;
         let fpTapTimer = null;
@@ -1623,7 +1746,7 @@
         }
 
         // ============================================================
-        // 15. TOGGLE PASSWORD VISIBILITY
+        // 17. TOGGLE PASSWORD VISIBILITY
         // ============================================================
         const togglePasswordBtn = document.getElementById('togglePasswordBtn');
         const passwordInput = document.getElementById('loginPassword');
@@ -1639,7 +1762,7 @@
         }
 
         // ============================================================
-        // 16. INITIALIZE LOGIN SYSTEM
+        // 18. INITIALIZE LOGIN SYSTEM
         // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
@@ -1650,16 +1773,13 @@
             console.log('🔐 Initializing login system...');
             console.log('📱 Device Fingerprint:', deviceFingerprint);
             
-            // Clear any existing session
             sessionStorage.removeItem('teva_logged_in');
             sessionStorage.removeItem('teva_password');
             isLoggedIn = false;
             
-            // Always show login screen
             overlay.classList.add('active');
             console.log('🔐 Showing login screen');
             
-            // Handle Login
             async function handleLogin() {
                 const password = input.value.trim();
                 console.log('🔑 Login attempt with password:', password);
@@ -1674,9 +1794,7 @@
                 console.log('📋 Login result:', success);
                 
                 if (success) {
-                    // Load user-specific codes
                     await loadUserCodes(password);
-                    
                     await forceSaveFingerprint(password);
                     
                     isLoggedIn = true;
@@ -1705,15 +1823,14 @@
         }
 
         // ============================================================
-        // 17. START
+        // 19. START
         // ============================================================
         setTimeout(initLogin, 100);
 
         console.log('🔐 ID Device:', deviceFingerprint);
         console.log('📱 TEVA App Loaded Successfully');
         console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
-        console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
         console.log('📝 Each user has their own codes in METFONE.txt, CELLCARD.txt, METFONE1.txt');
     </script>
 </body>
-</html>
+    </html>
