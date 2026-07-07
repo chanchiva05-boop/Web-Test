@@ -506,6 +506,7 @@
             50% { transform: translateY(-3px); }
         }
         
+        /* ===== STATUS BADGE ===== */
         .status-badge {
             position: fixed;
             top: 12px;
@@ -531,10 +532,17 @@
         }
         
         .status-badge.offline {
-            color: #fbbf24;
-            border-color: rgba(251, 191, 36, 0.4);
+            color: #ff6b6b;
+            border-color: rgba(255, 80, 80, 0.4);
+            animation: offlineBadgePulse 2s ease-in-out infinite;
         }
         
+        @keyframes offlineBadgePulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; box-shadow: 0 0 20px rgba(255, 80, 80, 0.2); }
+        }
+        
+        /* ===== NOTIFICATION ===== */
         .update-notification {
             position: fixed;
             bottom: 100px;
@@ -839,6 +847,251 @@
             margin-top: 10px;
         }
         
+        /* ===== OFFLINE MODE OVERLAY ===== */
+        .offline-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 42, 0.92);
+            backdrop-filter: blur(20px);
+            z-index: 9998;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 30px;
+            animation: offlineFadeIn 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
+        }
+        
+        .offline-overlay.active {
+            display: flex;
+        }
+        
+        @keyframes offlineFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .offline-box {
+            background: rgba(12, 18, 28, 0.9);
+            backdrop-filter: blur(30px);
+            border-radius: 48px;
+            padding: 48px 36px;
+            border: 1px solid rgba(255, 100, 100, 0.3);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 60px rgba(255, 50, 50, 0.1);
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            animation: offlineBounce 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        
+        @keyframes offlineBounce {
+            0% {
+                opacity: 0;
+                transform: scale(0.8) translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        .offline-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            background: radial-gradient(circle, rgba(255, 80, 80, 0.2), transparent 70%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            animation: offlinePulse 2s ease-in-out infinite;
+            border: 2px solid rgba(255, 80, 80, 0.2);
+        }
+        
+        @keyframes offlinePulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 30px rgba(255, 80, 80, 0.1);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 60px rgba(255, 80, 80, 0.2);
+            }
+        }
+        
+        .offline-title {
+            color: #ff6b6b;
+            font-size: 28px;
+            font-weight: 700;
+            font-family: 'Times New Roman', Times, serif;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+        
+        .offline-subtitle {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+        }
+        
+        .offline-wifi {
+            display: inline-block;
+            animation: wifiBlink 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes wifiBlink {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        .offline-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: rgba(255, 80, 80, 0.1);
+            padding: 12px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 80, 80, 0.15);
+            margin-bottom: 25px;
+        }
+        
+        .offline-dot {
+            width: 8px;
+            height: 8px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            animation: dotPulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes dotPulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+        
+        .offline-status-text {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        
+        .offline-retry-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #ff6b6b, #ee4444);
+            border: none;
+            border-radius: 30px;
+            color: #fff;
+            font-size: 17px;
+            font-weight: 700;
+            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 25px rgba(255, 80, 80, 0.3);
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .offline-retry-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 35px rgba(255, 80, 80, 0.5);
+            background: linear-gradient(135deg, #ff7b7b, #ff5555);
+        }
+        
+        .offline-retry-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .offline-retry-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .offline-retry-btn .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        .offline-retry-btn.loading .spinner {
+            display: inline-block;
+        }
+        
+        .offline-retry-btn.loading .btn-text {
+            display: none;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .offline-cache-info {
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 18px;
+        }
+        
+        .offline-cache-info span {
+            color: rgba(212, 175, 55, 0.4);
+        }
+        
+        /* Offline particles */
+        .offline-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9997;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        
+        .offline-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 80, 80, 0.2);
+            border-radius: 50%;
+            animation: floatParticleOffline 8s infinite linear;
+        }
+        
+        @keyframes floatParticleOffline {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 0.5; }
+            90% { opacity: 0.5; }
+            100% {
+                transform: translateY(-20vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
         @media (max-width: 500px) {
             .glass-panel {
                 max-width: 380px;
@@ -914,6 +1167,22 @@
                 padding: 8px 15px;
                 font-size: 12px;
             }
+            .offline-box {
+                padding: 36px 24px;
+                border-radius: 40px;
+            }
+            .offline-title {
+                font-size: 22px;
+            }
+            .offline-icon {
+                width: 70px;
+                height: 70px;
+                font-size: 35px;
+            }
+            .offline-retry-btn {
+                font-size: 15px;
+                padding: 14px;
+            }
         }
         
         @supports (display: standalone) {
@@ -925,6 +1194,31 @@
 </head>
 
 <body>
+    <!-- ===== OFFLINE OVERLAY ===== -->
+    <div class="offline-overlay" id="offlineOverlay">
+        <div class="offline-particles" id="offlineParticles"></div>
+        <div class="offline-box">
+            <div class="offline-icon">📡</div>
+            <div class="offline-title">គ្មានការតភ្ជាប់</div>
+            <div class="offline-subtitle">សូមពិនិត្យការតភ្ជាប់អ៊ីនធឺណិតរបស់អ្នក</div>
+            
+            <div class="offline-status">
+                <div class="offline-dot"></div>
+                <span class="offline-status-text">កំពុងរង់ចាំបណ្តាញ...</span>
+                <span class="offline-wifi">📶</span>
+            </div>
+            
+            <button class="offline-retry-btn" id="offlineRetryBtn" onclick="retryConnection()">
+                <span class="spinner"></span>
+                <span class="btn-text">🔄 ព្យាយាមភ្ជាប់ឡើងវិញ</span>
+            </button>
+            
+            <div class="offline-cache-info">
+                💾 ទិន្នន័យដែលបានរក្សាទុក <span id="offlineCacheStatus">មាន</span>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== LOGIN OVERLAY ===== -->
     <div class="login-overlay active" id="loginOverlay">
         <div class="login-box">
@@ -1068,11 +1362,37 @@
         createParticles();
         
         // ============================================================
-        // 3. STATUS BADGE
+        // 3. OFFLINE PARTICLES
+        // ============================================================
+        function createOfflineParticles() {
+            const container = document.getElementById('offlineParticles');
+            if (!container) return;
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('offline-particle');
+                const size = Math.random() * 4 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = 6 + Math.random() * 6 + 's';
+                particle.style.opacity = Math.random() * 0.3 + 0.1;
+                container.appendChild(particle);
+            }
+        }
+        createOfflineParticles();
+        
+        // ============================================================
+        // 4. STATUS BADGE & NOTIFICATION
         // ============================================================
         function updateStatusBadge() {
             const badge = document.getElementById('statusBadge');
-            if (navigator.onLine) {
+            if (!badge) return;
+            
+            if (isOffline) {
+                badge.textContent = '● Offline';
+                badge.className = 'status-badge offline';
+            } else if (navigator.onLine) {
                 badge.textContent = '● Online';
                 badge.className = 'status-badge online';
             } else {
@@ -1092,12 +1412,169 @@
         }
         
         // ============================================================
-        // 4. CLEAR ALL CACHE (LocalStorage + Service Worker)
+        // 5. OFFLINE MODE
+        // ============================================================
+        let isOffline = false;
+        let isRetrying = false;
+        let lastOnlineStatus = navigator.onLine;
+
+        function showOfflineMode() {
+            const overlay = document.getElementById('offlineOverlay');
+            if (overlay) {
+                overlay.classList.add('active');
+                isOffline = true;
+                updateStatusBadge();
+                console.log('📡 Offline mode activated');
+                updateOfflineCacheStatus();
+            }
+        }
+
+        function hideOfflineMode() {
+            const overlay = document.getElementById('offlineOverlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+                isOffline = false;
+                updateStatusBadge();
+                console.log('📡 Online mode restored');
+            }
+        }
+
+        function updateOfflineCacheStatus() {
+            const statusEl = document.getElementById('offlineCacheStatus');
+            if (!statusEl) return;
+            
+            try {
+                const password = sessionStorage.getItem('teva_password');
+                if (password) {
+                    const cached = localStorage.getItem('user_codes_' + password);
+                    if (cached) {
+                        statusEl.textContent = 'មាន (អាចប្រើបាន)';
+                        statusEl.style.color = '#4ade80';
+                    } else {
+                        statusEl.textContent = 'គ្មាន (ត្រូវការអ៊ីនធឺណិត)';
+                        statusEl.style.color = '#ff6b6b';
+                    }
+                } else {
+                    statusEl.textContent = 'មិនមានអ្នកប្រើប្រាស់';
+                    statusEl.style.color = '#888';
+                }
+            } catch(e) {
+                statusEl.textContent = 'មិនស្គាល់';
+                statusEl.style.color = '#888';
+            }
+        }
+
+        // ============================================================
+        // 6. RETRY CONNECTION
+        // ============================================================
+        async function retryConnection() {
+            if (isRetrying) return;
+            
+            const btn = document.getElementById('offlineRetryBtn');
+            isRetrying = true;
+            btn.classList.add('loading');
+            btn.disabled = true;
+            
+            console.log('🔄 Retrying connection...');
+            
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+                
+                const response = await fetch('TOOR.txt?_=' + Date.now(), {
+                    signal: controller.signal,
+                    cache: 'no-store',
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+                
+                clearTimeout(timeoutId);
+                
+                if (response && response.ok) {
+                    console.log('✅ Connection restored!');
+                    hideOfflineMode();
+                    showUpdateNotification('បណ្តាញ', 'ការតភ្ជាប់ត្រូវបានស្តារឡើងវិញ');
+                    
+                    const password = sessionStorage.getItem('teva_password');
+                    if (password) {
+                        await loadUserCodes(password, true);
+                        updateVersionDate();
+                    }
+                    
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    throw new Error('Network not available');
+                }
+            } catch(error) {
+                console.log('❌ Still offline:', error);
+                showUpdateNotification('កំហុស', 'មិនទាន់មានការតភ្ជាប់អ៊ីនធឺណិត');
+                
+                const statusText = document.querySelector('.offline-status-text');
+                if (statusText) {
+                    statusText.textContent = 'មិនទាន់មានបណ្តាញ...';
+                    statusText.style.color = '#ff6b6b';
+                }
+            } finally {
+                isRetrying = false;
+                btn.classList.remove('loading');
+                btn.disabled = false;
+                updateOfflineCacheStatus();
+            }
+        }
+
+        // ============================================================
+        // 7. MONITOR NETWORK STATUS
+        // ============================================================
+        function initOfflineMonitor() {
+            if (!navigator.onLine) {
+                setTimeout(showOfflineMode, 500);
+            }
+            
+            window.addEventListener('online', () => {
+                console.log('📡 Online event detected');
+                lastOnlineStatus = true;
+                if (isOffline) {
+                    hideOfflineMode();
+                    showUpdateNotification('បណ្តាញ', 'ការតភ្ជាប់ត្រូវបានស្តារឡើងវិញ');
+                    const password = sessionStorage.getItem('teva_password');
+                    if (password) {
+                        loadUserCodes(password, true);
+                        updateVersionDate();
+                    }
+                }
+            });
+            
+            window.addEventListener('offline', () => {
+                console.log('📡 Offline event detected');
+                lastOnlineStatus = false;
+                setTimeout(showOfflineMode, 300);
+            });
+            
+            setInterval(() => {
+                const currentStatus = navigator.onLine;
+                if (currentStatus !== lastOnlineStatus) {
+                    lastOnlineStatus = currentStatus;
+                    if (currentStatus && isOffline) {
+                        hideOfflineMode();
+                        showUpdateNotification('បណ្តាញ', 'ការតភ្ជាប់ត្រូវបានស្តារឡើងវិញ');
+                    } else if (!currentStatus && !isOffline) {
+                        showOfflineMode();
+                    }
+                }
+                updateOfflineCacheStatus();
+            }, 5000);
+            
+            updateStatusBadge();
+            console.log('📡 Offline monitor initialized');
+        }
+
+        // ============================================================
+        // 8. CLEAR ALL CACHE
         // ============================================================
         async function clearAllCaches() {
             console.log('🧹 Clearing all caches...');
             
-            // Clear localStorage items
             try {
                 const keysToRemove = [];
                 for (let i = 0; i < localStorage.length; i++) {
@@ -1119,7 +1596,6 @@
                 });
             } catch(e) {}
             
-            // Clear Service Worker cache
             if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
                 try {
                     navigator.serviceWorker.controller.postMessage('clearAllCache');
@@ -1142,7 +1618,6 @@
                 }
             }
             
-            // Clear browser cache
             if ('caches' in window) {
                 try {
                     const cacheNames = await caches.keys();
@@ -1159,7 +1634,7 @@
         }
         
         // ============================================================
-        // 5. LOAD USER-SPECIFIC CODES FROM TXT FILES
+        // 9. LOAD USER-SPECIFIC CODES
         // ============================================================
         let userCodes = {
             metfone: '',
@@ -1180,20 +1655,17 @@
                 await clearAllCaches();
             }
             
-            // Reset user codes
             userCodes = { metfone: '', cellcard: '', metfone1: '' };
             userExists = { metfone: false, cellcard: false, metfone1: false };
             
             console.log('🔄 Loading user codes from files for:', password);
             
-            // Load all three files with no-cache
             await Promise.all([
                 loadUserCodeFromFile('METFONE.txt', password, 'metfone'),
                 loadUserCodeFromFile('CELLCARD.txt', password, 'cellcard'),
                 loadUserCodeFromFile('METFONE1.txt', password, 'metfone1')
             ]);
             
-            // Save to localStorage for reference
             try {
                 localStorage.setItem('user_codes_' + password, JSON.stringify(userCodes));
                 localStorage.setItem('user_exists_' + password, JSON.stringify(userExists));
@@ -1227,7 +1699,6 @@
                 
                 const content = await response.text();
                 const lines = content.split('\n');
-                let found = false;
                 
                 console.log(`📄 Checking ${filename} (${lines.length} lines) for user: ${password}`);
                 
@@ -1236,7 +1707,6 @@
                     if (!line) continue;
                     
                     if (line.startsWith(password + ':')) {
-                        found = true;
                         const code = line.substring(password.length + 1).trim();
                         console.log(`🔍 Found line: "${line}"`);
                         console.log(`🔍 Extracted code: "${code}"`);
@@ -1267,7 +1737,7 @@
         }
 
         // ============================================================
-        // 6. CORE FUNCTION: OPEN V2BOX WITH DEEP LINK
+        // 10. OPEN V2BOX
         // ============================================================
         function openV2Box(type) {
             console.log(`🔍 Checking access for ${type}...`);
@@ -1275,7 +1745,6 @@
             console.log(`📋 User exists in ${type}: ${userExists[type]}`);
             console.log(`📋 User code: ${userCodes[type]}`);
             
-            // Check if user exists for this specific type
             if (!userExists[type]) {
                 showUpdateNotification('កំហុស', 'អ្នកប្រើប្រាស់មិនមានក្នុងប្រព័ន្ធសម្រាប់ប៊ូតុងនេះទេ');
                 console.log(`❌ User ${currentUser} not found for type: ${type}`);
@@ -1340,7 +1809,7 @@
         }
         
         // ============================================================
-        // 7. SERVICE WORKER & AUTO UPDATE
+        // 11. SERVICE WORKER & AUTO UPDATE
         // ============================================================
         let isFirstLoad = true;
         let lastUpdateCheck = 0;
@@ -1394,14 +1863,14 @@
         setInterval(() => { if (navigator.onLine) autoUpdateCheck(); }, 60000);
         
         // ============================================================
-        // 8. INITIALIZATION
+        // 12. INITIALIZATION
         // ============================================================
         loadSavedVersionDate();
         updateStatusBadge();
         setTimeout(() => { isFirstLoad = false; }, 1000);
         
         // ============================================================
-        // 9. PWA MANIFEST & INSTALL
+        // 13. PWA MANIFEST & INSTALL
         // ============================================================
         function createManifest() {
             const LOGO_FILE = "teva.png";
@@ -1460,7 +1929,7 @@
         }
 
         // ============================================================
-        // 10. STABLE DEVICE FINGERPRINT
+        // 14. DEVICE FINGERPRINT
         // ============================================================
         function getDeviceFingerprint() {
             let fp = localStorage.getItem('device_fingerprint');
@@ -1516,11 +1985,11 @@
         let isLoggedIn = false;
 
         // ============================================================
-        // 11. LOAD & SAVE TOOR.TXT
+        // 15. TOOR.TXT
         // ============================================================
         async function loadTOOR() {
             try {
-                const response = await fetch('TOOR.txt?' + Date.now() + '_' + Math.random().toString(36).substring(2, 6), { 
+                const response = await fetch('TOOR.txt?_=' + Date.now() + '_' + Math.random().toString(36).substring(2, 6), { 
                     cache: 'no-store',
                     headers: { 
                         'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -1571,7 +2040,7 @@
         }
 
         // ============================================================
-        // 12. CHECK LOGIN
+        // 16. CHECK LOGIN
         // ============================================================
         async function checkLogin(password) {
             const toorData = await loadTOOR();
@@ -1607,7 +2076,7 @@
         }
 
         // ============================================================
-        // 13. FORCE SAVE FINGERPRINT
+        // 17. FORCE SAVE FINGERPRINT
         // ============================================================
         async function forceSaveFingerprint(password) {
             try {
@@ -1638,7 +2107,7 @@
         }
 
         // ============================================================
-        // 14. SHOW FINGERPRINT ON SCREEN
+        // 18. SHOW FINGERPRINT
         // ============================================================
         function showFingerprintOnScreen() {
             const fp = getDeviceFingerprint();
@@ -1676,7 +2145,7 @@
         }
 
         // ============================================================
-        // 15. FINGERPRINT HELPER FOR MOBILE
+        // 19. FINGERPRINT HELPER
         // ============================================================
         let fpTapCount = 0;
         let fpTapTimer = null;
@@ -1708,7 +2177,7 @@
         }
 
         // ============================================================
-        // 16. TOGGLE PASSWORD VISIBILITY
+        // 20. TOGGLE PASSWORD
         // ============================================================
         const togglePasswordBtn = document.getElementById('togglePasswordBtn');
         const passwordInput = document.getElementById('loginPassword');
@@ -1724,7 +2193,7 @@
         }
 
         // ============================================================
-        // 17. INITIALIZE LOGIN SYSTEM
+        // 21. INITIALIZE LOGIN
         // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
@@ -1786,9 +2255,10 @@
         }
 
         // ============================================================
-        // 18. START
+        // 22. START
         // ============================================================
         setTimeout(initLogin, 100);
+        setTimeout(initOfflineMonitor, 500);
 
         console.log('🔐 ID Device:', deviceFingerprint);
         console.log('📱 TEVA App Loaded Successfully');
@@ -1796,6 +2266,7 @@
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
         console.log('📝 Each user has their own codes in METFONE.txt, CELLCARD.txt, METFONE1.txt');
         console.log('⚠️ Cache is cleared on each login to prevent old code usage');
+        console.log('📡 Offline mode will show when network is disconnected');
     </script>
 </body>
-</html>
+    </html>
