@@ -1,7 +1,7 @@
 [
-  {"password":"TEV","fingerprint":"FP_49f39f41"},
-  {"password":"TEVA1","fingerprint":"FP_4a4e9d6c"},
-  {"password":"sokmean","fingerprint":"FP_10d686b4"},
+  {"password":"TEVA","fingerprint":"FP_49f39f41"},
+  {"password":"USER004","fingerprint":""},
+  {"password":"USER004","fingerprint":""},
   {"password":"USER004","fingerprint":""},
   {"password":"USER003","fingerprint":""},
   {"password":"USER004","fingerprint":""},
