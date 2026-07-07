@@ -1,4 +1,4 @@
-const CACHE_NAME = 'teva-v10';
+const CACHE_NAME = 'teva-v12';
 const urlsToCache = [
   './',
   './index.html',
@@ -18,8 +18,10 @@ self.addEventListener('install', event => {
         console.log('Caching files...');
         return cache.addAll(urlsToCache);
       })
+      .then(() => {
+        return self.skipWaiting();
+      })
   );
-  self.skipWaiting();
 });
 
 // Network First - ALWAYS try network first for txt files
@@ -30,14 +32,18 @@ async function networkFirst(request) {
         fetchUrl.includes('CELLCARD.txt') || 
         fetchUrl.includes('METFONE1.txt') ||
         fetchUrl.includes('TOOR.txt')) {
-      fetchUrl = fetchUrl.split('?')[0] + '?_=' + Date.now();
+      const baseUrl = fetchUrl.split('?')[0];
+      fetchUrl = baseUrl + '?_=' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
     }
+    
+    console.log('🌐 Fetching from network:', fetchUrl);
     
     const response = await fetch(fetchUrl, { 
       cache: 'no-store',
       headers: { 
         'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache'
+        'Pragma': 'no-cache',
+        'Expires': '0'
       }
     });
     
@@ -61,7 +67,7 @@ async function networkFirst(request) {
     }
     throw new Error('Network failed');
   } catch (error) {
-    console.log('📦 Offline or network error, using cache:', request.url);
+    console.log('📦 Network error, checking cache:', request.url);
     const originalUrl = request.url.split('?')[0];
     const cachedResponse = await caches.match(originalUrl);
     if (cachedResponse) {
@@ -69,22 +75,19 @@ async function networkFirst(request) {
       return cachedResponse;
     }
     
-    // Fallback for txt files
-    if (originalUrl.includes('METFONE.txt')) {
-      console.log('⚠️ Using fallback for METFONE.txt');
-      return new Response('កាកម៉េសហ្អា', { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
-    }
-    if (originalUrl.includes('CELLCARD.txt')) {
-      console.log('⚠️ Using fallback for CELLCARD.txt');
-      return new Response('TEVA555', { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
-    }
-    if (originalUrl.includes('METFONE1.txt')) {
-      console.log('⚠️ Using fallback for METFONE1.txt');
-      return new Response('កាកម៉េសហ្អា1', { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+    // Return empty response for txt files (no fallback)
+    if (originalUrl.includes('METFONE.txt') || 
+        originalUrl.includes('CELLCARD.txt') || 
+        originalUrl.includes('METFONE1.txt')) {
+      console.log('⚠️ No cache and no network, returning empty');
+      return new Response('', { 
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' } 
+      });
     }
     if (originalUrl.includes('TOOR.txt')) {
-      console.log('⚠️ Using fallback for TOOR.txt');
-      return new Response('[{"password":"TEVA","fingerprint":""}]', { headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
+      return new Response('[{"password":"TEVA","fingerprint":""}]', { 
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' } 
+      });
     }
     return new Response('Offline', { status: 503 });
   }
@@ -154,7 +157,7 @@ self.addEventListener('activate', event => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
+            console.log('🗑️ Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -188,6 +191,22 @@ self.addEventListener('message', async (event) => {
     const clients = await self.clients.matchAll();
     clients.forEach(client => {
       client.postMessage({ type: 'refreshContent', source: 'sw' });
+    });
+  }
+  
+  if (event.data === 'clearAllCache') {
+    console.log('🧹 Clearing ALL cache...');
+    const cache = await caches.open(CACHE_NAME);
+    const keys = await cache.keys();
+    for (const request of keys) {
+      await cache.delete(request);
+      console.log('🗑️ Deleted:', request.url);
+    }
+    console.log('✅ All cache cleared');
+    
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+      client.postMessage({ type: 'cacheCleared', source: 'sw' });
     });
   }
   
