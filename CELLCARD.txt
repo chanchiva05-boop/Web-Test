@@ -1,4 +1,4 @@
-TEVA:https://raw.githubusercontent.com/sokc7618-boop/Kajabahagahbsbajajajsnanajajaj/main/4b3d481a-9c11-4b43-be56-42a3d250325c_cellcard.txt
+TEVA-:https://raw.githubusercontent.com/sokc7618-boop/Kajabahagahbsbajajajsnanajajaj/main/4b3d481a-9c11-4b43-be56-42a3d250325c_cellcard.txt
 TEVA1:https://raw.githubusercontent.com/sokc7618-boop/Kajabahagahbsbajajajsnanajajaj/main/a99285ed-30de-4a46-8064-52fbf5c7e09a_cellcard.txt
 USER003:https://raw.githubusercontent.com/.../user003_cellcard.txt
 USER004:https://raw.githubusercontent.com/.../user004_cellcard.txt
