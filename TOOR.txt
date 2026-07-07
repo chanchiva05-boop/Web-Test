@@ -20,5 +20,5 @@
   {"password":"USER017","fingerprint":""},
   {"password":"USER018","fingerprint":""},
   {"password":"USER019","fingerprint":""},
-  {"password":"iphone12","fingerprint":"FP_2a8b7731"}
+  {"password":"USER0020","fingerprint":""}
 ]
