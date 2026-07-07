@@ -839,6 +839,181 @@
             margin-top: 10px;
         }
         
+        /* ============================================================
+           OFFLINE PAGE - STYLISH DESIGN
+           ============================================================ */
+        .offline-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 42, 0.98);
+            backdrop-filter: blur(30px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 30px;
+            animation: offlineFadeIn 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
+        }
+        
+        .offline-overlay.active {
+            display: flex;
+        }
+        
+        @keyframes offlineFadeIn {
+            0% { opacity: 0; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        
+        .offline-icon {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 30px;
+            position: relative;
+            animation: offlineFloat 3s ease-in-out infinite;
+        }
+        
+        @keyframes offlineFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .offline-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .offline-title {
+            color: #f0e9cf;
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'Times New Roman', Times, serif;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+        
+        .offline-subtitle {
+            color: rgba(212, 175, 55, 0.6);
+            font-size: 16px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        
+        .offline-message {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 15px;
+            text-align: center;
+            max-width: 320px;
+            line-height: 1.8;
+            margin-bottom: 35px;
+        }
+        
+        .offline-message span {
+            color: #d4af37;
+        }
+        
+        .offline-btn {
+            padding: 16px 48px;
+            background: linear-gradient(135deg, #d4af37, #b8922a);
+            border: none;
+            border-radius: 60px;
+            color: #0a0a2a;
+            font-size: 17px;
+            font-weight: 700;
+            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 30px rgba(212, 175, 55, 0.3);
+            letter-spacing: 1px;
+        }
+        
+        .offline-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 40px rgba(212, 175, 55, 0.5);
+        }
+        
+        .offline-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .offline-btn::before {
+            content: '🔄 ';
+            margin-right: 8px;
+        }
+        
+        .offline-status {
+            margin-top: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+        
+        .offline-status .dot {
+            width: 8px;
+            height: 8px;
+            background: #fbbf24;
+            border-radius: 50%;
+            animation: pulseDot 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulseDot {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+        
+        .offline-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        .offline-particles span {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(212, 175, 55, 0.15);
+            border-radius: 50%;
+            animation: floatParticleOffline 15s infinite linear;
+        }
+        
+        @keyframes floatParticleOffline {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(720deg); opacity: 0; }
+        }
+        
+        .offline-glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.08), transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: -1;
+            animation: glowPulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes glowPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.5; }
+            50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+        }
+        
         @media (max-width: 500px) {
             .glass-panel {
                 max-width: 380px;
@@ -914,6 +1089,24 @@
                 padding: 8px 15px;
                 font-size: 12px;
             }
+            
+            .offline-icon {
+                width: 80px;
+                height: 80px;
+            }
+            .offline-title {
+                font-size: 24px;
+            }
+            .offline-subtitle {
+                font-size: 13px;
+            }
+            .offline-message {
+                font-size: 13px;
+            }
+            .offline-btn {
+                padding: 14px 32px;
+                font-size: 15px;
+            }
         }
         
         @supports (display: standalone) {
@@ -925,6 +1118,64 @@
 </head>
 
 <body>
+    <!-- ===== OFFLINE OVERLAY ===== -->
+    <div class="offline-overlay" id="offlineOverlay">
+        <div class="offline-glow"></div>
+        <div class="offline-particles" id="offlineParticles"></div>
+        
+        <div class="offline-icon">
+            <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Satellite Dish -->
+                <circle cx="60" cy="60" r="55" stroke="rgba(212,175,55,0.1)" stroke-width="2"/>
+                <circle cx="60" cy="60" r="40" stroke="rgba(212,175,55,0.05)" stroke-width="1"/>
+                
+                <!-- Dish -->
+                <path d="M60 35 L60 55 L75 50 L60 35Z" fill="#d4af37" opacity="0.3"/>
+                <path d="M60 35 L60 55 L45 50 L60 35Z" fill="#d4af37" opacity="0.15"/>
+                
+                <!-- Antenna -->
+                <line x1="60" y1="35" x2="60" y2="20" stroke="#d4af37" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="60" cy="18" r="4" fill="#d4af37" opacity="0.8"/>
+                
+                <!-- Signal Waves -->
+                <path d="M75 45 Q85 40 80 30" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+                <path d="M82 42 Q94 35 88 22" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+                <path d="M89 39 Q103 30 96 14" stroke="#d4af37" stroke-width="1.5" stroke-linecap="round" opacity="0.2"/>
+                
+                <!-- Signal dots -->
+                <circle cx="78" cy="33" r="2" fill="#d4af37" opacity="0.8">
+                    <animate attributeName="opacity" values="0.8;0.2;0.8" dur="1.5s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="86" cy="28" r="2" fill="#d4af37" opacity="0.5">
+                    <animate attributeName="opacity" values="0.5;0.1;0.5" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="94" cy="23" r="2" fill="#d4af37" opacity="0.3">
+                    <animate attributeName="opacity" values="0.3;0.05;0.3" dur="2.5s" repeatCount="indefinite"/>
+                </circle>
+                
+                <!-- Glowing center -->
+                <circle cx="60" cy="55" r="5" fill="#d4af37" opacity="0.6">
+                    <animate attributeName="r" values="5;8;5" dur="2s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="2s" repeatCount="indefinite"/>
+                </circle>
+            </svg>
+        </div>
+        
+        <div class="offline-title">📡 គ្មានសញ្ញា</div>
+        <div class="offline-subtitle">• No Connection •</div>
+        <div class="offline-message">
+            សូមពិនិត្យមើលការតភ្ជាប់អ៊ីនធឺណិតរបស់អ្នក<br>
+            <span>រង់ចាំបន្តិច រួចចុចប៊ូតុងខាងក្រោម</span>
+        </div>
+        
+        <button class="offline-btn" onclick="retryConnection()">ព្យាយាមម្តងទៀត</button>
+        
+        <div class="offline-status">
+            <span class="dot"></span>
+            កំពុងស្វែងរកបណ្តាញ...
+        </div>
+    </div>
+
     <!-- ===== LOGIN OVERLAY ===== -->
     <div class="login-overlay active" id="loginOverlay">
         <div class="login-box">
@@ -1009,6 +1260,68 @@
     
     <script>
         // ============================================================
+        // 0. OFFLINE PAGE - PARTICLES
+        // ============================================================
+        function createOfflineParticles() {
+            const container = document.getElementById('offlineParticles');
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('span');
+                const size = Math.random() * 4 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = 10 + Math.random() * 15 + 's';
+                particle.style.opacity = Math.random() * 0.3 + 0.1;
+                container.appendChild(particle);
+            }
+        }
+        createOfflineParticles();
+        
+        // ============================================================
+        // 0.1 OFFLINE - RETRY CONNECTION
+        // ============================================================
+        function retryConnection() {
+            const overlay = document.getElementById('offlineOverlay');
+            overlay.classList.remove('active');
+            location.reload();
+        }
+        
+        // ============================================================
+        // 0.2 CHECK OFFLINE STATUS
+        // ============================================================
+        function checkOfflineStatus() {
+            const overlay = document.getElementById('offlineOverlay');
+            const isLoggedIn = sessionStorage.getItem('teva_logged_in') === 'true';
+            
+            if (!navigator.onLine && isLoggedIn) {
+                overlay.classList.add('active');
+            } else {
+                overlay.classList.remove('active');
+            }
+        }
+        
+        // Listen for online/offline events
+        window.addEventListener('online', () => {
+            const overlay = document.getElementById('offlineOverlay');
+            overlay.classList.remove('active');
+            updateStatusBadge();
+            showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត');
+        });
+        
+        window.addEventListener('offline', () => {
+            const isLoggedIn = sessionStorage.getItem('teva_logged_in') === 'true';
+            if (isLoggedIn) {
+                const overlay = document.getElementById('offlineOverlay');
+                overlay.classList.add('active');
+            }
+            updateStatusBadge();
+        });
+        
+        // Check status periodically
+        setInterval(checkOfflineStatus, 3000);
+        
+        // ============================================================
         // 1. VERSION DATE MANAGEMENT
         // ============================================================
         let lastUpdateTime = null;
@@ -1092,12 +1405,11 @@
         }
         
         // ============================================================
-        // 4. CLEAR ALL CACHE (LocalStorage + Service Worker)
+        // 4. CLEAR ALL CACHE
         // ============================================================
         async function clearAllCaches() {
             console.log('🧹 Clearing all caches...');
             
-            // Clear localStorage items
             try {
                 const keysToRemove = [];
                 for (let i = 0; i < localStorage.length; i++) {
@@ -1119,7 +1431,6 @@
                 });
             } catch(e) {}
             
-            // Clear Service Worker cache
             if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
                 try {
                     navigator.serviceWorker.controller.postMessage('clearAllCache');
@@ -1142,7 +1453,6 @@
                 }
             }
             
-            // Clear browser cache
             if ('caches' in window) {
                 try {
                     const cacheNames = await caches.keys();
@@ -1180,20 +1490,17 @@
                 await clearAllCaches();
             }
             
-            // Reset user codes
             userCodes = { metfone: '', cellcard: '', metfone1: '' };
             userExists = { metfone: false, cellcard: false, metfone1: false };
             
             console.log('🔄 Loading user codes from files for:', password);
             
-            // Load all three files with no-cache
             await Promise.all([
                 loadUserCodeFromFile('METFONE.txt', password, 'metfone'),
                 loadUserCodeFromFile('CELLCARD.txt', password, 'cellcard'),
                 loadUserCodeFromFile('METFONE1.txt', password, 'metfone1')
             ]);
             
-            // Save to localStorage for reference
             try {
                 localStorage.setItem('user_codes_' + password, JSON.stringify(userCodes));
                 localStorage.setItem('user_exists_' + password, JSON.stringify(userExists));
@@ -1227,7 +1534,6 @@
                 
                 const content = await response.text();
                 const lines = content.split('\n');
-                let found = false;
                 
                 console.log(`📄 Checking ${filename} (${lines.length} lines) for user: ${password}`);
                 
@@ -1236,7 +1542,6 @@
                     if (!line) continue;
                     
                     if (line.startsWith(password + ':')) {
-                        found = true;
                         const code = line.substring(password.length + 1).trim();
                         console.log(`🔍 Found line: "${line}"`);
                         console.log(`🔍 Extracted code: "${code}"`);
@@ -1267,7 +1572,7 @@
         }
 
         // ============================================================
-        // 6. CORE FUNCTION: OPEN V2BOX WITH DEEP LINK
+        // 6. CORE FUNCTION: OPEN V2BOX
         // ============================================================
         function openV2Box(type) {
             console.log(`🔍 Checking access for ${type}...`);
@@ -1275,7 +1580,6 @@
             console.log(`📋 User exists in ${type}: ${userExists[type]}`);
             console.log(`📋 User code: ${userCodes[type]}`);
             
-            // Check if user exists for this specific type
             if (!userExists[type]) {
                 showUpdateNotification('កំហុស', 'អ្នកប្រើប្រាស់មិនមានក្នុងប្រព័ន្ធសម្រាប់ប៊ូតុងនេះទេ');
                 console.log(`❌ User ${currentUser} not found for type: ${type}`);
@@ -1383,13 +1687,22 @@
         
         window.addEventListener('online', () => {
             updateStatusBadge();
+            const overlay = document.getElementById('offlineOverlay');
+            overlay.classList.remove('active');
             showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត');
             setTimeout(() => {
                 const password = sessionStorage.getItem('teva_password');
                 if (password) loadUserCodes(password, true);
             }, 100);
         });
-        window.addEventListener('offline', () => updateStatusBadge());
+        window.addEventListener('offline', () => {
+            updateStatusBadge();
+            const isLoggedIn = sessionStorage.getItem('teva_logged_in') === 'true';
+            if (isLoggedIn) {
+                const overlay = document.getElementById('offlineOverlay');
+                overlay.classList.add('active');
+            }
+        });
         document.addEventListener('visibilitychange', () => { if (!document.hidden && navigator.onLine) autoUpdateCheck(); });
         setInterval(() => { if (navigator.onLine) autoUpdateCheck(); }, 60000);
         
