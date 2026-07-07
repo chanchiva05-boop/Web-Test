@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>| TEVA |</title>
+    <title>| 𝕊𝕂𝕐ℕ𝔼𝕋 |</title>
     
     <link rel="apple-touch-icon" href="teva.png">
     <link rel="icon" type="image/png" sizes="32x32" href="teva.png">
@@ -17,28 +17,21 @@
     <meta name="application-name" content="TEVA">
     <meta name="msapplication-TileColor" content="#0a0a2a">
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-    
-    <!-- Khmer OS Fonts via Google Early Access or local simulation: using Noto Sans Khmer as fallback but with custom font-family priority -->
     <style>
-        /* 1. Định nghĩa font chữ Khmer theo yêu cầu */
         @font-face {
-            font-family: 'Khmer OS Muol Light';
-            src: local('Khmer OS Muol Light'), local('KhmerOSMuolLight'), local('Khmer OS Muol Light');
+            font-family: 'Khmer OS Battambang';
+            src: local('Khmer OS Battambang'), local('KhmerOSBattambang');
             font-weight: normal;
             font-style: normal;
-            font-display: swap;
         }
         
         @font-face {
             font-family: 'Khmer OS Battambang';
-            src: local('Khmer OS Battambang'), local('KhmerOSBattambang'), local('Khmer OS Battambang');
-            font-weight: normal;
+            src: local('Khmer OS Battambang Bold'), local('KhmerOSBattambang-Bold');
+            font-weight: bold;
             font-style: normal;
-            font-display: swap;
         }
         
-        /* Fallback chuẩn: nếu không có font hệ thống thì dùng Noto Sans Khmer */
         * {
             margin: 0;
             padding: 0;
@@ -49,61 +42,9 @@
             height: 100vh;
             overflow: hidden;
             background: #0a0a2a;
-            /* Font mặc định cho toàn bộ chữ Khmer: Battambang (trừ phần ngày tháng) */
-            font-family: 'Khmer OS Battambang', 'Noto Sans Khmer', 'Inter', system-ui, sans-serif;
+            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
         }
         
-        /* Riêng dòng ngày tháng (badge-text) và các thành phần tiếng Anh hoặc số sẽ có Times New Roman riêng */
-        .badge-text, .badge-text span, .status-badge, .toast-message, .install-prompt, .update-notification {
-            font-family: 'Times New Roman', 'Inter', 'Khmer OS Battambang', serif;
-        }
-        
-        /* Tiêu đề badge có chứa "កាលបរិច្ឆេទកំណែ" yêu cầu font Khmer OS Muol Light */
-        .khmer-muol {
-            font-family: 'Khmer OS Muol Light', 'Noto Sans Khmer', 'Khmer OS Battambang', serif;
-            font-weight: normal;
-        }
-        
-        /* Áp dụng cho toàn bộ phần tử có lớp badge-text, nhưng bên trong muốn phần ngày tháng và chữ "កាលបរិច្ឆេទកំណែ" đều dùng Muol Light */
-        .badge-text {
-            font-family: 'Khmer OS Muol Light', 'Noto Sans Khmer', serif;
-            font-size: 18px;
-            font-weight: 500;
-            letter-spacing: 1px;
-            color: #f0e9cf;
-            text-transform: uppercase;
-        }
-        
-        /* Số và ký tự latin trong badge-text ưu tiên Times New Roman, nhưng vẫn giữ Muol cho chữ Khmer */
-        .badge-text span, .badge-text .latin-part {
-            font-family: 'Times New Roman', 'Khmer OS Muol Light', serif;
-            font-weight: 700;
-        }
-        
-        /* Các button và text Khmer thông thường dùng Battambang */
-        .btn, .card, .toast-premium .toast-message, .install-prompt, .update-notification, .status-badge {
-            font-family: 'Khmer OS Battambang', 'Noto Sans Khmer', 'Times New Roman', sans-serif;
-        }
-        
-        /* Riêng button text (tiếng Khmer) dùng Battambang */
-        .btn span {
-            font-family: 'Khmer OS Battambang', 'Noto Sans Khmer', sans-serif;
-            font-weight: 600;
-        }
-        
-        /* Latin/English text trong toast, install prompt dùng Times New Roman nhưng vẫn hỗ trợ Khmer */
-        .toast-message, .install-prompt, .status-badge, .update-notification {
-            font-family: 'Times New Roman', 'Khmer OS Battambang', serif;
-        }
-        
-        /* Đảm bảo phần tử chứa ngày tháng (30 មីនា 2026) dùng Muol Light + Times cho số */
-        .badge-text .date-part {
-            font-family: 'Times New Roman', 'Khmer OS Muol Light', serif;
-            font-weight: 700;
-            color: #d4af37;
-        }
-        
-        /* Phần còn lại của giao diện */
         .gradient-bg {
             position: fixed;
             top: 0;
@@ -221,6 +162,21 @@
             50% { opacity: 1; transform: scale(1.4); }
         }
         
+        .badge-text {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            color: #f0e9cf;
+            text-transform: uppercase;
+            font-family: 'Times New Roman', Times, serif;
+        }
+        
+        .badge-text span {
+            color: #d4af37;
+            font-weight: 700;
+            font-size: 19px;
+        }
+        
         .card {
             background: rgba(12, 18, 28, 0.55);
             backdrop-filter: blur(24px);
@@ -265,6 +221,7 @@
             border-radius: 40px;
             font-size: 17px;
             font-weight: 600;
+            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
             cursor: pointer;
             transition: all 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
             overflow: hidden;
@@ -315,47 +272,6 @@
             opacity: 1;
         }
         
-        .toast-premium {
-            margin-top: 24px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            background: rgba(10, 20, 18, 0.85);
-            backdrop-filter: blur(16px);
-            padding: 12px 24px;
-            border-radius: 60px;
-            border: 1px solid rgba(74, 222, 128, 0.4);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-            animation: toastGlide 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            width: fit-content;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .toast-premium .toast-icon {
-            font-size: 18px;
-            filter: drop-shadow(0 0 4px #4ade80);
-        }
-        
-        .toast-premium .toast-message {
-            font-size: 14px;
-            font-weight: 500;
-            color: #4ade80;
-            letter-spacing: 0.3px;
-        }
-        
-        @keyframes toastGlide {
-            from {
-                opacity: 0;
-                transform: translateY(15px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-        
         .line-decoration {
             position: absolute;
             left: 50%;
@@ -385,14 +301,6 @@
         .card:hover .dot {
             background: rgba(212, 175, 55, 0.9);
             box-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
-        }
-        
-        .text-to-copy {
-            position: absolute;
-            opacity: 0;
-            pointer-events: none;
-            height: 0;
-            overflow: hidden;
         }
         
         .birds-container {
@@ -563,6 +471,7 @@
             border-radius: 60px;
             font-size: 15px;
             font-weight: 700;
+            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
             cursor: pointer;
             z-index: 100;
             border: 1px solid rgba(255, 245, 180, 0.6);
@@ -606,12 +515,14 @@
             padding: 6px 14px;
             border-radius: 30px;
             font-size: 11px;
+            font-family: 'Times New Roman', Times, serif;
             font-weight: 600;
             z-index: 200;
             pointer-events: none;
             border: 1px solid rgba(212, 175, 55, 0.35);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
             letter-spacing: 0.3px;
+            transition: all 0.3s ease;
         }
         
         .status-badge.online {
@@ -636,6 +547,7 @@
             font-size: 13px;
             font-weight: bold;
             z-index: 1000;
+            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             animation: fadeInOut 3s ease forwards;
             white-space: nowrap;
@@ -648,25 +560,390 @@
             100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
         }
         
+        /* ===== LOGIN SCREEN STYLES ===== */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 42, 0.96);
+            backdrop-filter: blur(20px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .login-overlay.active {
+            display: flex;
+        }
+        
+        .login-box {
+            background: rgba(12, 18, 28, 0.85);
+            backdrop-filter: blur(24px);
+            border-radius: 48px;
+            padding: 48px 32px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
+        }
+        
+        .login-title {
+            color: #f0e9cf;
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'Times New Roman', Times, serif;
+            margin-bottom: 4px;
+            letter-spacing: 3px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+        
+        .login-title:active {
+            transform: scale(0.95);
+        }
+        
+        .login-subtitle {
+            color: rgba(212, 175, 55, 0.6);
+            font-size: 13px;
+            margin-bottom: 30px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        
+        .login-input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .login-input {
+            width: 100%;
+            padding: 16px 22px;
+            padding-right: 50px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 30px;
+            color: #f0e9cf;
+            font-size: 16px;
+            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
+            transition: all 0.3s ease;
+            outline: none;
+            letter-spacing: 1px;
+        }
+        
+        .login-input:focus {
+            border-color: #d4af37;
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.15);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .login-input::placeholder {
+            color: rgba(255, 255, 255, 0.25);
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.3s ease;
+            z-index: 10;
+        }
+        
+        .toggle-password:hover {
+            color: #d4af37;
+        }
+        
+        .toggle-password:active {
+            transform: translateY(-50%) scale(0.9);
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #d4af37, #b8922a);
+            border: none;
+            border-radius: 30px;
+            color: #0a0a2a;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+            letter-spacing: 1px;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5);
+        }
+        
+        .login-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .login-error {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 14px;
+            min-height: 24px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .login-error.show {
+            opacity: 1;
+        }
+        
+        .login-device-info {
+            color: rgba(255, 255, 255, 0.25);
+            font-size: 11px;
+            margin-top: 20px;
+            letter-spacing: 0.5px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 20px;
+        }
+        
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.15), transparent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #d4af37;
+            border: 2px solid rgba(212, 175, 55, 0.15);
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+        
+        .login-logo:active {
+            transform: scale(0.9);
+        }
+        
+        .login-shield {
+            font-size: 14px;
+            color: rgba(212, 175, 55, 0.4);
+            margin-top: 10px;
+            letter-spacing: 1px;
+        }
+        
+        /* ===== FINGERPRINT DISPLAY ===== */
+        #fpDisplay {
+            position: fixed;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.95);
+            color: #d4af37;
+            padding: 20px 25px;
+            border-radius: 20px;
+            font-family: monospace;
+            z-index: 99999;
+            border: 2px solid #d4af37;
+            box-shadow: 0 0 50px rgba(212,175,55,0.2);
+            text-align: center;
+            max-width: 90%;
+            width: 350px;
+            backdrop-filter: blur(10px);
+            animation: slideUp 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        
+        .fp-title {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+        
+        .fp-code {
+            font-weight: bold;
+            font-size: 22px;
+            color: #d4af37;
+            word-break: break-all;
+            margin: 10px 0;
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 10px;
+            letter-spacing: 1px;
+        }
+        
+        .fp-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        .fp-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .fp-btn-copy {
+            background: #d4af37;
+            color: #000;
+        }
+        
+        .fp-btn-copy:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(212,175,55,0.3);
+        }
+        
+        .fp-btn-close {
+            background: #ff4444;
+            color: #fff;
+        }
+        
+        .fp-btn-close:hover {
+            transform: scale(1.05);
+        }
+        
+        .fp-hint {
+            font-size: 10px;
+            color: #666;
+            margin-top: 10px;
+        }
+        
         @media (max-width: 500px) {
-            .glass-panel { max-width: 380px; }
-            .badge { padding: 12px 24px; gap: 10px; }
-            .badge-text { font-size: 14px; }
-            .badge-text span { font-size: 15px; }
-            .card { padding: 36px 24px; border-radius: 40px; }
-            .btn { padding: 15px 20px; font-size: 15px; }
-            .install-prompt { padding: 12px 22px; font-size: 13px; bottom: 18px; white-space: nowrap; }
-            .install-prompt::before { font-size: 16px; margin-right: 8px; }
-            .update-notification { font-size: 11px; padding: 8px 16px; white-space: nowrap; }
-            .status-badge { top: 8px; right: 8px; padding: 4px 10px; font-size: 9px; }
+            .glass-panel {
+                max-width: 380px;
+            }
+            .badge {
+                padding: 12px 24px;
+                gap: 10px;
+            }
+            .badge-text {
+                font-size: 14px;
+            }
+            .badge-text span {
+                font-size: 15px;
+            }
+            .card {
+                padding: 36px 24px;
+                border-radius: 40px;
+            }
+            .btn {
+                padding: 15px 20px;
+                font-size: 15px;
+            }
+            .install-prompt {
+                padding: 12px 22px;
+                font-size: 13px;
+                bottom: 18px;
+                white-space: nowrap;
+            }
+            .install-prompt::before {
+                font-size: 16px;
+                margin-right: 8px;
+            }
+            .update-notification {
+                font-size: 11px;
+                padding: 8px 16px;
+                white-space: nowrap;
+            }
+            .status-badge {
+                top: 8px;
+                right: 8px;
+                padding: 4px 10px;
+                font-size: 9px;
+            }
+            .login-box {
+                padding: 36px 24px;
+                border-radius: 40px;
+            }
+            .login-title {
+                font-size: 26px;
+            }
+            .login-input {
+                padding: 14px 18px;
+                padding-right: 45px;
+                font-size: 14px;
+            }
+            .toggle-password {
+                right: 14px;
+                font-size: 18px;
+            }
+            .login-btn {
+                padding: 14px;
+                font-size: 16px;
+            }
+            #fpDisplay {
+                width: 90%;
+                padding: 15px 18px;
+                bottom: 100px;
+            }
+            .fp-code {
+                font-size: 18px;
+            }
+            .fp-btn {
+                padding: 8px 15px;
+                font-size: 12px;
+            }
         }
         
         @supports (display: standalone) {
-            body { background: #0a0a2a; }
+            body {
+                background: #0a0a2a;
+            }
         }
     </style>
 </head>
+
 <body>
+    <!-- ===== LOGIN OVERLAY ===== -->
+    <div class="login-overlay active" id="loginOverlay">
+        <div class="login-box">
+            <div class="login-logo" id="loginLogo">🔐</div>
+            <div class="login-title" id="loginTitle">𝕊𝕂𝕐ℕ𝔼𝕋</div>
+            <div class="login-subtitle">• Secure Access •</div>
+            <div class="login-input-group">
+                <input type="password" class="login-input" id="loginPassword" placeholder="បញ្ចូលពាក្យសម្ងាត់..." autocomplete="off">
+                <button class="toggle-password" id="togglePasswordBtn" type="button" aria-label="Toggle password visibility">
+                    👁️
+                </button>
+            </div>
+            <button class="login-btn" id="loginBtn">ចូលប្រើប្រាស់</button>
+            <div class="login-error" id="loginError">ពាក្យសម្ងាត់មិនត្រឹមត្រូវ</div>
+            <div class="login-device-info">⚡ ពាក្យសម្ងាត់ប្រើបានតែមួយឧបករណ៍ប៉ុណ្ណោះ</div>
+            <div class="login-shield">🛡️ SECURE DEVICE LOCK</div>
+        </div>
+    </div>
+
     <div class="gradient-bg"></div>
     <div class="animated-bg"></div>
     
@@ -682,33 +959,24 @@
         <div class="header-badge">
             <div class="badge">
                 <div class="badge-icon"></div>
-                <div class="badge-text khmer-muol">
-                    កាលបរិច្ឆេទកំណែ · <span class="date-part">30 មីនា 2026</span>
-                </div>
+                <div class="badge-text" id="versionDate">កាលបរិច្ឆេទកំណែ : <span id="versionDateValue">កំពុងផ្ទុក...</span></div>
             </div>
         </div>
         
         <div class="card">
             <div class="button-group">
-                <button class="btn" onclick="copyText()">
+                <button class="btn" onclick="openV2Box('metfone')">
                     <span>មេតហ្វូន</span>
                     <div class="btn-glow"></div>
                 </button>
-                <button class="btn" onclick="copyCode()">
+                <button class="btn" onclick="openV2Box('cellcard')">
                     <span>សែលកាត</span>
                     <div class="btn-glow"></div>
                 </button>
-            </div>
-            
-            <div style="display: flex; justify-content: center; margin-top: 28px;">
-                <div id="toast" class="toast-premium" style="display: none;">
-                    <span class="toast-icon">✔</span>
-                    <span class="toast-message">ចម្លងជោគជ័យ</span>
-                </div>
-                <div id="toastCode" class="toast-premium" style="display: none;">
-                    <span class="toast-icon">✔</span>
-                    <span class="toast-message">ចម្លងជោគជ័យ</span>
-                </div>
+                <button class="btn" onclick="openV2Box('metfone1')">
+                    <span>មេតហ្វូន ១</span>
+                    <div class="btn-glow"></div>
+                </button>
             </div>
             
             <div class="card-footer">
@@ -720,252 +988,814 @@
         </div>
     </div>
     
-    <div class="text-to-copy" id="textToCopy">កំពុងផ្ទុកអត្ថបទ...</div>
-    <div class="text-to-copy" id="codeToCopy">កំពុងផ្ទុកកូដ...</div>
+    <div class="birds-container">
+        <div class="bird bird1"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
+        <div class="bird bird2"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
+        <div class="bird bird3"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
+        <div class="bird bird4"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
+        <div class="bird bird5"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
+    </div>
     
-    <div class="birds-container">...</div>
-    <div class="mountain-scene">...</div>
+    <div class="mountain-scene">
+        <div class="peak peak-1"></div>
+        <div class="peak peak-2"></div>
+        <div class="peak peak-3"></div>
+        <div class="peak peak-4"></div>
+    </div>
+    
     <div class="mist"></div>
     
     <button id="installBtn" class="install-prompt">ដំឡើងកម្មវិធី</button>
     
     <script>
-        (function() {
-            // Particles generation
-            function createParticles() {
-                const container = document.getElementById('particles');
-                if(container) {
-                    for (let i = 0; i < 45; i++) {
-                        const particle = document.createElement('div');
-                        particle.classList.add('particle');
-                        const size = Math.random() * 3 + 1;
-                        particle.style.width = size + 'px';
-                        particle.style.height = size + 'px';
-                        particle.style.left = Math.random() * 100 + '%';
-                        particle.style.animationDelay = Math.random() * 15 + 's';
-                        particle.style.animationDuration = 8 + Math.random() * 12 + 's';
-                        particle.style.opacity = Math.random() * 0.4 + 0.2;
-                        container.appendChild(particle);
+        // ============================================================
+        // 1. VERSION DATE MANAGEMENT
+        // ============================================================
+        let lastUpdateTime = null;
+        
+        function updateVersionDate() {
+            const versionSpan = document.getElementById('versionDateValue');
+            const now = new Date();
+            const formattedDate = `${now.getDate().toString().padStart(2, '0')} ${getKhmerMonth(now.getMonth())} ${now.getFullYear()}`;
+            versionSpan.textContent = formattedDate;
+            lastUpdateTime = now;
+            localStorage.setItem('last_version_update', now.toISOString());
+            console.log('📅 Version date updated to:', formattedDate);
+        }
+        
+        function getKhmerMonth(month) {
+            const khmerMonths = [
+                'មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា',
+                'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'
+            ];
+            return khmerMonths[month];
+        }
+        
+        function loadSavedVersionDate() {
+            const savedDate = localStorage.getItem('last_version_update');
+            if (savedDate) {
+                try {
+                    const date = new Date(savedDate);
+                    const formattedDate = `${date.getDate().toString().padStart(2, '0')} ${getKhmerMonth(date.getMonth())} ${date.getFullYear()}`;
+                    document.getElementById('versionDateValue').textContent = formattedDate;
+                    lastUpdateTime = date;
+                } catch(e) {
+                    updateVersionDate();
+                }
+            } else {
+                updateVersionDate();
+            }
+        }
+        
+        // ============================================================
+        // 2. PARTICLES BACKGROUND
+        // ============================================================
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 45; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 3 + 1;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = 8 + Math.random() * 12 + 's';
+                particle.style.opacity = Math.random() * 0.4 + 0.2;
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+        
+        // ============================================================
+        // 3. STATUS BADGE
+        // ============================================================
+        function updateStatusBadge() {
+            const badge = document.getElementById('statusBadge');
+            if (navigator.onLine) {
+                badge.textContent = '● Online';
+                badge.className = 'status-badge online';
+            } else {
+                badge.textContent = '● Offline';
+                badge.className = 'status-badge offline';
+            }
+        }
+        
+        function showUpdateNotification(title, message) {
+            const existingNotifications = document.querySelectorAll('.update-notification');
+            existingNotifications.forEach(notif => notif.remove());
+            const notification = document.createElement('div');
+            notification.className = 'update-notification';
+            notification.textContent = `✨ ${title}: ${message}`;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+        
+        // ============================================================
+        // 4. CLEAR ALL CACHE (LocalStorage + Service Worker)
+        // ============================================================
+        async function clearAllCaches() {
+            console.log('🧹 Clearing all caches...');
+            
+            // Clear localStorage items
+            try {
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && (key.includes('user_codes_') || 
+                                key.includes('_exists_') || 
+                                key.includes('METFONE') || 
+                                key.includes('CELLCARD') || 
+                                key.includes('METFONE1') ||
+                                key.includes('metfone') ||
+                                key.includes('cellcard') ||
+                                key.includes('toor_'))) {
+                        keysToRemove.push(key);
                     }
                 }
-            }
-            createParticles();
-            
-            let isFirstLoad = true;
-            function updateStatusBadge() {
-                const badge = document.getElementById('statusBadge');
-                if (navigator.onLine) {
-                    badge.textContent = '● Online';
-                    badge.className = 'status-badge online';
-                } else {
-                    badge.textContent = '● Offline';
-                    badge.className = 'status-badge offline';
-                }
-            }
-            
-            function showUpdateNotification(title, message) {
-                const existingNotifications = document.querySelectorAll('.update-notification');
-                existingNotifications.forEach(notif => notif.remove());
-                const notification = document.createElement('div');
-                notification.className = 'update-notification';
-                notification.textContent = `✨ ${title}: ${message}`;
-                document.body.appendChild(notification);
-                setTimeout(() => notification.remove(), 3000);
-            }
-            
-            async function forceUpdateTextContent() {
-                const textElement = document.getElementById('textToCopy');
-                const oldText = localStorage.getItem('metfone_text');
-                try {
-                    const response = await fetch('METFONE.txt?' + Date.now(), {
-                        cache: 'no-store',
-                        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
-                    });
-                    if (response.ok) {
-                        const newText = await response.text();
-                        if (oldText !== newText) {
-                            textElement.textContent = newText;
-                            localStorage.setItem('metfone_text', newText);
-                            console.log('🔄 METFONE.txt UPDATED');
-                            showUpdateNotification('មេតហ្វូន', 'បានធ្វើបច្ចុប្បន្នភាពដោយស្វ័យប្រវត្តិ');
-                            return true;
-                        }
-                    }
-                } catch(e) { console.log('⚠️ Network fail METFONE'); }
-                return false;
-            }
-            
-            async function forceUpdateCodeContent() {
-                const codeElement = document.getElementById('codeToCopy');
-                const oldCode = localStorage.getItem('cellcard_code');
-                try {
-                    const response = await fetch('CELLCARD.txt?' + Date.now(), {
-                        cache: 'no-store',
-                        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
-                    });
-                    if (response.ok) {
-                        const newCode = await response.text();
-                        if (oldCode !== newCode) {
-                            codeElement.textContent = newCode;
-                            localStorage.setItem('cellcard_code', newCode);
-                            console.log('🔄 CELLCARD.txt UPDATED');
-                            showUpdateNotification('សែលកាត', 'បានធ្វើបច្ចុប្បន្នភាពដោយស្វ័យប្រវត្តិ');
-                            return true;
-                        }
-                    }
-                } catch(e) { console.log('⚠️ Network fail CELLCARD'); }
-                return false;
-            }
-            
-            async function loadTextContent() {
-                const textElement = document.getElementById('textToCopy');
-                const oldText = localStorage.getItem('metfone_text');
-                try {
-                    const response = await fetch('METFONE.txt?' + Date.now(), { cache: 'no-store' });
-                    if (response.ok) {
-                        const newText = await response.text();
-                        textElement.textContent = newText;
-                        localStorage.setItem('metfone_text', newText);
-                        console.log('✅ Loaded METFONE');
-                        return;
-                    }
-                } catch(e) {}
-                if (oldText) textElement.textContent = oldText;
-                else textElement.textContent = 'កាកម៉េសហ្អា';
-            }
-            
-            async function loadCodeContent() {
-                const codeElement = document.getElementById('codeToCopy');
-                const oldCode = localStorage.getItem('cellcard_code');
-                try {
-                    const response = await fetch('CELLCARD.txt?' + Date.now(), { cache: 'no-store' });
-                    if (response.ok) {
-                        const newCode = await response.text();
-                        codeElement.textContent = newCode;
-                        localStorage.setItem('cellcard_code', newCode);
-                        console.log('✅ Loaded CELLCARD');
-                        return;
-                    }
-                } catch(e) {}
-                if (oldCode) codeElement.textContent = oldCode;
-                else codeElement.textContent = 'TEVA555';
-            }
-            
-            // Service Worker registration
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('./sw.js').then(reg => {
-                        console.log('✅ SW registered');
-                        reg.update();
-                        setInterval(() => { if(navigator.onLine) reg.update(); }, 3600000);
-                        reg.addEventListener('updatefound', () => {
-                            const newWorker = reg.installing;
-                            newWorker.addEventListener('statechange', () => {
-                                if(newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    showUpdateNotification('កម្មវិធី', 'កំណែថ្មីត្រៀមរួចរាល់');
-                                    setTimeout(() => window.location.reload(), 1500);
-                                }
-                            });
-                        });
-                    }).catch(err => console.log('SW failed', err));
+                keysToRemove.forEach(key => {
+                    localStorage.removeItem(key);
+                    console.log('🗑️ Removed localStorage:', key);
                 });
-            }
+            } catch(e) {}
             
-            let lastUpdateCheck = 0, isChecking = false;
-            async function autoUpdateCheck() {
-                if (!navigator.onLine || isChecking) return;
-                const now = Date.now();
-                if (now - lastUpdateCheck < 30000) return;
-                lastUpdateCheck = now;
-                isChecking = true;
+            // Clear Service Worker cache
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
                 try {
-                    await Promise.all([forceUpdateTextContent(), forceUpdateCodeContent()]);
-                } catch(err) {}
-                finally { isChecking = false; }
+                    navigator.serviceWorker.controller.postMessage('clearAllCache');
+                    await new Promise((resolve) => {
+                        const handler = (event) => {
+                            if (event.data.type === 'cacheCleared') {
+                                navigator.serviceWorker.removeEventListener('message', handler);
+                                console.log('✅ Service Worker cache cleared');
+                                resolve();
+                            }
+                        };
+                        navigator.serviceWorker.addEventListener('message', handler);
+                        setTimeout(() => {
+                            navigator.serviceWorker.removeEventListener('message', handler);
+                            resolve();
+                        }, 3000);
+                    });
+                } catch(e) {
+                    console.log('⚠️ Error clearing SW cache:', e);
+                }
             }
             
-            window.addEventListener('online', () => {
-                updateStatusBadge();
-                showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត - កំពុងពិនិត្យ');
-                setTimeout(() => autoUpdateCheck(), 100);
-            });
-            window.addEventListener('offline', () => { updateStatusBadge(); showUpdateNotification('បណ្តាញ', 'មិនមានអ៊ីនធឺណិត - ប្រើទិន្នន័យក្នុងស្តុក'); });
-            document.addEventListener('visibilitychange', () => { if (!document.hidden && navigator.onLine) autoUpdateCheck(); });
-            setInterval(() => { if(navigator.onLine) autoUpdateCheck(); }, 30000);
+            // Clear browser cache
+            if ('caches' in window) {
+                try {
+                    const cacheNames = await caches.keys();
+                    for (const name of cacheNames) {
+                        if (name.includes('teva') || name.includes('v')) {
+                            await caches.delete(name);
+                            console.log('🗑️ Deleted cache:', name);
+                        }
+                    }
+                } catch(e) {}
+            }
             
-            loadTextContent();
-            loadCodeContent();
+            console.log('✅ All caches cleared!');
+        }
+        
+        // ============================================================
+        // 5. LOAD USER-SPECIFIC CODES FROM TXT FILES
+        // ============================================================
+        let userCodes = {
+            metfone: '',
+            cellcard: '',
+            metfone1: ''
+        };
+        let currentUser = '';
+        let userExists = {
+            metfone: false,
+            cellcard: false,
+            metfone1: false
+        };
+
+        async function loadUserCodes(password, forceReload = true) {
+            currentUser = password;
+            
+            if (forceReload) {
+                await clearAllCaches();
+            }
+            
+            // Reset user codes
+            userCodes = { metfone: '', cellcard: '', metfone1: '' };
+            userExists = { metfone: false, cellcard: false, metfone1: false };
+            
+            console.log('🔄 Loading user codes from files for:', password);
+            
+            // Load all three files with no-cache
+            await Promise.all([
+                loadUserCodeFromFile('METFONE.txt', password, 'metfone'),
+                loadUserCodeFromFile('CELLCARD.txt', password, 'cellcard'),
+                loadUserCodeFromFile('METFONE1.txt', password, 'metfone1')
+            ]);
+            
+            // Save to localStorage for reference
+            try {
+                localStorage.setItem('user_codes_' + password, JSON.stringify(userCodes));
+                localStorage.setItem('user_exists_' + password, JSON.stringify(userExists));
+                localStorage.setItem('current_user', password);
+            } catch(e) {}
+            
+            console.log('✅ Loaded user codes for', password, ':', userCodes);
+            console.log('✅ User exists status:', userExists);
+            return userCodes;
+        }
+
+        async function loadUserCodeFromFile(filename, password, type) {
+            try {
+                const url = filename + '?_=' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+                console.log(`📄 Fetching ${url} for user: ${password}`);
+                
+                const response = await fetch(url, { 
+                    cache: 'no-store',
+                    headers: { 
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                
+                if (!response.ok) {
+                    console.log(`⚠️ Failed to load ${filename}, status: ${response.status}`);
+                    userExists[type] = false;
+                    return '';
+                }
+                
+                const content = await response.text();
+                const lines = content.split('\n');
+                let found = false;
+                
+                console.log(`📄 Checking ${filename} (${lines.length} lines) for user: ${password}`);
+                
+                for (let line of lines) {
+                    line = line.trim();
+                    if (!line) continue;
+                    
+                    if (line.startsWith(password + ':')) {
+                        found = true;
+                        const code = line.substring(password.length + 1).trim();
+                        console.log(`🔍 Found line: "${line}"`);
+                        console.log(`🔍 Extracted code: "${code}"`);
+                        
+                        if (code && code !== '' && code !== 'undefined' && code !== 'null') {
+                            userCodes[type] = code;
+                            userExists[type] = true;
+                            console.log(`✅ Found ${type} code for ${password}`);
+                            return code;
+                        } else {
+                            userExists[type] = true;
+                            userCodes[type] = '';
+                            console.log(`⚠️ User ${password} exists in ${filename} but has NO CODE`);
+                            return '';
+                        }
+                    }
+                }
+                
+                userExists[type] = false;
+                console.log(`❌ User ${password} NOT FOUND in ${filename}`);
+                return '';
+                
+            } catch(error) {
+                console.log(`❌ Error loading ${filename}:`, error);
+                userExists[type] = false;
+                return '';
+            }
+        }
+
+        // ============================================================
+        // 6. CORE FUNCTION: OPEN V2BOX WITH DEEP LINK
+        // ============================================================
+        function openV2Box(type) {
+            console.log(`🔍 Checking access for ${type}...`);
+            console.log(`📋 User: ${currentUser}`);
+            console.log(`📋 User exists in ${type}: ${userExists[type]}`);
+            console.log(`📋 User code: ${userCodes[type]}`);
+            
+            // Check if user exists for this specific type
+            if (!userExists[type]) {
+                showUpdateNotification('កំហុស', 'អ្នកប្រើប្រាស់មិនមានក្នុងប្រព័ន្ធសម្រាប់ប៊ូតុងនេះទេ');
+                console.log(`❌ User ${currentUser} not found for type: ${type}`);
+                return;
+            }
+            
+            let content = '';
+            let name = '';
+            
+            if (type === 'metfone') {
+                content = userCodes.metfone || '';
+                name = 'METFONE';
+            } else if (type === 'cellcard') {
+                content = userCodes.cellcard || '';
+                name = 'CELLCARD';
+            } else if (type === 'metfone1') {
+                content = userCodes.metfone1 || '';
+                name = 'METFONE1';
+            }
+            
+            if (!content || content === '' || content === 'undefined' || content === 'null') {
+                showUpdateNotification('កំហុស', 'មិនមានកូដសម្រាប់អ្នកប្រើប្រាស់នេះទេ');
+                console.log('❌ No content for type:', type);
+                return;
+            }
+            
+            if (!content.startsWith('http://') && !content.startsWith('https://')) {
+                showUpdateNotification('កំហុស', 'កូដមិនត្រឹមត្រូវ (ត្រូវការ URL)');
+                console.log('❌ Invalid content (not a URL):', content);
+                return;
+            }
+            
+            const encodedContent = encodeURIComponent(content);
+            const encodedName = encodeURIComponent(name);
+            const v2boxUrl = `v2box://install-sub?url=${encodedContent}&name=${encodedName}`;
+            
+            console.log('🔗 Opening V2Box:', v2boxUrl);
+            window.location.href = v2boxUrl;
+            
+            let appOpened = false;
+            const checkAppOpened = () => {
+                appOpened = true;
+                document.removeEventListener('visibilitychange', checkAppOpened);
+                window.removeEventListener('blur', checkAppOpened);
+            };
+            
+            document.addEventListener('visibilitychange', checkAppOpened);
+            window.addEventListener('blur', checkAppOpened);
+            
+            setTimeout(() => {
+                if (!appOpened) {
+                    const isAndroid = /android/i.test(navigator.userAgent);
+                    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+                    
+                    if (isAndroid) {
+                        window.location.href = 'https://play.google.com/store/apps/details?id=dev.hexasoftware.v2box';
+                    } else if (isIOS) {
+                        window.location.href = 'https://apps.apple.com/app/v2box/id6446814670';
+                    }
+                }
+            }, 2500);
+        }
+        
+        // ============================================================
+        // 7. SERVICE WORKER & AUTO UPDATE
+        // ============================================================
+        let isFirstLoad = true;
+        let lastUpdateCheck = 0;
+        let isChecking = false;
+        
+        async function autoUpdateCheck() {
+            if (!navigator.onLine) return;
+            if (isChecking) return;
+            const now = Date.now();
+            if (now - lastUpdateCheck < 30000) return;
+            lastUpdateCheck = now;
+            isChecking = true;
+            try {
+                const password = sessionStorage.getItem('teva_password');
+                if (password) {
+                    await loadUserCodes(password, false);
+                    updateVersionDate();
+                }
+            } catch(err) {}
+            finally { isChecking = false; }
+        }
+        
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data.type === 'contentUpdated' || event.data.type === 'backgroundUpdate') {
+                    const password = sessionStorage.getItem('teva_password');
+                    if (password) {
+                        loadUserCodes(password, true);
+                        updateVersionDate();
+                    }
+                }
+                if (event.data.type === 'updatesChecked' && event.data.hasUpdates) {
+                    updateVersionDate();
+                }
+            });
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration error:', err));
+            });
+        }
+        
+        window.addEventListener('online', () => {
             updateStatusBadge();
-            setTimeout(() => { isFirstLoad = false; }, 1000);
-            
-            function showToast(element) {
-                if(element) {
-                    element.style.display = 'flex';
-                    setTimeout(() => { element.style.display = 'none'; }, 1800);
-                }
+            showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត');
+            setTimeout(() => {
+                const password = sessionStorage.getItem('teva_password');
+                if (password) loadUserCodes(password, true);
+            }, 100);
+        });
+        window.addEventListener('offline', () => updateStatusBadge());
+        document.addEventListener('visibilitychange', () => { if (!document.hidden && navigator.onLine) autoUpdateCheck(); });
+        setInterval(() => { if (navigator.onLine) autoUpdateCheck(); }, 60000);
+        
+        // ============================================================
+        // 8. INITIALIZATION
+        // ============================================================
+        loadSavedVersionDate();
+        updateStatusBadge();
+        setTimeout(() => { isFirstLoad = false; }, 1000);
+        
+        // ============================================================
+        // 9. PWA MANIFEST & INSTALL
+        // ============================================================
+        function createManifest() {
+            const LOGO_FILE = "teva.png";
+            const manifestData = { 
+                name: "𝕊𝕂𝕐ℕ𝔼𝕋", 
+                short_name: "𝕊𝕂𝕐ℕ𝔼𝕋", 
+                description: "𝕊𝕂𝕐ℕ𝔼𝕋🟢", 
+                start_url: ".", 
+                display: "standalone", 
+                orientation: "portrait", 
+                theme_color: "#0a0a2a", 
+                background_color: "#0a0a2a", 
+                icons: [ 
+                    { src: LOGO_FILE, sizes: "192x192", type: "image/png", purpose: "any maskable" }, 
+                    { src: LOGO_FILE, sizes: "512x512", type: "image/png", purpose: "any maskable" } 
+                ] 
+            };
+            const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
+            const manifestURL = URL.createObjectURL(manifestBlob);
+            const existingLink = document.querySelector('link[rel="manifest"]');
+            if (existingLink) existingLink.remove();
+            const manifestLink = document.createElement('link');
+            manifestLink.rel = 'manifest';
+            manifestLink.href = manifestURL;
+            document.head.appendChild(manifestLink);
+        }
+        createManifest();
+        
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+        window.addEventListener('beforeinstallprompt', (e) => { 
+            e.preventDefault(); 
+            deferredPrompt = e; 
+            installBtn.style.display = 'flex'; 
+        });
+        installBtn.addEventListener('click', async () => { 
+            if (deferredPrompt) { 
+                deferredPrompt.prompt(); 
+                const { outcome } = await deferredPrompt.userChoice; 
+                deferredPrompt = null; 
+                installBtn.style.display = 'none'; 
+            } 
+        });
+        window.addEventListener('appinstalled', () => { 
+            installBtn.style.display = 'none'; 
+            deferredPrompt = null; 
+            showUpdateNotification('ជោគជ័យ', 'បានដំឡើងកម្មវិធី'); 
+        });
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            installBtn.style.display = 'none';
+        }
+        if ('connection' in navigator) {
+            navigator.connection.addEventListener('change', () => { 
+                if (navigator.onLine) autoUpdateCheck(); 
+            });
+        }
+
+        // ============================================================
+        // 10. STABLE DEVICE FINGERPRINT
+        // ============================================================
+        function getDeviceFingerprint() {
+            let fp = localStorage.getItem('device_fingerprint');
+            if (fp && fp.startsWith('FP_')) {
+                console.log('✅ Using saved fingerprint:', fp);
+                return fp;
             }
-            window.copyText = function() {
-                const textToCopy = document.getElementById("textToCopy").textContent;
-                navigator.clipboard.writeText(textToCopy).then(() => showToast(document.getElementById("toast"))).catch(() => fallbackCopyText(textToCopy, "toast"));
-            };
-            window.copyCode = function() {
-                const codeToCopy = document.getElementById("codeToCopy").textContent;
-                navigator.clipboard.writeText(codeToCopy).then(() => showToast(document.getElementById("toastCode"))).catch(() => fallbackCopyText(codeToCopy, "toastCode"));
-            };
-            function fallbackCopyText(text, toastId) {
-                const textArea = document.createElement("textarea");
-                textArea.value = text;
-                textArea.style.position = "fixed";
-                textArea.style.opacity = "0";
-                document.body.appendChild(textArea);
-                textArea.select();
+            
+            console.log('🔐 Generating new stable fingerprint...');
+            
+            const components = [
+                navigator.userAgent,
+                screen.width + 'x' + screen.height,
+                screen.colorDepth,
+                navigator.hardwareConcurrency || 0,
+                navigator.platform,
+                navigator.language,
+                new Date().getTimezoneOffset()
+            ];
+            
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 200;
+                canvas.height = 50;
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#f60';
+                ctx.fillRect(125, 1, 62, 20);
+                ctx.fillStyle = '#069';
+                ctx.fillText('TEVA', 2, 15);
+                ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+                ctx.fillText('SECURE', 4, 17);
+                components.push(canvas.toDataURL());
+            } catch(e) {}
+            
+            const str = components.join('|||');
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            fp = 'FP_' + Math.abs(hash).toString(16).padStart(8, '0');
+            
+            localStorage.setItem('device_fingerprint', fp);
+            console.log('✅ New stable fingerprint saved:', fp);
+            
+            return fp;
+        }
+
+        let deviceFingerprint = getDeviceFingerprint();
+        let isLoggedIn = false;
+
+        // ============================================================
+        // 11. LOAD & SAVE TOOR.TXT
+        // ============================================================
+        async function loadTOOR() {
+            try {
+                const response = await fetch('TOOR.txt?' + Date.now() + '_' + Math.random().toString(36).substring(2, 6), { 
+                    cache: 'no-store',
+                    headers: { 
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.text();
+                    try {
+                        const parsed = JSON.parse(data);
+                        return parsed;
+                    } catch(e) {
+                        return [{ password: data.trim(), fingerprint: '' }];
+                    }
+                }
+            } catch(e) {
+                console.log('⚠️ Failed to load TOOR.txt, using localStorage fallback');
+            }
+            
+            const localData = localStorage.getItem('toor_data');
+            if (localData) {
                 try {
-                    if(document.execCommand('copy')) showToast(document.getElementById(toastId));
-                    else alert("មិនអាចចម្លងអត្ថបទបានទេ។");
-                } catch(err) { alert("មិនអាចចម្លងអត្ថបទបានទេ។"); }
-                document.body.removeChild(textArea);
+                    return JSON.parse(localData);
+                } catch(e) {}
             }
             
-            function createManifest() {
-                const LOGO_FILE = "teva.png";
-                const manifestData = {
-                    name: "TEVA", short_name: "𝕊𝕂𝕐ℕ𝔼𝕋", description: "ចម្លងលេខកូដ Metfone និង Cellcard",
-                    start_url: ".", display: "standalone", orientation: "portrait", theme_color: "#0a0a2a", background_color: "#0a0a2a",
-                    icons: [{ src: LOGO_FILE, sizes: "192x192", type: "image/png", purpose: "any maskable" }, { src: LOGO_FILE, sizes: "512x512", type: "image/png", purpose: "any maskable" }]
-                };
-                const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
-                const manifestURL = URL.createObjectURL(manifestBlob);
-                const existingLink = document.querySelector('link[rel="manifest"]');
-                if(existingLink) existingLink.remove();
-                const manifestLink = document.createElement('link');
-                manifestLink.rel = 'manifest';
-                manifestLink.href = manifestURL;
-                document.head.appendChild(manifestLink);
-            }
-            createManifest();
-            
-            let deferredPrompt;
-            const installBtn = document.getElementById('installBtn');
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                installBtn.style.display = 'flex';
-            });
-            installBtn.addEventListener('click', async () => {
-                if(deferredPrompt) {
-                    deferredPrompt.prompt();
-                    await deferredPrompt.userChoice;
-                    deferredPrompt = null;
-                    installBtn.style.display = 'none';
+            return [{ password: 'TEVA', fingerprint: '' }];
+        }
+
+        async function saveTOOR(data) {
+            try {
+                const response = await fetch('TOOR.txt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (response.ok) {
+                    localStorage.setItem('toor_data', JSON.stringify(data));
+                    return true;
                 }
-            });
-            window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; deferredPrompt = null; showUpdateNotification('ជោគជ័យ', 'បានដំឡើងកម្មវិធី'); });
-            if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) installBtn.style.display = 'none';
-            
-            if('connection' in navigator) {
-                navigator.connection.addEventListener('change', () => { if(navigator.onLine) autoUpdateCheck(); });
+            } catch(e) {
+                console.log('⚠️ Failed to save TOOR.txt, saving to localStorage');
             }
-        })();
+            
+            localStorage.setItem('toor_data', JSON.stringify(data));
+            return true;
+        }
+
+        // ============================================================
+        // 12. CHECK LOGIN
+        // ============================================================
+        async function checkLogin(password) {
+            const toorData = await loadTOOR();
+            const currentFP = deviceFingerprint;
+            
+            console.log('🔍 Checking login...');
+            console.log('📋 Password entered:', password);
+            console.log('📋 Current FP:', currentFP);
+            
+            for (let entry of toorData) {
+                if (entry.password === password) {
+                    console.log('✅ Password matched!');
+                    
+                    if (!entry.fingerprint) {
+                        console.log('🔐 No fingerprint, saving current device...');
+                        entry.fingerprint = currentFP;
+                        await saveTOOR(toorData);
+                        return true;
+                    }
+                    
+                    if (entry.fingerprint === currentFP) {
+                        console.log('✅ Fingerprint matched!');
+                        return true;
+                    }
+                    
+                    console.log('❌ Fingerprint mismatch!');
+                    return false;
+                }
+            }
+            
+            console.log('❌ Password not found in TOOR data');
+            return false;
+        }
+
+        // ============================================================
+        // 13. FORCE SAVE FINGERPRINT
+        // ============================================================
+        async function forceSaveFingerprint(password) {
+            try {
+                const toorData = await loadTOOR();
+                const currentFP = deviceFingerprint;
+                let updated = false;
+                
+                for (let entry of toorData) {
+                    if (entry.password === password && !entry.fingerprint) {
+                        entry.fingerprint = currentFP;
+                        updated = true;
+                        break;
+                    }
+                }
+                
+                if (updated) {
+                    const saved = await saveTOOR(toorData);
+                    if (saved) {
+                        console.log('✅ Fingerprint saved successfully:', currentFP);
+                        return true;
+                    }
+                }
+                return false;
+            } catch (error) {
+                console.error('❌ Error saving fingerprint:', error);
+                return false;
+            }
+        }
+
+        // ============================================================
+        // 14. SHOW FINGERPRINT ON SCREEN
+        // ============================================================
+        function showFingerprintOnScreen() {
+            const fp = getDeviceFingerprint();
+            
+            if (document.getElementById('fpDisplay')) {
+                document.getElementById('fpDisplay').remove();
+                return;
+            }
+            
+            const div = document.createElement('div');
+            div.id = 'fpDisplay';
+            div.innerHTML = `
+                <div class="fp-title">🔐 ID DEVICE</div>
+                <div class="fp-code">${fp}</div>
+                <div class="fp-actions">
+                    <button class="fp-btn fp-btn-copy" onclick="copyFingerprint()">📋 ចម្លង</button>
+                    <button class="fp-btn fp-btn-close" onclick="this.parentElement.parentElement.remove()">✕ បិទ</button>
+                </div>
+            `;
+            document.body.appendChild(div);
+            
+            setTimeout(() => {
+                const el = document.getElementById('fpDisplay');
+                if (el) el.remove();
+            }, 30000);
+        }
+        
+        function copyFingerprint() {
+            const fp = getDeviceFingerprint();
+            navigator.clipboard.writeText(fp).then(() => {
+                showUpdateNotification('✅', 'ចម្លងដោយជោគជ័យ!');
+            }).catch(() => {
+                alert('⚠️ សូមចម្លងដោយដៃ: ' + fp);
+            });
+        }
+
+        // ============================================================
+        // 15. FINGERPRINT HELPER FOR MOBILE
+        // ============================================================
+        let fpTapCount = 0;
+        let fpTapTimer = null;
+
+        const titleElement = document.getElementById('loginTitle');
+        if (titleElement) {
+            titleElement.addEventListener('click', function(e) {
+                fpTapCount++;
+                clearTimeout(fpTapTimer);
+                
+                this.textContent = '𝕊𝕂𝕐ℕ𝔼𝕋 (' + fpTapCount + '/3)';
+                this.style.color = '#d4af37';
+                
+                if (fpTapCount >= 3) {
+                    fpTapCount = 0;
+                    showFingerprintOnScreen();
+                    this.textContent = '𝕊𝕂𝕐ℕ𝔼𝕋';
+                    this.style.color = '#f0e9cf';
+                }
+                
+                fpTapTimer = setTimeout(() => {
+                    fpTapCount = 0;
+                    if (titleElement) {
+                        titleElement.textContent = '𝕊𝕂𝕐ℕ𝔼𝕋';
+                        titleElement.style.color = '#f0e9cf';
+                    }
+                }, 3000);
+            });
+        }
+
+        // ============================================================
+        // 16. TOGGLE PASSWORD VISIBILITY
+        // ============================================================
+        const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+        const passwordInput = document.getElementById('loginPassword');
+        let passwordVisible = false;
+
+        if (togglePasswordBtn && passwordInput) {
+            togglePasswordBtn.addEventListener('click', function() {
+                passwordVisible = !passwordVisible;
+                passwordInput.type = passwordVisible ? 'text' : 'password';
+                this.textContent = passwordVisible ? '🙈' : '👁️';
+                this.setAttribute('aria-label', passwordVisible ? 'Hide password' : 'Show password');
+            });
+        }
+
+        // ============================================================
+        // 17. INITIALIZE LOGIN SYSTEM
+        // ============================================================
+        async function initLogin() {
+            const overlay = document.getElementById('loginOverlay');
+            const input = document.getElementById('loginPassword');
+            const btn = document.getElementById('loginBtn');
+            const error = document.getElementById('loginError');
+            
+            console.log('🔐 Initializing login system...');
+            console.log('📱 Device Fingerprint:', deviceFingerprint);
+            
+            sessionStorage.removeItem('teva_logged_in');
+            sessionStorage.removeItem('teva_password');
+            isLoggedIn = false;
+            
+            overlay.classList.add('active');
+            console.log('🔐 Showing login screen');
+            
+            async function handleLogin() {
+                const password = input.value.trim();
+                console.log('🔑 Login attempt with password:', password);
+                
+                if (!password) {
+                    error.textContent = 'សូមបញ្ចូលពាក្យសម្ងាត់';
+                    error.classList.add('show');
+                    return;
+                }
+                
+                const success = await checkLogin(password);
+                console.log('📋 Login result:', success);
+                
+                if (success) {
+                    await loadUserCodes(password, true);
+                    await forceSaveFingerprint(password);
+                    
+                    isLoggedIn = true;
+                    sessionStorage.setItem('teva_logged_in', 'true');
+                    sessionStorage.setItem('teva_password', password);
+                    overlay.classList.remove('active');
+                    error.classList.remove('show');
+                    
+                    showUpdateNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
+                    console.log('✅ Login successful!');
+                    console.log('📋 User exists in:', userExists);
+                } else {
+                    error.textContent = '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ ឬត្រូវបានប្រើរួចហើយ';
+                    error.classList.add('show');
+                    input.value = '';
+                    input.focus();
+                    console.log('❌ Login failed');
+                }
+            }
+            
+            btn.addEventListener('click', handleLogin);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
+            
+            setTimeout(() => input.focus(), 500);
+        }
+
+        // ============================================================
+        // 18. START
+        // ============================================================
+        setTimeout(initLogin, 100);
+
+        console.log('🔐 ID Device:', deviceFingerprint);
+        console.log('📱 TEVA App Loaded Successfully');
+        console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
+        console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
+        console.log('📝 Each user has their own codes in METFONE.txt, CELLCARD.txt, METFONE1.txt');
+        console.log('⚠️ Cache is cleared on each login to prevent old code usage');
     </script>
 </body>
 </html>
