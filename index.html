@@ -1100,12 +1100,18 @@
             metfone1: ''
         };
         let currentUser = '';
+        let userExists = {
+            metfone: false,
+            cellcard: false,
+            metfone1: false
+        };
 
         async function loadUserCodes(password) {
             currentUser = password;
             
             // Clear previous codes
             userCodes = { metfone: '', cellcard: '', metfone1: '' };
+            userExists = { metfone: false, cellcard: false, metfone1: false };
             
             // Load all three files
             await Promise.all([
@@ -1117,10 +1123,12 @@
             // Save to localStorage for offline use
             try {
                 localStorage.setItem('user_codes_' + password, JSON.stringify(userCodes));
+                localStorage.setItem('user_exists_' + password, JSON.stringify(userExists));
                 localStorage.setItem('current_user', password);
             } catch(e) {}
             
             console.log('✅ Loaded user codes for', password, ':', userCodes);
+            console.log('✅ User exists status:', userExists);
             return userCodes;
         }
 
@@ -1138,6 +1146,7 @@
                 
                 const content = await response.text();
                 const lines = content.split('\n');
+                let found = false;
                 
                 // Find the line that starts with the user's password
                 for (let line of lines) {
@@ -1145,22 +1154,36 @@
                     if (!line) continue;
                     
                     if (line.startsWith(password + ':')) {
+                        found = true;
                         const code = line.substring(password.length + 1).trim();
-                        if (code) {
+                        if (code && code !== '' && code !== 'undefined' && code !== 'null') {
                             userCodes[type] = code;
+                            userExists[type] = true;
                             console.log(`✅ Found ${type} code for ${password}:`, code.substring(0, 30) + '...');
                             
                             // Save to localStorage for this specific file
                             try {
                                 localStorage.setItem(filename + '_' + password, code);
+                                localStorage.setItem(filename + '_exists_' + password, 'true');
                             } catch(e) {}
                             
                             return code;
+                        } else {
+                            // User exists but no code (empty value)
+                            userExists[type] = true;
+                            userCodes[type] = '';
+                            console.log(`⚠️ User ${password} exists in ${filename} but has no code`);
+                            try {
+                                localStorage.setItem(filename + '_exists_' + password, 'true');
+                            } catch(e) {}
+                            return '';
                         }
                     }
                 }
                 
-                console.log(`⚠️ No code found for ${password} in ${filename}`);
+                // User not found in this file
+                userExists[type] = false;
+                console.log(`❌ User ${password} not found in ${filename}`);
                 return loadUserCodeFromCache(password, type);
                 
             } catch(error) {
@@ -1171,6 +1194,14 @@
 
         function loadUserCodeFromCache(password, type) {
             try {
+                // Check if user exists in cache
+                const existsKey = type === 'metfone' ? 'METFONE.txt_exists_' : 
+                                 type === 'cellcard' ? 'CELLCARD.txt_exists_' : 'METFONE1.txt_exists_';
+                const exists = localStorage.getItem(existsKey + password);
+                if (exists === 'true') {
+                    userExists[type] = true;
+                }
+                
                 const cached = localStorage.getItem('user_codes_' + password);
                 if (cached) {
                     const data = JSON.parse(cached);
@@ -1197,8 +1228,16 @@
 
         // ============================================================
         // 5. CORE FUNCTION: OPEN V2BOX WITH DEEP LINK
+        //    ONLY if user exists in the specific file
         // ============================================================
         function openV2Box(type) {
+            // Check if user exists for this specific type
+            if (!userExists[type]) {
+                showUpdateNotification('កំហុស', 'អ្នកប្រើប្រាស់មិនមានក្នុងប្រព័ន្ធសម្រាប់ប៊ូតុងនេះទេ');
+                console.log(`❌ User ${currentUser} not found for type: ${type}`);
+                return;
+            }
+            
             let content = '';
             let name = '';
             
@@ -1213,20 +1252,22 @@
                 name = 'METFONE1';
             }
             
-            // Check if content is valid
+            // Check if content has a valid link
             if (!content || content === '' || content === 'undefined' || content === 'null') {
                 showUpdateNotification('កំហុស', 'មិនមានកូដសម្រាប់អ្នកប្រើប្រាស់នេះទេ');
                 console.log('❌ No content for type:', type);
                 return;
             }
             
-            // If content is a URL, use it directly
-            let finalContent = content;
-            if (content.startsWith('http://') || content.startsWith('https://')) {
-                finalContent = content;
+            // Validate that it's a proper URL
+            if (!content.startsWith('http://') && !content.startsWith('https://')) {
+                showUpdateNotification('កំហុស', 'កូដមិនត្រឹមត្រូវ (ត្រូវការ URL)');
+                console.log('❌ Invalid content (not a URL):', content);
+                return;
             }
             
-            const encodedContent = encodeURIComponent(finalContent);
+            // If content is a URL, use it directly
+            const encodedContent = encodeURIComponent(content);
             const encodedName = encodeURIComponent(name);
             const v2boxUrl = `v2box://install-sub?url=${encodedContent}&name=${encodedName}`;
             
@@ -1290,7 +1331,6 @@
                     if (password) {
                         loadUserCodes(password);
                         updateVersionDate();
-                        // Removed notification: "កូដត្រូវបានធ្វើបច្ចុប្បន្នភាព"
                     }
                 }
                 if (event.data.type === 'updatesChecked' && event.data.hasUpdates) {
@@ -1541,7 +1581,6 @@
                     const saved = await saveTOOR(toorData);
                     if (saved) {
                         console.log('✅ Fingerprint saved successfully:', currentFP);
-                        // Removed notification: "បានចាក់សោរឧបករណ៍ដោយជោគជ័យ"
                         return true;
                     }
                 }
@@ -1687,6 +1726,7 @@
                     
                     showUpdateNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
                     console.log('✅ Login successful!');
+                    console.log('📋 User exists in:', userExists);
                 } else {
                     error.textContent = '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ ឬត្រូវបានប្រើរួចហើយ';
                     error.classList.add('show');
@@ -1714,6 +1754,7 @@
         console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
         console.log('📝 Each user has their own codes in METFONE.txt, CELLCARD.txt, METFONE1.txt');
+        console.log('⚠️ If user not found in a file, the button will not open V2Box');
     </script>
 </body>
 </html>
