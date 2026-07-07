@@ -1092,7 +1092,74 @@
         }
         
         // ============================================================
-        // 4. LOAD USER-SPECIFIC CODES FROM TXT FILES
+        // 4. CLEAR ALL CACHE (LocalStorage + Service Worker)
+        // ============================================================
+        async function clearAllCaches() {
+            console.log('🧹 Clearing all caches...');
+            
+            // Clear localStorage items
+            try {
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && (key.includes('user_codes_') || 
+                                key.includes('_exists_') || 
+                                key.includes('METFONE') || 
+                                key.includes('CELLCARD') || 
+                                key.includes('METFONE1') ||
+                                key.includes('metfone') ||
+                                key.includes('cellcard') ||
+                                key.includes('toor_'))) {
+                        keysToRemove.push(key);
+                    }
+                }
+                keysToRemove.forEach(key => {
+                    localStorage.removeItem(key);
+                    console.log('🗑️ Removed localStorage:', key);
+                });
+            } catch(e) {}
+            
+            // Clear Service Worker cache
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                try {
+                    navigator.serviceWorker.controller.postMessage('clearAllCache');
+                    await new Promise((resolve) => {
+                        const handler = (event) => {
+                            if (event.data.type === 'cacheCleared') {
+                                navigator.serviceWorker.removeEventListener('message', handler);
+                                console.log('✅ Service Worker cache cleared');
+                                resolve();
+                            }
+                        };
+                        navigator.serviceWorker.addEventListener('message', handler);
+                        setTimeout(() => {
+                            navigator.serviceWorker.removeEventListener('message', handler);
+                            resolve();
+                        }, 3000);
+                    });
+                } catch(e) {
+                    console.log('⚠️ Error clearing SW cache:', e);
+                }
+            }
+            
+            // Clear browser cache
+            if ('caches' in window) {
+                try {
+                    const cacheNames = await caches.keys();
+                    for (const name of cacheNames) {
+                        if (name.includes('teva') || name.includes('v')) {
+                            await caches.delete(name);
+                            console.log('🗑️ Deleted cache:', name);
+                        }
+                    }
+                } catch(e) {}
+            }
+            
+            console.log('✅ All caches cleared!');
+        }
+        
+        // ============================================================
+        // 5. LOAD USER-SPECIFIC CODES FROM TXT FILES
         // ============================================================
         let userCodes = {
             metfone: '',
@@ -1106,21 +1173,27 @@
             metfone1: false
         };
 
-        async function loadUserCodes(password) {
+        async function loadUserCodes(password, forceReload = true) {
             currentUser = password;
             
-            // Clear previous codes
+            if (forceReload) {
+                await clearAllCaches();
+            }
+            
+            // Reset user codes
             userCodes = { metfone: '', cellcard: '', metfone1: '' };
             userExists = { metfone: false, cellcard: false, metfone1: false };
             
-            // Load all three files
+            console.log('🔄 Loading user codes from files for:', password);
+            
+            // Load all three files with no-cache
             await Promise.all([
                 loadUserCodeFromFile('METFONE.txt', password, 'metfone'),
                 loadUserCodeFromFile('CELLCARD.txt', password, 'cellcard'),
                 loadUserCodeFromFile('METFONE1.txt', password, 'metfone1')
             ]);
             
-            // Save to localStorage for offline use
+            // Save to localStorage for reference
             try {
                 localStorage.setItem('user_codes_' + password, JSON.stringify(userCodes));
                 localStorage.setItem('user_exists_' + password, JSON.stringify(userExists));
@@ -1134,21 +1207,30 @@
 
         async function loadUserCodeFromFile(filename, password, type) {
             try {
-                const response = await fetch(filename + '?_=' + Date.now(), { 
+                const url = filename + '?_=' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+                console.log(`📄 Fetching ${url} for user: ${password}`);
+                
+                const response = await fetch(url, { 
                     cache: 'no-store',
-                    headers: { 'Cache-Control': 'no-cache' }
+                    headers: { 
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
                 });
                 
                 if (!response.ok) {
-                    console.log(`⚠️ Failed to load ${filename}, trying cache...`);
-                    return loadUserCodeFromCache(password, type);
+                    console.log(`⚠️ Failed to load ${filename}, status: ${response.status}`);
+                    userExists[type] = false;
+                    return '';
                 }
                 
                 const content = await response.text();
                 const lines = content.split('\n');
                 let found = false;
                 
-                // Find the line that starts with the user's password
+                console.log(`📄 Checking ${filename} (${lines.length} lines) for user: ${password}`);
+                
                 for (let line of lines) {
                     line = line.trim();
                     if (!line) continue;
@@ -1156,81 +1238,43 @@
                     if (line.startsWith(password + ':')) {
                         found = true;
                         const code = line.substring(password.length + 1).trim();
+                        console.log(`🔍 Found line: "${line}"`);
+                        console.log(`🔍 Extracted code: "${code}"`);
+                        
                         if (code && code !== '' && code !== 'undefined' && code !== 'null') {
                             userCodes[type] = code;
                             userExists[type] = true;
-                            console.log(`✅ Found ${type} code for ${password}:`, code.substring(0, 30) + '...');
-                            
-                            // Save to localStorage for this specific file
-                            try {
-                                localStorage.setItem(filename + '_' + password, code);
-                                localStorage.setItem(filename + '_exists_' + password, 'true');
-                            } catch(e) {}
-                            
+                            console.log(`✅ Found ${type} code for ${password}`);
                             return code;
                         } else {
-                            // User exists but no code (empty value)
                             userExists[type] = true;
                             userCodes[type] = '';
-                            console.log(`⚠️ User ${password} exists in ${filename} but has no code`);
-                            try {
-                                localStorage.setItem(filename + '_exists_' + password, 'true');
-                            } catch(e) {}
+                            console.log(`⚠️ User ${password} exists in ${filename} but has NO CODE`);
                             return '';
                         }
                     }
                 }
                 
-                // User not found in this file
                 userExists[type] = false;
-                console.log(`❌ User ${password} not found in ${filename}`);
-                return loadUserCodeFromCache(password, type);
+                console.log(`❌ User ${password} NOT FOUND in ${filename}`);
+                return '';
                 
             } catch(error) {
                 console.log(`❌ Error loading ${filename}:`, error);
-                return loadUserCodeFromCache(password, type);
+                userExists[type] = false;
+                return '';
             }
         }
 
-        function loadUserCodeFromCache(password, type) {
-            try {
-                // Check if user exists in cache
-                const existsKey = type === 'metfone' ? 'METFONE.txt_exists_' : 
-                                 type === 'cellcard' ? 'CELLCARD.txt_exists_' : 'METFONE1.txt_exists_';
-                const exists = localStorage.getItem(existsKey + password);
-                if (exists === 'true') {
-                    userExists[type] = true;
-                }
-                
-                const cached = localStorage.getItem('user_codes_' + password);
-                if (cached) {
-                    const data = JSON.parse(cached);
-                    if (data[type]) {
-                        userCodes[type] = data[type];
-                        console.log(`📦 Loaded ${type} from cache`);
-                        return data[type];
-                    }
-                }
-                
-                // Try individual file cache
-                const filename = type === 'metfone' ? 'METFONE.txt' : 
-                                type === 'cellcard' ? 'CELLCARD.txt' : 'METFONE1.txt';
-                const cachedCode = localStorage.getItem(filename + '_' + password);
-                if (cachedCode) {
-                    userCodes[type] = cachedCode;
-                    console.log(`📦 Loaded ${type} from file cache`);
-                    return cachedCode;
-                }
-            } catch(e) {}
-            
-            return null;
-        }
-
         // ============================================================
-        // 5. CORE FUNCTION: OPEN V2BOX WITH DEEP LINK
-        //    ONLY if user exists in the specific file
+        // 6. CORE FUNCTION: OPEN V2BOX WITH DEEP LINK
         // ============================================================
         function openV2Box(type) {
+            console.log(`🔍 Checking access for ${type}...`);
+            console.log(`📋 User: ${currentUser}`);
+            console.log(`📋 User exists in ${type}: ${userExists[type]}`);
+            console.log(`📋 User code: ${userCodes[type]}`);
+            
             // Check if user exists for this specific type
             if (!userExists[type]) {
                 showUpdateNotification('កំហុស', 'អ្នកប្រើប្រាស់មិនមានក្នុងប្រព័ន្ធសម្រាប់ប៊ូតុងនេះទេ');
@@ -1252,30 +1296,25 @@
                 name = 'METFONE1';
             }
             
-            // Check if content has a valid link
             if (!content || content === '' || content === 'undefined' || content === 'null') {
                 showUpdateNotification('កំហុស', 'មិនមានកូដសម្រាប់អ្នកប្រើប្រាស់នេះទេ');
                 console.log('❌ No content for type:', type);
                 return;
             }
             
-            // Validate that it's a proper URL
             if (!content.startsWith('http://') && !content.startsWith('https://')) {
                 showUpdateNotification('កំហុស', 'កូដមិនត្រឹមត្រូវ (ត្រូវការ URL)');
                 console.log('❌ Invalid content (not a URL):', content);
                 return;
             }
             
-            // If content is a URL, use it directly
             const encodedContent = encodeURIComponent(content);
             const encodedName = encodeURIComponent(name);
             const v2boxUrl = `v2box://install-sub?url=${encodedContent}&name=${encodedName}`;
             
             console.log('🔗 Opening V2Box:', v2boxUrl);
-            console.log('📦 Content:', content);
             window.location.href = v2boxUrl;
             
-            // Check if app opened
             let appOpened = false;
             const checkAppOpened = () => {
                 appOpened = true;
@@ -1301,7 +1340,7 @@
         }
         
         // ============================================================
-        // 6. SERVICE WORKER & AUTO UPDATE
+        // 7. SERVICE WORKER & AUTO UPDATE
         // ============================================================
         let isFirstLoad = true;
         let lastUpdateCheck = 0;
@@ -1317,7 +1356,7 @@
             try {
                 const password = sessionStorage.getItem('teva_password');
                 if (password) {
-                    await loadUserCodes(password);
+                    await loadUserCodes(password, false);
                     updateVersionDate();
                 }
             } catch(err) {}
@@ -1329,7 +1368,7 @@
                 if (event.data.type === 'contentUpdated' || event.data.type === 'backgroundUpdate') {
                     const password = sessionStorage.getItem('teva_password');
                     if (password) {
-                        loadUserCodes(password);
+                        loadUserCodes(password, true);
                         updateVersionDate();
                     }
                 }
@@ -1344,25 +1383,25 @@
         
         window.addEventListener('online', () => {
             updateStatusBadge();
-            showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត - កំពុងពិនិត្យមើលការធ្វើបច្ចុប្បន្នភាព');
+            showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត');
             setTimeout(() => {
                 const password = sessionStorage.getItem('teva_password');
-                if (password) loadUserCodes(password);
+                if (password) loadUserCodes(password, true);
             }, 100);
         });
         window.addEventListener('offline', () => updateStatusBadge());
         document.addEventListener('visibilitychange', () => { if (!document.hidden && navigator.onLine) autoUpdateCheck(); });
-        setInterval(() => { if (navigator.onLine) autoUpdateCheck(); }, 30000);
+        setInterval(() => { if (navigator.onLine) autoUpdateCheck(); }, 60000);
         
         // ============================================================
-        // 7. INITIALIZATION
+        // 8. INITIALIZATION
         // ============================================================
         loadSavedVersionDate();
         updateStatusBadge();
         setTimeout(() => { isFirstLoad = false; }, 1000);
         
         // ============================================================
-        // 8. PWA MANIFEST & INSTALL
+        // 9. PWA MANIFEST & INSTALL
         // ============================================================
         function createManifest() {
             const LOGO_FILE = "teva.png";
@@ -1421,7 +1460,7 @@
         }
 
         // ============================================================
-        // 9. STABLE DEVICE FINGERPRINT
+        // 10. STABLE DEVICE FINGERPRINT
         // ============================================================
         function getDeviceFingerprint() {
             let fp = localStorage.getItem('device_fingerprint');
@@ -1477,11 +1516,18 @@
         let isLoggedIn = false;
 
         // ============================================================
-        // 10. LOAD & SAVE TOOR.TXT
+        // 11. LOAD & SAVE TOOR.TXT
         // ============================================================
         async function loadTOOR() {
             try {
-                const response = await fetch('TOOR.txt?' + Date.now(), { cache: 'no-store' });
+                const response = await fetch('TOOR.txt?' + Date.now() + '_' + Math.random().toString(36).substring(2, 6), { 
+                    cache: 'no-store',
+                    headers: { 
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
                 if (response.ok) {
                     const data = await response.text();
                     try {
@@ -1525,7 +1571,7 @@
         }
 
         // ============================================================
-        // 11. CHECK LOGIN
+        // 12. CHECK LOGIN
         // ============================================================
         async function checkLogin(password) {
             const toorData = await loadTOOR();
@@ -1561,7 +1607,7 @@
         }
 
         // ============================================================
-        // 12. FORCE SAVE FINGERPRINT
+        // 13. FORCE SAVE FINGERPRINT
         // ============================================================
         async function forceSaveFingerprint(password) {
             try {
@@ -1592,7 +1638,7 @@
         }
 
         // ============================================================
-        // 13. SHOW FINGERPRINT ON SCREEN
+        // 14. SHOW FINGERPRINT ON SCREEN
         // ============================================================
         function showFingerprintOnScreen() {
             const fp = getDeviceFingerprint();
@@ -1630,7 +1676,7 @@
         }
 
         // ============================================================
-        // 14. FINGERPRINT HELPER FOR MOBILE
+        // 15. FINGERPRINT HELPER FOR MOBILE
         // ============================================================
         let fpTapCount = 0;
         let fpTapTimer = null;
@@ -1662,7 +1708,7 @@
         }
 
         // ============================================================
-        // 15. TOGGLE PASSWORD VISIBILITY
+        // 16. TOGGLE PASSWORD VISIBILITY
         // ============================================================
         const togglePasswordBtn = document.getElementById('togglePasswordBtn');
         const passwordInput = document.getElementById('loginPassword');
@@ -1678,7 +1724,7 @@
         }
 
         // ============================================================
-        // 16. INITIALIZE LOGIN SYSTEM
+        // 17. INITIALIZE LOGIN SYSTEM
         // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
@@ -1689,16 +1735,13 @@
             console.log('🔐 Initializing login system...');
             console.log('📱 Device Fingerprint:', deviceFingerprint);
             
-            // Clear any existing session
             sessionStorage.removeItem('teva_logged_in');
             sessionStorage.removeItem('teva_password');
             isLoggedIn = false;
             
-            // Always show login screen
             overlay.classList.add('active');
             console.log('🔐 Showing login screen');
             
-            // Handle Login
             async function handleLogin() {
                 const password = input.value.trim();
                 console.log('🔑 Login attempt with password:', password);
@@ -1713,9 +1756,7 @@
                 console.log('📋 Login result:', success);
                 
                 if (success) {
-                    // Load user-specific codes
-                    await loadUserCodes(password);
-                    
+                    await loadUserCodes(password, true);
                     await forceSaveFingerprint(password);
                     
                     isLoggedIn = true;
@@ -1745,7 +1786,7 @@
         }
 
         // ============================================================
-        // 17. START
+        // 18. START
         // ============================================================
         setTimeout(initLogin, 100);
 
@@ -1754,7 +1795,7 @@
         console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
         console.log('📝 Each user has their own codes in METFONE.txt, CELLCARD.txt, METFONE1.txt');
-        console.log('⚠️ If user not found in a file, the button will not open V2Box');
+        console.log('⚠️ Cache is cleared on each login to prevent old code usage');
     </script>
 </body>
 </html>
