@@ -974,7 +974,7 @@
                     <div class="btn-glow"></div>
                 </button>
                 <button class="btn" onclick="openV2Box('metfone1')">
-                    <span>ស្មាត</span>
+                    <span>មេតហ្វូន ១</span>
                     <div class="btn-glow"></div>
                 </button>
             </div>
@@ -1015,6 +1015,7 @@
         
         function updateVersionDate() {
             const versionSpan = document.getElementById('versionDateValue');
+            if (!versionSpan) return;
             const now = new Date();
             const formattedDate = `${now.getDate().toString().padStart(2, '0')} ${getKhmerMonth(now.getMonth())} ${now.getFullYear()}`;
             versionSpan.textContent = formattedDate;
@@ -1033,11 +1034,13 @@
         
         function loadSavedVersionDate() {
             const savedDate = localStorage.getItem('last_version_update');
+            const versionSpan = document.getElementById('versionDateValue');
+            if (!versionSpan) return;
             if (savedDate) {
                 try {
                     const date = new Date(savedDate);
                     const formattedDate = `${date.getDate().toString().padStart(2, '0')} ${getKhmerMonth(date.getMonth())} ${date.getFullYear()}`;
-                    document.getElementById('versionDateValue').textContent = formattedDate;
+                    versionSpan.textContent = formattedDate;
                     lastUpdateTime = date;
                 } catch(e) {
                     updateVersionDate();
@@ -1052,6 +1055,7 @@
         // ============================================================
         function createParticles() {
             const container = document.getElementById('particles');
+            if (!container) return;
             for (let i = 0; i < 45; i++) {
                 const particle = document.createElement('div');
                 particle.classList.add('particle');
@@ -1072,6 +1076,7 @@
         // ============================================================
         function updateStatusBadge() {
             const badge = document.getElementById('statusBadge');
+            if (!badge) return;
             if (navigator.onLine) {
                 badge.textContent = '● Online';
                 badge.className = 'status-badge online';
@@ -1125,7 +1130,7 @@
                     navigator.serviceWorker.controller.postMessage('clearAllCache');
                     await new Promise((resolve) => {
                         const handler = (event) => {
-                            if (event.data.type === 'cacheCleared') {
+                            if (event.data && event.data.type === 'cacheCleared') {
                                 navigator.serviceWorker.removeEventListener('message', handler);
                                 console.log('✅ Service Worker cache cleared');
                                 resolve();
@@ -1277,7 +1282,7 @@
             
             // Check if user exists for this specific type
             if (!userExists[type]) {
-                showUpdateNotification('កំហុស', 'អ្នកមិនបានទិញគម្រោង INTERNET នេះទេ');
+                showUpdateNotification('កំហុស', 'អ្នកប្រើប្រាស់មិនមានក្នុងប្រព័ន្ធសម្រាប់ប៊ូតុងនេះទេ');
                 console.log(`❌ User ${currentUser} not found for type: ${type}`);
                 return;
             }
@@ -1297,7 +1302,7 @@
             }
             
             if (!content || content === '' || content === 'undefined' || content === 'null') {
-                showUpdateNotification('កំហុស', 'អ្នកមិនបានទិញគម្រោង INTERNET នេះទេ');
+                showUpdateNotification('កំហុស', 'មិនមានកូដសម្រាប់អ្នកប្រើប្រាស់នេះទេ');
                 console.log('❌ No content for type:', type);
                 return;
             }
@@ -1359,20 +1364,22 @@
                     await loadUserCodes(password, false);
                     updateVersionDate();
                 }
-            } catch(err) {}
+            } catch(err) {
+                console.warn('⚠️ Auto update check failed:', err);
+            }
             finally { isChecking = false; }
         }
         
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.addEventListener('message', (event) => {
-                if (event.data.type === 'contentUpdated' || event.data.type === 'backgroundUpdate') {
+                if (event.data && (event.data.type === 'contentUpdated' || event.data.type === 'backgroundUpdate')) {
                     const password = sessionStorage.getItem('teva_password');
                     if (password) {
                         loadUserCodes(password, true);
                         updateVersionDate();
                     }
                 }
-                if (event.data.type === 'updatesChecked' && event.data.hasUpdates) {
+                if (event.data && event.data.type === 'updatesChecked' && event.data.hasUpdates) {
                     updateVersionDate();
                 }
             });
@@ -1435,23 +1442,25 @@
         window.addEventListener('beforeinstallprompt', (e) => { 
             e.preventDefault(); 
             deferredPrompt = e; 
-            installBtn.style.display = 'flex'; 
+            if (installBtn) installBtn.style.display = 'flex'; 
         });
-        installBtn.addEventListener('click', async () => { 
-            if (deferredPrompt) { 
-                deferredPrompt.prompt(); 
-                const { outcome } = await deferredPrompt.userChoice; 
-                deferredPrompt = null; 
-                installBtn.style.display = 'none'; 
-            } 
-        });
+        if (installBtn) {
+            installBtn.addEventListener('click', async () => { 
+                if (deferredPrompt) { 
+                    deferredPrompt.prompt(); 
+                    const { outcome } = await deferredPrompt.userChoice; 
+                    deferredPrompt = null; 
+                    installBtn.style.display = 'none'; 
+                } 
+            });
+        }
         window.addEventListener('appinstalled', () => { 
-            installBtn.style.display = 'none'; 
+            if (installBtn) installBtn.style.display = 'none'; 
             deferredPrompt = null; 
             showUpdateNotification('ជោគជ័យ', 'បានដំឡើងកម្មវិធី'); 
         });
         if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-            installBtn.style.display = 'none';
+            if (installBtn) installBtn.style.display = 'none';
         }
         if ('connection' in navigator) {
             navigator.connection.addEventListener('change', () => { 
@@ -1532,7 +1541,10 @@
                     const data = await response.text();
                     try {
                         const parsed = JSON.parse(data);
-                        return parsed;
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            return parsed;
+                        }
+                        return [{ password: 'TEVA', fingerprint: '' }];
                     } catch(e) {
                         return [{ password: data.trim(), fingerprint: '' }];
                     }
@@ -1544,7 +1556,10 @@
             const localData = localStorage.getItem('toor_data');
             if (localData) {
                 try {
-                    return JSON.parse(localData);
+                    const parsed = JSON.parse(localData);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        return parsed;
+                    }
                 } catch(e) {}
             }
             
@@ -1571,7 +1586,7 @@
         }
 
         // ============================================================
-        // 12. CHECK LOGIN
+        // 12. CHECK LOGIN - IMPROVED WITH FINGERPRINT
         // ============================================================
         async function checkLogin(password) {
             const toorData = await loadTOOR();
@@ -1585,6 +1600,7 @@
                 if (entry.password === password) {
                     console.log('✅ Password matched!');
                     
+                    // If no fingerprint, save it and allow login
                     if (!entry.fingerprint) {
                         console.log('🔐 No fingerprint, saving current device...');
                         entry.fingerprint = currentFP;
@@ -1592,12 +1608,14 @@
                         return true;
                     }
                     
+                    // If fingerprint matches, allow login
                     if (entry.fingerprint === currentFP) {
                         console.log('✅ Fingerprint matched!');
                         return true;
                     }
                     
-                    console.log('❌ Fingerprint mismatch!');
+                    // Fingerprint mismatch
+                    console.log('❌ Fingerprint mismatch! This password is already used on another device.');
                     return false;
                 }
             }
@@ -1668,11 +1686,31 @@
         
         function copyFingerprint() {
             const fp = getDeviceFingerprint();
-            navigator.clipboard.writeText(fp).then(() => {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(fp).then(() => {
+                    showUpdateNotification('✅', 'ចម្លងដោយជោគជ័យ!');
+                }).catch(() => {
+                    fallbackCopy(fp);
+                });
+            } else {
+                fallbackCopy(fp);
+            }
+        }
+        
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
                 showUpdateNotification('✅', 'ចម្លងដោយជោគជ័យ!');
-            }).catch(() => {
-                alert('⚠️ សូមចម្លងដោយដៃ: ' + fp);
-            });
+            } catch(e) {
+                alert('⚠️ សូមចម្លងដោយដៃ: ' + text);
+            }
+            document.body.removeChild(textarea);
         }
 
         // ============================================================
@@ -1739,7 +1777,7 @@
             sessionStorage.removeItem('teva_password');
             isLoggedIn = false;
             
-            overlay.classList.add('active');
+            if (overlay) overlay.classList.add('active');
             console.log('🔐 Showing login screen');
             
             async function handleLogin() {
@@ -1762,8 +1800,8 @@
                     isLoggedIn = true;
                     sessionStorage.setItem('teva_logged_in', 'true');
                     sessionStorage.setItem('teva_password', password);
-                    overlay.classList.remove('active');
-                    error.classList.remove('show');
+                    if (overlay) overlay.classList.remove('active');
+                    if (error) error.classList.remove('show');
                     
                     showUpdateNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
                     console.log('✅ Login successful!');
@@ -1777,12 +1815,14 @@
                 }
             }
             
-            btn.addEventListener('click', handleLogin);
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') handleLogin();
-            });
+            if (btn) btn.addEventListener('click', handleLogin);
+            if (input) {
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') handleLogin();
+                });
+            }
             
-            setTimeout(() => input.focus(), 500);
+            setTimeout(() => { if (input) input.focus(); }, 500);
         }
 
         // ============================================================
