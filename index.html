@@ -746,6 +746,34 @@
             letter-spacing: 1px;
         }
         
+        .login-loading {
+            margin-top: 15px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+        
+        .login-loading.active {
+            display: flex;
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(212, 175, 55, 0.2);
+            border-top: 2px solid #d4af37;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
         /* ===== FINGERPRINT DISPLAY ===== */
         #fpDisplay {
             position: fixed;
@@ -938,8 +966,12 @@
                 </button>
             </div>
             <button class="login-btn" id="loginBtn">ចូលប្រើប្រាស់</button>
+            <div class="login-loading" id="loginLoading">
+                <div class="spinner"></div>
+                <span>កំពុងផ្ទៀងផ្ទាត់...</span>
+            </div>
             <div class="login-error" id="loginError">ពាក្យសម្ងាត់មិនត្រឹមត្រូវ</div>
-            <div class="login-device-info">⚡ ពាក្យសម្ងាត់ប្រើបានតែមួយឧបករណ៍ប៉ុណ្ណោះ</div>
+            <div class="login-device-info">⚡ តម្រូវឱ្យមានអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់</div>
             <div class="login-shield">🛡️ SECURE DEVICE LOCK</div>
         </div>
     </div>
@@ -974,7 +1006,7 @@
                     <div class="btn-glow"></div>
                 </button>
                 <button class="btn" onclick="openV2Box('metfone1')">
-                    <span>មេតហ្វូន ១</span>
+                    <span>ស្មាត</span>
                     <div class="btn-glow"></div>
                 </button>
             </div>
@@ -1015,7 +1047,6 @@
         
         function updateVersionDate() {
             const versionSpan = document.getElementById('versionDateValue');
-            if (!versionSpan) return;
             const now = new Date();
             const formattedDate = `${now.getDate().toString().padStart(2, '0')} ${getKhmerMonth(now.getMonth())} ${now.getFullYear()}`;
             versionSpan.textContent = formattedDate;
@@ -1034,13 +1065,11 @@
         
         function loadSavedVersionDate() {
             const savedDate = localStorage.getItem('last_version_update');
-            const versionSpan = document.getElementById('versionDateValue');
-            if (!versionSpan) return;
             if (savedDate) {
                 try {
                     const date = new Date(savedDate);
                     const formattedDate = `${date.getDate().toString().padStart(2, '0')} ${getKhmerMonth(date.getMonth())} ${date.getFullYear()}`;
-                    versionSpan.textContent = formattedDate;
+                    document.getElementById('versionDateValue').textContent = formattedDate;
                     lastUpdateTime = date;
                 } catch(e) {
                     updateVersionDate();
@@ -1055,7 +1084,6 @@
         // ============================================================
         function createParticles() {
             const container = document.getElementById('particles');
-            if (!container) return;
             for (let i = 0; i < 45; i++) {
                 const particle = document.createElement('div');
                 particle.classList.add('particle');
@@ -1076,7 +1104,6 @@
         // ============================================================
         function updateStatusBadge() {
             const badge = document.getElementById('statusBadge');
-            if (!badge) return;
             if (navigator.onLine) {
                 badge.textContent = '● Online';
                 badge.className = 'status-badge online';
@@ -1097,12 +1124,9 @@
         }
         
         // ============================================================
-        // 4. CLEAR ALL CACHE (LocalStorage + Service Worker)
+        // 4. CLEAR LOCAL STORAGE
         // ============================================================
-        async function clearAllCaches() {
-            console.log('🧹 Clearing all caches...');
-            
-            // Clear localStorage items
+        function clearLocalStorage() {
             try {
                 const keysToRemove = [];
                 for (let i = 0; i < localStorage.length; i++) {
@@ -1122,49 +1146,15 @@
                     localStorage.removeItem(key);
                     console.log('🗑️ Removed localStorage:', key);
                 });
-            } catch(e) {}
-            
-            // Clear Service Worker cache
-            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                try {
-                    navigator.serviceWorker.controller.postMessage('clearAllCache');
-                    await new Promise((resolve) => {
-                        const handler = (event) => {
-                            if (event.data && event.data.type === 'cacheCleared') {
-                                navigator.serviceWorker.removeEventListener('message', handler);
-                                console.log('✅ Service Worker cache cleared');
-                                resolve();
-                            }
-                        };
-                        navigator.serviceWorker.addEventListener('message', handler);
-                        setTimeout(() => {
-                            navigator.serviceWorker.removeEventListener('message', handler);
-                            resolve();
-                        }, 3000);
-                    });
-                } catch(e) {
-                    console.log('⚠️ Error clearing SW cache:', e);
-                }
+                return true;
+            } catch(e) {
+                console.error('❌ Error clearing localStorage:', e);
+                return false;
             }
-            
-            // Clear browser cache
-            if ('caches' in window) {
-                try {
-                    const cacheNames = await caches.keys();
-                    for (const name of cacheNames) {
-                        if (name.includes('teva') || name.includes('v')) {
-                            await caches.delete(name);
-                            console.log('🗑️ Deleted cache:', name);
-                        }
-                    }
-                } catch(e) {}
-            }
-            
-            console.log('✅ All caches cleared!');
         }
         
         // ============================================================
-        // 5. LOAD USER-SPECIFIC CODES FROM TXT FILES
+        // 5. LOAD USER-SPECIFIC CODES FROM TXT FILES (ALWAYS FROM NETWORK)
         // ============================================================
         let userCodes = {
             metfone: '',
@@ -1178,32 +1168,31 @@
             metfone1: false
         };
 
-        async function loadUserCodes(password, forceReload = true) {
+        async function loadUserCodes(password) {
             currentUser = password;
             
-            if (forceReload) {
-                await clearAllCaches();
-            }
+            // Clear local storage to prevent offline access
+            clearLocalStorage();
             
             // Reset user codes
             userCodes = { metfone: '', cellcard: '', metfone1: '' };
             userExists = { metfone: false, cellcard: false, metfone1: false };
             
-            console.log('🔄 Loading user codes from files for:', password);
+            console.log('🔄 Loading user codes from network for:', password);
             
-            // Load all three files with no-cache
+            // Check if online
+            if (!navigator.onLine) {
+                console.log('❌ Offline - cannot authenticate');
+                showUpdateNotification('កំហុស', 'ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់');
+                return null;
+            }
+            
+            // Load all three files with no-cache from network only
             await Promise.all([
                 loadUserCodeFromFile('METFONE.txt', password, 'metfone'),
                 loadUserCodeFromFile('CELLCARD.txt', password, 'cellcard'),
                 loadUserCodeFromFile('METFONE1.txt', password, 'metfone1')
             ]);
-            
-            // Save to localStorage for reference
-            try {
-                localStorage.setItem('user_codes_' + password, JSON.stringify(userCodes));
-                localStorage.setItem('user_exists_' + password, JSON.stringify(userExists));
-                localStorage.setItem('current_user', password);
-            } catch(e) {}
             
             console.log('✅ Loaded user codes for', password, ':', userCodes);
             console.log('✅ User exists status:', userExists);
@@ -1212,8 +1201,9 @@
 
         async function loadUserCodeFromFile(filename, password, type) {
             try {
-                const url = filename + '?_=' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
-                console.log(`📄 Fetching ${url} for user: ${password}`);
+                // Force network request with unique query string
+                const url = filename + '?_=' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+                console.log(`📄 Fetching from network: ${url}`);
                 
                 const response = await fetch(url, { 
                     cache: 'no-store',
@@ -1282,7 +1272,7 @@
             
             // Check if user exists for this specific type
             if (!userExists[type]) {
-                showUpdateNotification('កំហុស', 'អ្នកប្រើប្រាស់មិនមានក្នុងប្រព័ន្ធសម្រាប់ប៊ូតុងនេះទេ');
+                showUpdateNotification('កំហុស', 'អ្នកមិនបានទិញគម្រោង INTERNET នេះទេ');
                 console.log(`❌ User ${currentUser} not found for type: ${type}`);
                 return;
             }
@@ -1302,7 +1292,7 @@
             }
             
             if (!content || content === '' || content === 'undefined' || content === 'null') {
-                showUpdateNotification('កំហុស', 'មិនមានកូដសម្រាប់អ្នកប្រើប្រាស់នេះទេ');
+                showUpdateNotification('កំហុស', 'អ្នកមិនបានទិញគម្រោង INTERNET នេះទេ');
                 console.log('❌ No content for type:', type);
                 return;
             }
@@ -1345,44 +1335,9 @@
         }
         
         // ============================================================
-        // 7. SERVICE WORKER & AUTO UPDATE
+        // 7. SERVICE WORKER (Minimal - only for PWA)
         // ============================================================
-        let isFirstLoad = true;
-        let lastUpdateCheck = 0;
-        let isChecking = false;
-        
-        async function autoUpdateCheck() {
-            if (!navigator.onLine) return;
-            if (isChecking) return;
-            const now = Date.now();
-            if (now - lastUpdateCheck < 30000) return;
-            lastUpdateCheck = now;
-            isChecking = true;
-            try {
-                const password = sessionStorage.getItem('teva_password');
-                if (password) {
-                    await loadUserCodes(password, false);
-                    updateVersionDate();
-                }
-            } catch(err) {
-                console.warn('⚠️ Auto update check failed:', err);
-            }
-            finally { isChecking = false; }
-        }
-        
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.addEventListener('message', (event) => {
-                if (event.data && (event.data.type === 'contentUpdated' || event.data.type === 'backgroundUpdate')) {
-                    const password = sessionStorage.getItem('teva_password');
-                    if (password) {
-                        loadUserCodes(password, true);
-                        updateVersionDate();
-                    }
-                }
-                if (event.data && event.data.type === 'updatesChecked' && event.data.hasUpdates) {
-                    updateVersionDate();
-                }
-            });
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration error:', err));
             });
@@ -1391,21 +1346,17 @@
         window.addEventListener('online', () => {
             updateStatusBadge();
             showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត');
-            setTimeout(() => {
-                const password = sessionStorage.getItem('teva_password');
-                if (password) loadUserCodes(password, true);
-            }, 100);
         });
-        window.addEventListener('offline', () => updateStatusBadge());
-        document.addEventListener('visibilitychange', () => { if (!document.hidden && navigator.onLine) autoUpdateCheck(); });
-        setInterval(() => { if (navigator.onLine) autoUpdateCheck(); }, 60000);
+        window.addEventListener('offline', () => {
+            updateStatusBadge();
+            showUpdateNotification('បណ្តាញ', 'បានផ្តាច់អ៊ីនធឺណិត');
+        });
         
         // ============================================================
         // 8. INITIALIZATION
         // ============================================================
         loadSavedVersionDate();
         updateStatusBadge();
-        setTimeout(() => { isFirstLoad = false; }, 1000);
         
         // ============================================================
         // 9. PWA MANIFEST & INSTALL
@@ -1442,30 +1393,23 @@
         window.addEventListener('beforeinstallprompt', (e) => { 
             e.preventDefault(); 
             deferredPrompt = e; 
-            if (installBtn) installBtn.style.display = 'flex'; 
+            installBtn.style.display = 'flex'; 
         });
-        if (installBtn) {
-            installBtn.addEventListener('click', async () => { 
-                if (deferredPrompt) { 
-                    deferredPrompt.prompt(); 
-                    const { outcome } = await deferredPrompt.userChoice; 
-                    deferredPrompt = null; 
-                    installBtn.style.display = 'none'; 
-                } 
-            });
-        }
+        installBtn.addEventListener('click', async () => { 
+            if (deferredPrompt) { 
+                deferredPrompt.prompt(); 
+                const { outcome } = await deferredPrompt.userChoice; 
+                deferredPrompt = null; 
+                installBtn.style.display = 'none'; 
+            } 
+        });
         window.addEventListener('appinstalled', () => { 
-            if (installBtn) installBtn.style.display = 'none'; 
+            installBtn.style.display = 'none'; 
             deferredPrompt = null; 
             showUpdateNotification('ជោគជ័យ', 'បានដំឡើងកម្មវិធី'); 
         });
         if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-            if (installBtn) installBtn.style.display = 'none';
-        }
-        if ('connection' in navigator) {
-            navigator.connection.addEventListener('change', () => { 
-                if (navigator.onLine) autoUpdateCheck(); 
-            });
+            installBtn.style.display = 'none';
         }
 
         // ============================================================
@@ -1525,11 +1469,16 @@
         let isLoggedIn = false;
 
         // ============================================================
-        // 11. LOAD & SAVE TOOR.TXT
+        // 11. LOAD & SAVE TOOR.TXT (ALWAYS FROM NETWORK)
         // ============================================================
         async function loadTOOR() {
+            if (!navigator.onLine) {
+                console.log('❌ Offline - cannot load TOOR.txt');
+                return null;
+            }
+            
             try {
-                const response = await fetch('TOOR.txt?' + Date.now() + '_' + Math.random().toString(36).substring(2, 6), { 
+                const response = await fetch('TOOR.txt?' + Date.now() + '_' + Math.random().toString(36).substring(2, 8), { 
                     cache: 'no-store',
                     headers: { 
                         'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -1541,122 +1490,93 @@
                     const data = await response.text();
                     try {
                         const parsed = JSON.parse(data);
-                        if (Array.isArray(parsed) && parsed.length > 0) {
-                            return parsed;
-                        }
-                        return [{ password: 'TEVA', fingerprint: '' }];
+                        return parsed;
                     } catch(e) {
                         return [{ password: data.trim(), fingerprint: '' }];
                     }
                 }
             } catch(e) {
-                console.log('⚠️ Failed to load TOOR.txt, using localStorage fallback');
+                console.log('⚠️ Failed to load TOOR.txt');
+                return null;
             }
-            
-            const localData = localStorage.getItem('toor_data');
-            if (localData) {
-                try {
-                    const parsed = JSON.parse(localData);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        return parsed;
-                    }
-                } catch(e) {}
-            }
-            
-            return [{ password: 'TEVA', fingerprint: '' }];
-        }
-
-        async function saveTOOR(data) {
-            try {
-                const response = await fetch('TOOR.txt', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                if (response.ok) {
-                    localStorage.setItem('toor_data', JSON.stringify(data));
-                    return true;
-                }
-            } catch(e) {
-                console.log('⚠️ Failed to save TOOR.txt, saving to localStorage');
-            }
-            
-            localStorage.setItem('toor_data', JSON.stringify(data));
-            return true;
+            return null;
         }
 
         // ============================================================
-        // 12. CHECK LOGIN - IMPROVED WITH FINGERPRINT
+        // 12. CHECK LOGIN (ALWAYS REQUIRES NETWORK)
         // ============================================================
         async function checkLogin(password) {
+            if (!navigator.onLine) {
+                console.log('❌ Offline - cannot authenticate');
+                showUpdateNotification('កំហុស', 'ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់');
+                return false;
+            }
+            
             const toorData = await loadTOOR();
+            if (!toorData) {
+                console.log('❌ Failed to load TOOR data');
+                showUpdateNotification('កំហុស', 'មិនអាចផ្ទុកទិន្នន័យបាន');
+                return false;
+            }
+            
             const currentFP = deviceFingerprint;
             
             console.log('🔍 Checking login...');
             console.log('📋 Password entered:', password);
             console.log('📋 Current FP:', currentFP);
+            console.log('📋 TOOR Data:', toorData);
             
+            let matchedEntry = null;
             for (let entry of toorData) {
                 if (entry.password === password) {
-                    console.log('✅ Password matched!');
-                    
-                    // If no fingerprint, save it and allow login
-                    if (!entry.fingerprint) {
-                        console.log('🔐 No fingerprint, saving current device...');
-                        entry.fingerprint = currentFP;
-                        await saveTOOR(toorData);
-                        return true;
-                    }
-                    
-                    // If fingerprint matches, allow login
-                    if (entry.fingerprint === currentFP) {
-                        console.log('✅ Fingerprint matched!');
-                        return true;
-                    }
-                    
-                    // Fingerprint mismatch
-                    console.log('❌ Fingerprint mismatch! This password is already used on another device.');
-                    return false;
+                    matchedEntry = entry;
+                    break;
                 }
             }
             
-            console.log('❌ Password not found in TOOR data');
+            if (!matchedEntry) {
+                console.log('❌ Password not found in TOOR data');
+                return false;
+            }
+            
+            console.log('✅ Password matched!');
+            
+            // Check if fingerprint exists
+            if (!matchedEntry.fingerprint) {
+                console.log('🔐 No fingerprint, saving current device...');
+                matchedEntry.fingerprint = currentFP;
+                // Try to save back to TOOR.txt
+                try {
+                    const response = await fetch('TOOR.txt', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(toorData)
+                    });
+                    if (response.ok) {
+                        console.log('✅ Fingerprint saved to server');
+                        return true;
+                    }
+                } catch(e) {
+                    console.log('⚠️ Failed to save fingerprint to server');
+                }
+                // Even if save fails, allow login once
+                return true;
+            }
+            
+            // Check fingerprint match
+            if (matchedEntry.fingerprint === currentFP) {
+                console.log('✅ Fingerprint matched!');
+                return true;
+            }
+            
+            console.log('❌ Fingerprint mismatch!');
+            console.log(`📋 Saved FP: ${matchedEntry.fingerprint}`);
+            console.log(`📋 Current FP: ${currentFP}`);
             return false;
         }
 
         // ============================================================
-        // 13. FORCE SAVE FINGERPRINT
-        // ============================================================
-        async function forceSaveFingerprint(password) {
-            try {
-                const toorData = await loadTOOR();
-                const currentFP = deviceFingerprint;
-                let updated = false;
-                
-                for (let entry of toorData) {
-                    if (entry.password === password && !entry.fingerprint) {
-                        entry.fingerprint = currentFP;
-                        updated = true;
-                        break;
-                    }
-                }
-                
-                if (updated) {
-                    const saved = await saveTOOR(toorData);
-                    if (saved) {
-                        console.log('✅ Fingerprint saved successfully:', currentFP);
-                        return true;
-                    }
-                }
-                return false;
-            } catch (error) {
-                console.error('❌ Error saving fingerprint:', error);
-                return false;
-            }
-        }
-
-        // ============================================================
-        // 14. SHOW FINGERPRINT ON SCREEN
+        // 13. SHOW FINGERPRINT ON SCREEN
         // ============================================================
         function showFingerprintOnScreen() {
             const fp = getDeviceFingerprint();
@@ -1675,6 +1595,7 @@
                     <button class="fp-btn fp-btn-copy" onclick="copyFingerprint()">📋 ចម្លង</button>
                     <button class="fp-btn fp-btn-close" onclick="this.parentElement.parentElement.remove()">✕ បិទ</button>
                 </div>
+                <div class="fp-hint">💡 ប្រើសម្រាប់ចាក់សោរឧបករណ៍</div>
             `;
             document.body.appendChild(div);
             
@@ -1686,35 +1607,15 @@
         
         function copyFingerprint() {
             const fp = getDeviceFingerprint();
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(fp).then(() => {
-                    showUpdateNotification('✅', 'ចម្លងដោយជោគជ័យ!');
-                }).catch(() => {
-                    fallbackCopy(fp);
-                });
-            } else {
-                fallbackCopy(fp);
-            }
-        }
-        
-        function fallbackCopy(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-            try {
-                document.execCommand('copy');
+            navigator.clipboard.writeText(fp).then(() => {
                 showUpdateNotification('✅', 'ចម្លងដោយជោគជ័យ!');
-            } catch(e) {
-                alert('⚠️ សូមចម្លងដោយដៃ: ' + text);
-            }
-            document.body.removeChild(textarea);
+            }).catch(() => {
+                alert('⚠️ សូមចម្លងដោយដៃ: ' + fp);
+            });
         }
 
         // ============================================================
-        // 15. FINGERPRINT HELPER FOR MOBILE
+        // 14. FINGERPRINT HELPER FOR MOBILE
         // ============================================================
         let fpTapCount = 0;
         let fpTapTimer = null;
@@ -1746,7 +1647,7 @@
         }
 
         // ============================================================
-        // 16. TOGGLE PASSWORD VISIBILITY
+        // 15. TOGGLE PASSWORD VISIBILITY
         // ============================================================
         const togglePasswordBtn = document.getElementById('togglePasswordBtn');
         const passwordInput = document.getElementById('loginPassword');
@@ -1762,22 +1663,24 @@
         }
 
         // ============================================================
-        // 17. INITIALIZE LOGIN SYSTEM
+        // 16. INITIALIZE LOGIN SYSTEM
         // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
             const input = document.getElementById('loginPassword');
             const btn = document.getElementById('loginBtn');
             const error = document.getElementById('loginError');
+            const loading = document.getElementById('loginLoading');
             
             console.log('🔐 Initializing login system...');
             console.log('📱 Device Fingerprint:', deviceFingerprint);
+            console.log('📶 Network status:', navigator.onLine ? 'Online' : 'Offline');
             
             sessionStorage.removeItem('teva_logged_in');
             sessionStorage.removeItem('teva_password');
             isLoggedIn = false;
             
-            if (overlay) overlay.classList.add('active');
+            overlay.classList.add('active');
             console.log('🔐 Showing login screen');
             
             async function handleLogin() {
@@ -1790,43 +1693,65 @@
                     return;
                 }
                 
-                const success = await checkLogin(password);
-                console.log('📋 Login result:', success);
-                
-                if (success) {
-                    await loadUserCodes(password, true);
-                    await forceSaveFingerprint(password);
-                    
-                    isLoggedIn = true;
-                    sessionStorage.setItem('teva_logged_in', 'true');
-                    sessionStorage.setItem('teva_password', password);
-                    if (overlay) overlay.classList.remove('active');
-                    if (error) error.classList.remove('show');
-                    
-                    showUpdateNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
-                    console.log('✅ Login successful!');
-                    console.log('📋 User exists in:', userExists);
-                } else {
-                    error.textContent = '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ ឬត្រូវបានប្រើរួចហើយ';
+                // Check network first
+                if (!navigator.onLine) {
+                    error.textContent = '❌ ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់';
                     error.classList.add('show');
-                    input.value = '';
-                    input.focus();
-                    console.log('❌ Login failed');
+                    return;
+                }
+                
+                // Show loading
+                loading.classList.add('active');
+                btn.disabled = true;
+                error.classList.remove('show');
+                
+                try {
+                    const success = await checkLogin(password);
+                    console.log('📋 Login result:', success);
+                    
+                    if (success) {
+                        const codes = await loadUserCodes(password);
+                        if (codes) {
+                            isLoggedIn = true;
+                            sessionStorage.setItem('teva_logged_in', 'true');
+                            sessionStorage.setItem('teva_password', password);
+                            overlay.classList.remove('active');
+                            error.classList.remove('show');
+                            
+                            showUpdateNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
+                            console.log('✅ Login successful!');
+                            console.log('📋 User exists in:', userExists);
+                        } else {
+                            error.textContent = '❌ មិនអាចផ្ទុកទិន្នន័យបាន';
+                            error.classList.add('show');
+                        }
+                    } else {
+                        error.textContent = '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ ឬត្រូវបានប្រើរួចហើយ';
+                        error.classList.add('show');
+                        input.value = '';
+                        input.focus();
+                        console.log('❌ Login failed');
+                    }
+                } catch (err) {
+                    console.error('❌ Login error:', err);
+                    error.textContent = '❌ មានបញ្ហាក្នុងការផ្ទៀងផ្ទាត់';
+                    error.classList.add('show');
+                } finally {
+                    loading.classList.remove('active');
+                    btn.disabled = false;
                 }
             }
             
-            if (btn) btn.addEventListener('click', handleLogin);
-            if (input) {
-                input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') handleLogin();
-                });
-            }
+            btn.addEventListener('click', handleLogin);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
             
-            setTimeout(() => { if (input) input.focus(); }, 500);
+            setTimeout(() => input.focus(), 500);
         }
 
         // ============================================================
-        // 18. START
+        // 17. START
         // ============================================================
         setTimeout(initLogin, 100);
 
@@ -1834,8 +1759,8 @@
         console.log('📱 TEVA App Loaded Successfully');
         console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
-        console.log('📝 Each user has their own codes in METFONE.txt, CELLCARD.txt, METFONE1.txt');
+        console.log('⚠️ Offline mode DISABLED - Network required for authentication');
         console.log('⚠️ Cache is cleared on each login to prevent old code usage');
     </script>
 </body>
-</html>
+                    </html>
