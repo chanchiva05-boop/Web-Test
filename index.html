@@ -1277,7 +1277,7 @@
             
             // Check if user exists for this specific type
             if (!userExists[type]) {
-                showUpdateNotification('កំហុស', 'អ្នកប្រើប្រាស់មិនមានក្នុងប្រព័ន្ធសម្រាប់ប៊ូតុងនេះទេ');
+                showUpdateNotification('កំហុស', 'អ្នកមិនបានទិញគម្រោង INTERNET នេះទេ');
                 console.log(`❌ User ${currentUser} not found for type: ${type}`);
                 return;
             }
@@ -1297,7 +1297,7 @@
             }
             
             if (!content || content === '' || content === 'undefined' || content === 'null') {
-                showUpdateNotification('កំហុស', 'មិនមានកូដសម្រាប់អ្នកប្រើប្រាស់នេះទេ');
+                showUpdateNotification('កំហុស', 'អ្នកមិនបានទិញគម្រោង INTERNET នេះទេ');
                 console.log('❌ No content for type:', type);
                 return;
             }
