@@ -1,4 +1,4 @@
-const CACHE_NAME = 'teva-v12';
+const CACHE_NAME = 'teva-v13';
 const urlsToCache = [
   './',
   './index.html',
@@ -14,24 +14,41 @@ self.addEventListener('install', event => {
   console.log('Service Worker installing...', CACHE_NAME);
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
+      .then(async cache => {
         console.log('Caching files...');
-        return cache.addAll(urlsToCache);
-      })
-      .then(() => {
+        // Cache each file individually to avoid failure
+        for (const url of urlsToCache) {
+          try {
+            const response = await fetch(url, { 
+              cache: 'no-store',
+              headers: { 'Cache-Control': 'no-cache' }
+            });
+            if (response && response.ok) {
+              await cache.put(url, response);
+              console.log('✅ Cached:', url);
+            } else {
+              console.warn('⚠️ Failed to cache:', url, response.status);
+            }
+          } catch (err) {
+            console.warn('⚠️ Error caching:', url, err);
+          }
+        }
         return self.skipWaiting();
       })
   );
 });
 
-// Network First - ALWAYS try network first for txt files
+// Network First with Better Error Handling
 async function networkFirst(request) {
+  const originalUrl = request.url.split('?')[0];
+  const isTxtFile = originalUrl.includes('METFONE.txt') || 
+                     originalUrl.includes('CELLCARD.txt') || 
+                     originalUrl.includes('METFONE1.txt') ||
+                     originalUrl.includes('TOOR.txt');
+  
   try {
     let fetchUrl = request.url;
-    if (fetchUrl.includes('METFONE.txt') || 
-        fetchUrl.includes('CELLCARD.txt') || 
-        fetchUrl.includes('METFONE1.txt') ||
-        fetchUrl.includes('TOOR.txt')) {
+    if (isTxtFile) {
       const baseUrl = fetchUrl.split('?')[0];
       fetchUrl = baseUrl + '?_=' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
     }
@@ -50,10 +67,10 @@ async function networkFirst(request) {
     if (response && response.status === 200) {
       const responseToCache = response.clone();
       const cache = await caches.open(CACHE_NAME);
-      const originalUrl = request.url.split('?')[0];
       await cache.put(originalUrl, responseToCache);
       console.log('🔄 Updated cache:', originalUrl);
       
+      // Notify clients
       const clients = await self.clients.matchAll();
       clients.forEach(client => {
         client.postMessage({ 
@@ -65,35 +82,36 @@ async function networkFirst(request) {
       
       return response;
     }
-    throw new Error('Network failed');
+    throw new Error('Network response not OK');
   } catch (error) {
-    console.log('📦 Network error, checking cache:', request.url);
-    const originalUrl = request.url.split('?')[0];
+    console.log('📦 Network error, checking cache:', originalUrl);
+    
+    // Try cache first
     const cachedResponse = await caches.match(originalUrl);
     if (cachedResponse) {
       console.log('✅ Found cached version for:', originalUrl);
       return cachedResponse;
     }
     
-    // Return empty response for txt files (no fallback)
-    if (originalUrl.includes('METFONE.txt') || 
-        originalUrl.includes('CELLCARD.txt') || 
-        originalUrl.includes('METFONE1.txt')) {
-      console.log('⚠️ No cache and no network, returning empty');
+    // Return fallback for txt files
+    if (isTxtFile) {
+      console.log('⚠️ No cache and no network, returning fallback for:', originalUrl);
+      if (originalUrl.includes('TOOR.txt')) {
+        return new Response('[{"password":"TEVA","fingerprint":""}]', { 
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' } 
+        });
+      }
+      // Return empty for other txt files
       return new Response('', { 
         headers: { 'Content-Type': 'text/plain; charset=utf-8' } 
       });
     }
-    if (originalUrl.includes('TOOR.txt')) {
-      return new Response('[{"password":"TEVA","fingerprint":""}]', { 
-        headers: { 'Content-Type': 'text/plain; charset=utf-8' } 
-      });
-    }
+    
     return new Response('Offline', { status: 503 });
   }
 }
 
-// Network First for HTML
+// HTML Network First
 async function htmlNetworkFirst(request) {
   try {
     const response = await fetch(request, { 
@@ -120,33 +138,52 @@ async function htmlNetworkFirst(request) {
 }
 
 // Cache First for static assets
-function cacheFirst(request) {
-  return caches.match(request)
-    .then(response => {
-      if (response) {
-        console.log('✅ Cache hit for:', request.url);
-        return response;
-      }
-      return fetch(request);
-    });
+async function cacheFirst(request) {
+  const cachedResponse = await caches.match(request);
+  if (cachedResponse) {
+    console.log('✅ Cache hit for:', request.url);
+    return cachedResponse;
+  }
+  try {
+    return await fetch(request);
+  } catch (error) {
+    console.log('⚠️ Failed to fetch:', request.url);
+    return new Response('Asset not available', { status: 404 });
+  }
 }
 
 // Handle fetch events
 self.addEventListener('fetch', event => {
   const url = event.request.url;
   
+  // Handle SW.js update
+  if (url.includes('sw.js')) {
+    event.respondWith(
+      fetch(event.request, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      })
+    );
+    return;
+  }
+  
+  // TXT files - network first
   if (url.includes('METFONE.txt') || 
       url.includes('CELLCARD.txt') || 
       url.includes('METFONE1.txt') ||
       url.includes('TOOR.txt')) {
     event.respondWith(networkFirst(event.request));
+    return;
   }
-  else if (url.includes('index.html') || url === './' || event.request.mode === 'navigate') {
+  
+  // HTML - network first
+  if (url.includes('index.html') || url === './' || event.request.mode === 'navigate') {
     event.respondWith(htmlNetworkFirst(event.request));
+    return;
   }
-  else {
-    event.respondWith(cacheFirst(event.request));
-  }
+  
+  // Other assets - cache first
+  event.respondWith(cacheFirst(event.request));
 });
 
 // Activate and clean old caches
@@ -169,24 +206,23 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Listen for messages from main page
+// Message handling
 self.addEventListener('message', async (event) => {
   console.log('📨 Received message:', event.data);
+  const cache = await caches.open(CACHE_NAME);
   
   if (event.data === 'forceUpdate') {
     console.log('📡 Force update triggered - clearing txt caches');
-    const cache = await caches.open(CACHE_NAME);
-    
-    await cache.delete('./METFONE.txt');
-    await cache.delete('METFONE.txt');
-    await cache.delete('./CELLCARD.txt');
-    await cache.delete('CELLCARD.txt');
-    await cache.delete('./METFONE1.txt');
-    await cache.delete('METFONE1.txt');
-    await cache.delete('./TOOR.txt');
-    await cache.delete('TOOR.txt');
-    
-    console.log('✅ Cleared txt files from cache');
+    const txtFiles = ['./METFONE.txt', 'METFONE.txt', './CELLCARD.txt', 'CELLCARD.txt', 
+                      './METFONE1.txt', 'METFONE1.txt', './TOOR.txt', 'TOOR.txt'];
+    for (const file of txtFiles) {
+      try {
+        await cache.delete(file);
+        console.log('🗑️ Deleted:', file);
+      } catch (err) {
+        console.warn('⚠️ Could not delete:', file);
+      }
+    }
     
     const clients = await self.clients.matchAll();
     clients.forEach(client => {
@@ -196,13 +232,11 @@ self.addEventListener('message', async (event) => {
   
   if (event.data === 'clearAllCache') {
     console.log('🧹 Clearing ALL cache...');
-    const cache = await caches.open(CACHE_NAME);
     const keys = await cache.keys();
     for (const request of keys) {
       await cache.delete(request);
       console.log('🗑️ Deleted:', request.url);
     }
-    console.log('✅ All cache cleared');
     
     const clients = await self.clients.matchAll();
     clients.forEach(client => {
@@ -212,10 +246,9 @@ self.addEventListener('message', async (event) => {
   
   if (event.data === 'checkUpdates') {
     console.log('🔍 Checking for updates...');
-    const cache = await caches.open(CACHE_NAME);
     let hasUpdates = false;
-    
     const txtFiles = ['./METFONE.txt', './CELLCARD.txt', './METFONE1.txt', './TOOR.txt'];
+    
     for (const file of txtFiles) {
       try {
         const response = await fetch(file + '?_=' + Date.now(), {
@@ -256,71 +289,7 @@ self.addEventListener('message', async (event) => {
   }
 });
 
-// Periodic background sync
-self.addEventListener('periodicsync', (event) => {
-  if (event.tag === 'update-content') {
-    event.waitUntil(updateContentInBackground());
-  }
-});
-
-async function updateContentInBackground() {
-  console.log('🔄 Background sync: updating content');
-  const cache = await caches.open(CACHE_NAME);
-  let hasUpdates = false;
-  
-  const filesToUpdate = ['./METFONE.txt', './CELLCARD.txt', './METFONE1.txt', './TOOR.txt'];
-  
-  for (const file of filesToUpdate) {
-    try {
-      const response = await fetch(file + '?_=' + Date.now(), {
-        cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache' }
-      });
-      if (response && response.ok) {
-        const cachedResponse = await cache.match(file);
-        const newContent = await response.text();
-        
-        if (cachedResponse) {
-          const oldContent = await cachedResponse.text();
-          if (oldContent !== newContent) {
-            hasUpdates = true;
-            console.log('🔄 Background update - content changed:', file);
-          }
-        }
-        
-        await cache.put(file, response.clone());
-        console.log('🔄 Background updated:', file);
-      }
-    } catch (err) {
-      console.log('⚠️ Background update failed for:', file);
-    }
-  }
-  
-  if (hasUpdates) {
-    const clients = await self.clients.matchAll();
-    clients.forEach(client => {
-      client.postMessage({ 
-        type: 'backgroundUpdate', 
-        source: 'sw',
-        timestamp: Date.now()
-      });
-    });
-  }
-}
-
-// Auto-update Service Worker
-self.addEventListener('fetch', (event) => {
-  if (event.request.url.includes('sw.js')) {
-    event.respondWith(
-      fetch(event.request, {
-        cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache' }
-      })
-    );
-  }
-});
-
-// Handle controller change
+// Controller change
 self.addEventListener('controllerchange', () => {
   console.log('🔄 Service Worker controller changed');
   self.clients.matchAll().then(clients => {
