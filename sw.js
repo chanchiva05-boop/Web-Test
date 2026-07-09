@@ -1,11 +1,10 @@
-const CACHE_NAME = 'teva-v14';
+const CACHE_NAME = 'teva-v15';
 const urlsToCache = [
   './',
   './index.html',
   './teva.png'
 ];
 
-// Install Service Worker
 self.addEventListener('install', event => {
   console.log('Service Worker installing...', CACHE_NAME);
   event.waitUntil(
@@ -20,7 +19,6 @@ self.addEventListener('install', event => {
   );
 });
 
-// Network First for HTML
 async function networkFirst(request) {
   try {
     console.log('🌐 Fetching from network:', request.url);
@@ -46,7 +44,6 @@ async function networkFirst(request) {
   }
 }
 
-// Cache First for static assets only
 function cacheFirst(request) {
   return caches.match(request)
     .then(response => {
@@ -58,11 +55,9 @@ function cacheFirst(request) {
     });
 }
 
-// Handle fetch events
 self.addEventListener('fetch', event => {
   const url = event.request.url;
   
-  // TXT files - NEVER cache
   if (url.includes('METFONE.txt') || 
       url.includes('CELLCARD.txt') || 
       url.includes('METFONE1.txt') ||
@@ -89,7 +84,6 @@ self.addEventListener('fetch', event => {
   }
 });
 
-// Activate and clean old caches
 self.addEventListener('activate', event => {
   console.log('Service Worker activating...', CACHE_NAME);
   event.waitUntil(
@@ -109,7 +103,6 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Listen for messages from main page
 self.addEventListener('message', async (event) => {
   console.log('📨 Received message:', event.data);
   
@@ -130,7 +123,6 @@ self.addEventListener('message', async (event) => {
   }
 });
 
-// Auto-update Service Worker
 self.addEventListener('fetch', (event) => {
   if (event.request.url.includes('sw.js')) {
     event.respondWith(
@@ -142,7 +134,6 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
-// Handle controller change
 self.addEventListener('controllerchange', () => {
   console.log('🔄 Service Worker controller changed');
 });
