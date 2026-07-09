@@ -1,11 +1,11 @@
-const CACHE_NAME = 'teva-v13';
+const CACHE_NAME = 'teva-v14';
 const urlsToCache = [
   './',
   './index.html',
   './teva.png'
 ];
 
-// Install Service Worker - only cache static assets
+// Install Service Worker
 self.addEventListener('install', event => {
   console.log('Service Worker installing...', CACHE_NAME);
   event.waitUntil(
@@ -20,7 +20,7 @@ self.addEventListener('install', event => {
   );
 });
 
-// Network First for HTML - no offline fallback
+// Network First for HTML
 async function networkFirst(request) {
   try {
     console.log('🌐 Fetching from network:', request.url);
@@ -34,7 +34,6 @@ async function networkFirst(request) {
     });
     
     if (response && response.status === 200) {
-      // Cache for performance only, not for offline use
       const responseToCache = response.clone();
       const cache = await caches.open(CACHE_NAME);
       await cache.put(request, responseToCache);
@@ -43,7 +42,6 @@ async function networkFirst(request) {
     throw new Error('Network failed');
   } catch (error) {
     console.log('📡 Network error - no offline fallback');
-    // Return error, not cached version
     return new Response('Network required', { status: 503 });
   }
 }
@@ -64,11 +62,12 @@ function cacheFirst(request) {
 self.addEventListener('fetch', event => {
   const url = event.request.url;
   
-  // TXT files - NEVER cache, always fetch from network
+  // TXT files - NEVER cache
   if (url.includes('METFONE.txt') || 
       url.includes('CELLCARD.txt') || 
       url.includes('METFONE1.txt') ||
-      url.includes('TOOR.txt')) {
+      url.includes('TOOR.txt') ||
+      url.includes('DATE.txt')) {
     event.respondWith(
       fetch(event.request, { 
         cache: 'no-store',
@@ -78,7 +77,6 @@ self.addEventListener('fetch', event => {
           'Expires': '0'
         }
       }).catch(() => {
-        // No fallback for txt files
         return new Response('', { status: 503 });
       })
     );
