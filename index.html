@@ -638,6 +638,9 @@
         .login-expiry.not-found {
             color: #ff6b6b !important;
         }
+        .login-expiry.denied {
+            color: #ff4444 !important;
+        }
         
         .login-input-group {
             position: relative;
@@ -1284,9 +1287,10 @@
         }
 
         // ============================================================
-        // 6. EXPIRY DATE MANAGEMENT - USING EXPIRY DATE (PER USER)
+        // 6. EXPIRY DATE MANAGEMENT - WITH DEVICE FINGERPRINT VERIFICATION
         // ============================================================
         let expiryConfig = null;
+        let verifiedPassword = null;
 
         async function loadExpiryConfig() {
             if (!navigator.onLine) {
@@ -1341,8 +1345,56 @@
                 return { ...userConfig, expired: false };
             }
             
-            // User not found in DATE.txt
             return null;
+        }
+
+        // ===== VERIFY DEVICE FOR USER =====
+        async function verifyDeviceForUser(password) {
+            if (verifiedPassword === password) {
+                console.log('✅ Already verified for this user');
+                return true;
+            }
+            
+            const toorData = await loadTOOR();
+            if (!toorData) {
+                console.log('❌ Failed to load TOOR data for verification');
+                return false;
+            }
+            
+            const currentFP = getDeviceFingerprint();
+            
+            console.log('🔍 Verifying device for user:', password);
+            console.log('📋 Current FP:', currentFP);
+            
+            let matchedEntry = null;
+            for (let entry of toorData) {
+                if (entry.password === password) {
+                    matchedEntry = entry;
+                    break;
+                }
+            }
+            
+            if (!matchedEntry) {
+                console.log('❌ User not found in TOOR.txt');
+                return false;
+            }
+            
+            if (!matchedEntry.fingerprint) {
+                console.log('🔐 No fingerprint saved, allowing access');
+                verifiedPassword = password;
+                return true;
+            }
+            
+            if (matchedEntry.fingerprint === currentFP) {
+                console.log('✅ Device fingerprint matched!');
+                verifiedPassword = password;
+                return true;
+            }
+            
+            console.log('❌ Device fingerprint mismatch!');
+            console.log(`📋 Saved FP: ${matchedEntry.fingerprint}`);
+            console.log(`📋 Current FP: ${currentFP}`);
+            return false;
         }
 
         async function checkUserExpiry(password) {
@@ -1401,6 +1453,17 @@
                 return;
             }
             
+            // ===== FIRST: Verify device ownership =====
+            const isVerified = await verifyDeviceForUser(password);
+            
+            if (!isVerified) {
+                expiryText.textContent = '🔒 ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត';
+                expiryEl.className = 'login-expiry denied';
+                console.log(`🔒 Device not verified for user: ${password}`);
+                return;
+            }
+            
+            // ===== SECOND: Check expiry =====
             await loadExpiryConfig();
             
             if (!expiryConfig) {
@@ -1578,7 +1641,15 @@
                 return false;
             }
             
-            // ===== CHECK USER EXPIRY FIRST =====
+            // ===== FIRST: Verify device ownership =====
+            const isVerified = await verifyDeviceForUser(password);
+            if (!isVerified) {
+                console.log('❌ Device not verified for this user');
+                showUpdateNotification('កំហុស', 'ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត');
+                return false;
+            }
+            
+            // ===== SECOND: Check expiry =====
             const expiryResult = await checkUserExpiry(password);
             if (!expiryResult.isValid) {
                 console.log('❌ User account expired or not found');
@@ -1627,16 +1698,19 @@
                     });
                     if (response.ok) {
                         console.log('✅ Fingerprint saved to server');
+                        verifiedPassword = password;
                         return true;
                     }
                 } catch(e) {
                     console.log('⚠️ Failed to save fingerprint to server');
                 }
+                verifiedPassword = password;
                 return true;
             }
             
             if (matchedEntry.fingerprint === currentFP) {
                 console.log('✅ Fingerprint matched!');
+                verifiedPassword = password;
                 return true;
             }
             
@@ -1953,7 +2027,7 @@
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
         console.log('⚠️ Offline mode DISABLED - Network required for authentication');
         console.log('⚠️ Cache is cleared on each login to prevent old code usage');
-        console.log('⚠️ User must exist in DATE.txt to login');
+        console.log('⚠️ User must exist in DATE.txt and device must be verified to login');
     </script>
 </body>
 </html>
