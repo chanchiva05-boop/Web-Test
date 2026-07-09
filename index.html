@@ -613,9 +613,27 @@
         .login-subtitle {
             color: rgba(212, 175, 55, 0.6);
             font-size: 13px;
-            margin-bottom: 30px;
+            margin-bottom: 8px;
             letter-spacing: 3px;
             text-transform: uppercase;
+        }
+        
+        .login-expiry {
+            font-size: 13px;
+            color: rgba(212, 175, 55, 0.7);
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            min-height: 24px;
+            transition: all 0.3s ease;
+        }
+        .login-expiry.warning {
+            color: #fbbf24 !important;
+        }
+        .login-expiry.expired {
+            color: #ff6b6b !important;
+        }
+        .login-expiry.success {
+            color: #4ade80 !important;
         }
         
         .login-input-group {
@@ -694,6 +712,11 @@
         
         .login-btn:active {
             transform: translateY(1px);
+        }
+        
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
         
         .login-error {
@@ -959,6 +982,9 @@
             <div class="login-logo" id="loginLogo">🔐</div>
             <div class="login-title" id="loginTitle">𝕊𝕂𝕐ℕ𝔼𝕋</div>
             <div class="login-subtitle">• Secure Access •</div>
+            <div class="login-expiry" id="loginExpiry">
+                <span id="expiryText">📅 កំពុងផ្ទុក...</span>
+            </div>
             <div class="login-input-group">
                 <input type="password" class="login-input" id="loginPassword" placeholder="បញ្ចូលពាក្យសម្ងាត់..." autocomplete="off">
                 <button class="toggle-password" id="togglePasswordBtn" type="button" aria-label="Toggle password visibility">
@@ -1154,7 +1180,7 @@
         }
         
         // ============================================================
-        // 5. LOAD USER-SPECIFIC CODES FROM TXT FILES (ALWAYS FROM NETWORK)
+        // 5. LOAD USER-SPECIFIC CODES FROM TXT FILES
         // ============================================================
         let userCodes = {
             metfone: '',
@@ -1170,24 +1196,18 @@
 
         async function loadUserCodes(password) {
             currentUser = password;
-            
-            // Clear local storage to prevent offline access
             clearLocalStorage();
-            
-            // Reset user codes
             userCodes = { metfone: '', cellcard: '', metfone1: '' };
             userExists = { metfone: false, cellcard: false, metfone1: false };
             
             console.log('🔄 Loading user codes from network for:', password);
             
-            // Check if online
             if (!navigator.onLine) {
                 console.log('❌ Offline - cannot authenticate');
                 showUpdateNotification('កំហុស', 'ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់');
                 return null;
             }
             
-            // Load all three files with no-cache from network only
             await Promise.all([
                 loadUserCodeFromFile('METFONE.txt', password, 'metfone'),
                 loadUserCodeFromFile('CELLCARD.txt', password, 'cellcard'),
@@ -1201,7 +1221,6 @@
 
         async function loadUserCodeFromFile(filename, password, type) {
             try {
-                // Force network request with unique query string
                 const url = filename + '?_=' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
                 console.log(`📄 Fetching from network: ${url}`);
                 
@@ -1262,7 +1281,173 @@
         }
 
         // ============================================================
-        // 6. CORE FUNCTION: OPEN V2BOX WITH DEEP LINK
+        // 6. EXPIRY DATE MANAGEMENT - PER USER
+        // ============================================================
+        let expiryConfig = null;
+
+        async function loadExpiryConfig() {
+            if (!navigator.onLine) {
+                console.log('❌ Offline - cannot load DATE.txt');
+                return null;
+            }
+            
+            try {
+                const response = await fetch('DATE.txt?' + Date.now() + '_' + Math.random().toString(36).substring(2, 8), { 
+                    cache: 'no-store',
+                    headers: { 
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.text();
+                    try {
+                        const parsed = JSON.parse(data);
+                        console.log('📅 Loaded expiry config:', parsed);
+                        expiryConfig = parsed;
+                        return parsed;
+                    } catch(e) {
+                        console.log('⚠️ Invalid JSON in DATE.txt');
+                        return null;
+                    }
+                }
+            } catch(e) {
+                console.log('⚠️ Failed to load DATE.txt');
+                return null;
+            }
+            return null;
+        }
+
+        function getDaysRemaining(startDateStr, expiryDays) {
+            const startDate = new Date(startDateStr);
+            const now = new Date();
+            const diffTime = now.getTime() - startDate.getTime();
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            return expiryDays - diffDays;
+        }
+
+        function getUserExpiry(password) {
+            if (!expiryConfig) return null;
+            
+            if (expiryConfig.users && expiryConfig.users[password]) {
+                const userConfig = expiryConfig.users[password];
+                if (userConfig.status === 'inactive' || userConfig.status === 'expired') {
+                    return { ...userConfig, expired: true };
+                }
+                return { ...userConfig, expired: false };
+            }
+            
+            if (expiryConfig.default) {
+                const defaultConfig = {
+                    expiryDays: expiryConfig.default.expiryDays || 30,
+                    startDate: new Date().toISOString().split('T')[0],
+                    status: 'active'
+                };
+                return defaultConfig;
+            }
+            
+            return null;
+        }
+
+        async function checkUserExpiry(password) {
+            await loadExpiryConfig();
+            
+            if (!expiryConfig) {
+                console.log('⚠️ No DATE.txt, defaulting to 30 days');
+                const today = new Date().toISOString().split('T')[0];
+                const daysRemaining = 30;
+                console.log(`📅 Default: ${daysRemaining} days remaining`);
+                return { isValid: true, daysRemaining: 30, totalDays: 30 };
+            }
+            
+            const userExpiry = getUserExpiry(password);
+            
+            if (!userExpiry) {
+                console.log('⚠️ User not found in DATE.txt, using default');
+                const defaultDays = expiryConfig.default?.expiryDays || 30;
+                const today = new Date().toISOString().split('T')[0];
+                const daysRemaining = getDaysRemaining(today, defaultDays);
+                return { isValid: daysRemaining >= 0, daysRemaining, totalDays: defaultDays };
+            }
+            
+            if (userExpiry.expired || userExpiry.status === 'inactive' || userExpiry.status === 'expired') {
+                console.log(`❌ User ${password} is inactive/expired`);
+                return { isValid: false, daysRemaining: -1, message: 'គណនីត្រូវបានបិទ' };
+            }
+            
+            const { expiryDays, startDate } = userExpiry;
+            const daysRemaining = getDaysRemaining(startDate, expiryDays);
+            
+            console.log(`📅 User ${password}: ${daysRemaining} days remaining of ${expiryDays}`);
+            
+            if (daysRemaining < 0) {
+                console.log(`❌ User ${password} expired!`);
+                return { isValid: false, daysRemaining, message: 'គម្រោងបានផុតកំណត់' };
+            }
+            
+            return { isValid: true, daysRemaining, totalDays: expiryDays };
+        }
+
+        async function updateExpiryDisplayForUser(password) {
+            const expiryText = document.getElementById('expiryText');
+            const expiryEl = document.getElementById('loginExpiry');
+            if (!expiryText) return;
+            
+            if (!password || password.length < 4) {
+                expiryText.textContent = '📅 បញ្ចូលពាក្យសម្ងាត់ដើម្បីមើលថ្ងៃដែលនៅសល់';
+                expiryEl.className = 'login-expiry';
+                return;
+            }
+            
+            await loadExpiryConfig();
+            
+            if (!expiryConfig) {
+                expiryText.textContent = '📅 30 ថ្ងៃ (កំណត់លំនាំដើម)';
+                expiryEl.className = 'login-expiry';
+                return;
+            }
+            
+            const userExpiry = getUserExpiry(password);
+            
+            if (!userExpiry) {
+                const defaultDays = expiryConfig.default?.expiryDays || 30;
+                const today = new Date().toISOString().split('T')[0];
+                const daysRemaining = getDaysRemaining(today, defaultDays);
+                expiryText.textContent = `📅 ${daysRemaining} ថ្ងៃ (កំណត់លំនាំដើម)`;
+                if (daysRemaining < 0) {
+                    expiryEl.className = 'login-expiry expired';
+                } else if (daysRemaining <= 5) {
+                    expiryEl.className = 'login-expiry warning';
+                } else {
+                    expiryEl.className = 'login-expiry';
+                }
+                return;
+            }
+            
+            if (userExpiry.status === 'inactive' || userExpiry.status === 'expired' || userExpiry.expired) {
+                expiryText.textContent = '⛔ គណនីត្រូវបានបិទ';
+                expiryEl.className = 'login-expiry expired';
+                return;
+            }
+            
+            const { expiryDays, startDate } = userExpiry;
+            const daysRemaining = getDaysRemaining(startDate, expiryDays);
+            
+            if (daysRemaining < 0) {
+                expiryText.textContent = `⛔ ផុតកំណត់ (ហួស ${Math.abs(daysRemaining)} ថ្ងៃ)`;
+                expiryEl.className = 'login-expiry expired';
+            } else if (daysRemaining <= 5) {
+                expiryText.textContent = `⚠️ នៅសល់ ${daysRemaining} ថ្ងៃ (ជិតផុតកំណត់)`;
+                expiryEl.className = 'login-expiry warning';
+            } else {
+                expiryText.textContent = `📅 នៅសល់ ${daysRemaining} ថ្ងៃ (សរុប ${expiryDays} ថ្ងៃ)`;
+                expiryEl.className = 'login-expiry success';
+            }
+        }
+
+        // ============================================================
+        // 7. CORE FUNCTION: OPEN V2BOX WITH DEEP LINK
         // ============================================================
         function openV2Box(type) {
             console.log(`🔍 Checking access for ${type}...`);
@@ -1270,7 +1455,6 @@
             console.log(`📋 User exists in ${type}: ${userExists[type]}`);
             console.log(`📋 User code: ${userCodes[type]}`);
             
-            // Check if user exists for this specific type
             if (!userExists[type]) {
                 showUpdateNotification('កំហុស', 'អ្នកមិនបានទិញគម្រោង INTERNET នេះទេ');
                 console.log(`❌ User ${currentUser} not found for type: ${type}`);
@@ -1335,7 +1519,7 @@
         }
         
         // ============================================================
-        // 7. SERVICE WORKER (Minimal - only for PWA)
+        // 8. SERVICE WORKER
         // ============================================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -1353,67 +1537,118 @@
         });
         
         // ============================================================
-        // 8. INITIALIZATION
+        // 9. LOAD TOOR.TXT
         // ============================================================
-        loadSavedVersionDate();
-        updateStatusBadge();
-        
-        // ============================================================
-        // 9. PWA MANIFEST & INSTALL
-        // ============================================================
-        function createManifest() {
-            const LOGO_FILE = "teva.png";
-            const manifestData = { 
-                name: "𝕊𝕂𝕐ℕ𝔼𝕋", 
-                short_name: "𝕊𝕂𝕐ℕ𝔼𝕋", 
-                description: "𝕊𝕂𝕐ℕ𝔼𝕋🟢", 
-                start_url: ".", 
-                display: "standalone", 
-                orientation: "portrait", 
-                theme_color: "#0a0a2a", 
-                background_color: "#0a0a2a", 
-                icons: [ 
-                    { src: LOGO_FILE, sizes: "192x192", type: "image/png", purpose: "any maskable" }, 
-                    { src: LOGO_FILE, sizes: "512x512", type: "image/png", purpose: "any maskable" } 
-                ] 
-            };
-            const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
-            const manifestURL = URL.createObjectURL(manifestBlob);
-            const existingLink = document.querySelector('link[rel="manifest"]');
-            if (existingLink) existingLink.remove();
-            const manifestLink = document.createElement('link');
-            manifestLink.rel = 'manifest';
-            manifestLink.href = manifestURL;
-            document.head.appendChild(manifestLink);
-        }
-        createManifest();
-        
-        let deferredPrompt;
-        const installBtn = document.getElementById('installBtn');
-        window.addEventListener('beforeinstallprompt', (e) => { 
-            e.preventDefault(); 
-            deferredPrompt = e; 
-            installBtn.style.display = 'flex'; 
-        });
-        installBtn.addEventListener('click', async () => { 
-            if (deferredPrompt) { 
-                deferredPrompt.prompt(); 
-                const { outcome } = await deferredPrompt.userChoice; 
-                deferredPrompt = null; 
-                installBtn.style.display = 'none'; 
-            } 
-        });
-        window.addEventListener('appinstalled', () => { 
-            installBtn.style.display = 'none'; 
-            deferredPrompt = null; 
-            showUpdateNotification('ជោគជ័យ', 'បានដំឡើងកម្មវិធី'); 
-        });
-        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-            installBtn.style.display = 'none';
+        async function loadTOOR() {
+            if (!navigator.onLine) {
+                console.log('❌ Offline - cannot load TOOR.txt');
+                return null;
+            }
+            
+            try {
+                const response = await fetch('TOOR.txt?' + Date.now() + '_' + Math.random().toString(36).substring(2, 8), { 
+                    cache: 'no-store',
+                    headers: { 
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.text();
+                    try {
+                        const parsed = JSON.parse(data);
+                        return parsed;
+                    } catch(e) {
+                        return [{ password: data.trim(), fingerprint: '' }];
+                    }
+                }
+            } catch(e) {
+                console.log('⚠️ Failed to load TOOR.txt');
+                return null;
+            }
+            return null;
         }
 
         // ============================================================
-        // 10. STABLE DEVICE FINGERPRINT
+        // 10. CHECK LOGIN
+        // ============================================================
+        async function checkLogin(password) {
+            if (!navigator.onLine) {
+                console.log('❌ Offline - cannot authenticate');
+                showUpdateNotification('កំហុស', 'ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់');
+                return false;
+            }
+            
+            const expiryResult = await checkUserExpiry(password);
+            if (!expiryResult.isValid) {
+                console.log('❌ User account expired or inactive');
+                const msg = expiryResult.message || 'គម្រោងរបស់អ្នកបានផុតកំណត់ហើយ!';
+                showUpdateNotification('កំហុស', msg);
+                return false;
+            }
+            
+            const toorData = await loadTOOR();
+            if (!toorData) {
+                console.log('❌ Failed to load TOOR data');
+                showUpdateNotification('កំហុស', 'មិនអាចផ្ទុកទិន្នន័យបាន');
+                return false;
+            }
+            
+            const currentFP = deviceFingerprint;
+            
+            console.log('🔍 Checking login...');
+            console.log('📋 Password entered:', password);
+            console.log('📋 Current FP:', currentFP);
+            console.log('📋 TOOR Data:', toorData);
+            
+            let matchedEntry = null;
+            for (let entry of toorData) {
+                if (entry.password === password) {
+                    matchedEntry = entry;
+                    break;
+                }
+            }
+            
+            if (!matchedEntry) {
+                console.log('❌ Password not found in TOOR data');
+                return false;
+            }
+            
+            console.log('✅ Password matched!');
+            
+            if (!matchedEntry.fingerprint) {
+                console.log('🔐 No fingerprint, saving current device...');
+                matchedEntry.fingerprint = currentFP;
+                try {
+                    const response = await fetch('TOOR.txt', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(toorData)
+                    });
+                    if (response.ok) {
+                        console.log('✅ Fingerprint saved to server');
+                        return true;
+                    }
+                } catch(e) {
+                    console.log('⚠️ Failed to save fingerprint to server');
+                }
+                return true;
+            }
+            
+            if (matchedEntry.fingerprint === currentFP) {
+                console.log('✅ Fingerprint matched!');
+                return true;
+            }
+            
+            console.log('❌ Fingerprint mismatch!');
+            console.log(`📋 Saved FP: ${matchedEntry.fingerprint}`);
+            console.log(`📋 Current FP: ${currentFP}`);
+            return false;
+        }
+
+        // ============================================================
+        // 11. STABLE DEVICE FINGERPRINT
         // ============================================================
         function getDeviceFingerprint() {
             let fp = localStorage.getItem('device_fingerprint');
@@ -1469,114 +1704,7 @@
         let isLoggedIn = false;
 
         // ============================================================
-        // 11. LOAD & SAVE TOOR.TXT (ALWAYS FROM NETWORK)
-        // ============================================================
-        async function loadTOOR() {
-            if (!navigator.onLine) {
-                console.log('❌ Offline - cannot load TOOR.txt');
-                return null;
-            }
-            
-            try {
-                const response = await fetch('TOOR.txt?' + Date.now() + '_' + Math.random().toString(36).substring(2, 8), { 
-                    cache: 'no-store',
-                    headers: { 
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache',
-                        'Expires': '0'
-                    }
-                });
-                if (response.ok) {
-                    const data = await response.text();
-                    try {
-                        const parsed = JSON.parse(data);
-                        return parsed;
-                    } catch(e) {
-                        return [{ password: data.trim(), fingerprint: '' }];
-                    }
-                }
-            } catch(e) {
-                console.log('⚠️ Failed to load TOOR.txt');
-                return null;
-            }
-            return null;
-        }
-
-        // ============================================================
-        // 12. CHECK LOGIN (ALWAYS REQUIRES NETWORK)
-        // ============================================================
-        async function checkLogin(password) {
-            if (!navigator.onLine) {
-                console.log('❌ Offline - cannot authenticate');
-                showUpdateNotification('កំហុស', 'ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់');
-                return false;
-            }
-            
-            const toorData = await loadTOOR();
-            if (!toorData) {
-                console.log('❌ Failed to load TOOR data');
-                showUpdateNotification('កំហុស', 'មិនអាចផ្ទុកទិន្នន័យបាន');
-                return false;
-            }
-            
-            const currentFP = deviceFingerprint;
-            
-            console.log('🔍 Checking login...');
-            console.log('📋 Password entered:', password);
-            console.log('📋 Current FP:', currentFP);
-            console.log('📋 TOOR Data:', toorData);
-            
-            let matchedEntry = null;
-            for (let entry of toorData) {
-                if (entry.password === password) {
-                    matchedEntry = entry;
-                    break;
-                }
-            }
-            
-            if (!matchedEntry) {
-                console.log('❌ Password not found in TOOR data');
-                return false;
-            }
-            
-            console.log('✅ Password matched!');
-            
-            // Check if fingerprint exists
-            if (!matchedEntry.fingerprint) {
-                console.log('🔐 No fingerprint, saving current device...');
-                matchedEntry.fingerprint = currentFP;
-                // Try to save back to TOOR.txt
-                try {
-                    const response = await fetch('TOOR.txt', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(toorData)
-                    });
-                    if (response.ok) {
-                        console.log('✅ Fingerprint saved to server');
-                        return true;
-                    }
-                } catch(e) {
-                    console.log('⚠️ Failed to save fingerprint to server');
-                }
-                // Even if save fails, allow login once
-                return true;
-            }
-            
-            // Check fingerprint match
-            if (matchedEntry.fingerprint === currentFP) {
-                console.log('✅ Fingerprint matched!');
-                return true;
-            }
-            
-            console.log('❌ Fingerprint mismatch!');
-            console.log(`📋 Saved FP: ${matchedEntry.fingerprint}`);
-            console.log(`📋 Current FP: ${currentFP}`);
-            return false;
-        }
-
-        // ============================================================
-        // 13. SHOW FINGERPRINT ON SCREEN
+        // 12. SHOW FINGERPRINT ON SCREEN
         // ============================================================
         function showFingerprintOnScreen() {
             const fp = getDeviceFingerprint();
@@ -1615,7 +1743,7 @@
         }
 
         // ============================================================
-        // 14. FINGERPRINT HELPER FOR MOBILE
+        // 13. FINGERPRINT HELPER
         // ============================================================
         let fpTapCount = 0;
         let fpTapTimer = null;
@@ -1647,7 +1775,7 @@
         }
 
         // ============================================================
-        // 15. TOGGLE PASSWORD VISIBILITY
+        // 14. TOGGLE PASSWORD VISIBILITY
         // ============================================================
         const togglePasswordBtn = document.getElementById('togglePasswordBtn');
         const passwordInput = document.getElementById('loginPassword');
@@ -1663,7 +1791,7 @@
         }
 
         // ============================================================
-        // 16. INITIALIZE LOGIN SYSTEM
+        // 15. INITIALIZE LOGIN SYSTEM
         // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
@@ -1683,6 +1811,16 @@
             overlay.classList.add('active');
             console.log('🔐 Showing login screen');
             
+            // Update expiry display on input
+            input.addEventListener('input', function() {
+                const password = this.value.trim();
+                updateExpiryDisplayForUser(password);
+            });
+            
+            // Load initial expiry display
+            await loadExpiryConfig();
+            updateExpiryDisplayForUser('');
+            
             async function handleLogin() {
                 const password = input.value.trim();
                 console.log('🔑 Login attempt with password:', password);
@@ -1693,14 +1831,12 @@
                     return;
                 }
                 
-                // Check network first
                 if (!navigator.onLine) {
                     error.textContent = '❌ ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់';
                     error.classList.add('show');
                     return;
                 }
                 
-                // Show loading
                 loading.classList.add('active');
                 btn.disabled = true;
                 error.classList.remove('show');
@@ -1726,10 +1862,11 @@
                             error.classList.add('show');
                         }
                     } else {
-                        error.textContent = '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ ឬត្រូវបានប្រើរួចហើយ';
+                        error.textContent = '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ ឬគម្រោងបានផុតកំណត់';
                         error.classList.add('show');
                         input.value = '';
                         input.focus();
+                        updateExpiryDisplayForUser('');
                         console.log('❌ Login failed');
                     }
                 } catch (err) {
@@ -1751,9 +1888,66 @@
         }
 
         // ============================================================
+        // 16. PWA MANIFEST & INSTALL
+        // ============================================================
+        function createManifest() {
+            const LOGO_FILE = "teva.png";
+            const manifestData = { 
+                name: "𝕊𝕂𝕐ℕ𝔼𝕋", 
+                short_name: "𝕊𝕂𝕐ℕ𝔼𝕋", 
+                description: "𝕊𝕂𝕐ℕ𝔼𝕋🟢", 
+                start_url: ".", 
+                display: "standalone", 
+                orientation: "portrait", 
+                theme_color: "#0a0a2a", 
+                background_color: "#0a0a2a", 
+                icons: [ 
+                    { src: LOGO_FILE, sizes: "192x192", type: "image/png", purpose: "any maskable" }, 
+                    { src: LOGO_FILE, sizes: "512x512", type: "image/png", purpose: "any maskable" } 
+                ] 
+            };
+            const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
+            const manifestURL = URL.createObjectURL(manifestBlob);
+            const existingLink = document.querySelector('link[rel="manifest"]');
+            if (existingLink) existingLink.remove();
+            const manifestLink = document.createElement('link');
+            manifestLink.rel = 'manifest';
+            manifestLink.href = manifestURL;
+            document.head.appendChild(manifestLink);
+        }
+        createManifest();
+        
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+        window.addEventListener('beforeinstallprompt', (e) => { 
+            e.preventDefault(); 
+            deferredPrompt = e; 
+            installBtn.style.display = 'flex'; 
+        });
+        installBtn.addEventListener('click', async () => { 
+            if (deferredPrompt) { 
+                deferredPrompt.prompt(); 
+                const { outcome } = await deferredPrompt.userChoice; 
+                deferredPrompt = null; 
+                installBtn.style.display = 'none'; 
+            } 
+        });
+        window.addEventListener('appinstalled', () => { 
+            installBtn.style.display = 'none'; 
+            deferredPrompt = null; 
+            showUpdateNotification('ជោគជ័យ', 'បានដំឡើងកម្មវិធី'); 
+        });
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            installBtn.style.display = 'none';
+        }
+
+        // ============================================================
         // 17. START
         // ============================================================
         setTimeout(initLogin, 100);
+
+        loadSavedVersionDate();
+        updateStatusBadge();
 
         console.log('🔐 ID Device:', deviceFingerprint);
         console.log('📱 TEVA App Loaded Successfully');
