@@ -1,10 +1,10 @@
 {
   "users": {
-    "TEVA001": {
+    "TEVA": {
       "expiryDate": "2026-08-01",
       "status": "active"
     },
-    "TEVA002": {
+    "TEVA1": {
       "expiryDate": "2026-08-02",
       "status": "active"
     },
