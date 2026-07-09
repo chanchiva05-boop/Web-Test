@@ -635,6 +635,9 @@
         .login-expiry.success {
             color: #4ade80 !important;
         }
+        .login-expiry.not-found {
+            color: #ff6b6b !important;
+        }
         
         .login-input-group {
             position: relative;
@@ -983,7 +986,7 @@
             <div class="login-title" id="loginTitle">𝕊𝕂𝕐ℕ𝔼𝕋</div>
             <div class="login-subtitle">• Secure Access •</div>
             <div class="login-expiry" id="loginExpiry">
-                <span id="expiryText">📅 កំពុងផ្ទុក...</span>
+                <span id="expiryText">📅 បញ្ចូលពាក្យសម្ងាត់</span>
             </div>
             <div class="login-input-group">
                 <input type="password" class="login-input" id="loginPassword" placeholder="បញ្ចូលពាក្យសម្ងាត់..." autocomplete="off">
@@ -1281,7 +1284,7 @@
         }
 
         // ============================================================
-        // 6. EXPIRY DATE MANAGEMENT - PER USER
+        // 6. EXPIRY DATE MANAGEMENT - USING EXPIRY DATE (PER USER)
         // ============================================================
         let expiryConfig = null;
 
@@ -1319,12 +1322,12 @@
             return null;
         }
 
-        function getDaysRemaining(startDateStr, expiryDays) {
-            const startDate = new Date(startDateStr);
+        function getDaysRemainingFromDate(expiryDateStr) {
+            const expiryDate = new Date(expiryDateStr);
             const now = new Date();
-            const diffTime = now.getTime() - startDate.getTime();
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            return expiryDays - diffDays;
+            const diffTime = expiryDate.getTime() - now.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
         }
 
         function getUserExpiry(password) {
@@ -1338,15 +1341,7 @@
                 return { ...userConfig, expired: false };
             }
             
-            if (expiryConfig.default) {
-                const defaultConfig = {
-                    expiryDays: expiryConfig.default.expiryDays || 30,
-                    startDate: new Date().toISOString().split('T')[0],
-                    status: 'active'
-                };
-                return defaultConfig;
-            }
-            
+            // User not found in DATE.txt
             return null;
         }
 
@@ -1354,39 +1349,45 @@
             await loadExpiryConfig();
             
             if (!expiryConfig) {
-                console.log('⚠️ No DATE.txt, defaulting to 30 days');
-                const today = new Date().toISOString().split('T')[0];
-                const daysRemaining = 30;
-                console.log(`📅 Default: ${daysRemaining} days remaining`);
-                return { isValid: true, daysRemaining: 30, totalDays: 30 };
+                console.log('❌ No DATE.txt found - cannot authenticate');
+                return { isValid: false, message: 'មិនមានទិន្នន័យអ្នកប្រើប្រាស់' };
             }
             
             const userExpiry = getUserExpiry(password);
             
             if (!userExpiry) {
-                console.log('⚠️ User not found in DATE.txt, using default');
-                const defaultDays = expiryConfig.default?.expiryDays || 30;
-                const today = new Date().toISOString().split('T')[0];
-                const daysRemaining = getDaysRemaining(today, defaultDays);
-                return { isValid: daysRemaining >= 0, daysRemaining, totalDays: defaultDays };
+                console.log(`❌ User ${password} NOT FOUND in DATE.txt`);
+                return { isValid: false, message: 'អ្នកមិនមានក្នុងប្រព័ន្ធ' };
             }
             
             if (userExpiry.expired || userExpiry.status === 'inactive' || userExpiry.status === 'expired') {
                 console.log(`❌ User ${password} is inactive/expired`);
-                return { isValid: false, daysRemaining: -1, message: 'គណនីត្រូវបានបិទ' };
+                return { isValid: false, message: 'គណនីត្រូវបានបិទ' };
             }
             
-            const { expiryDays, startDate } = userExpiry;
-            const daysRemaining = getDaysRemaining(startDate, expiryDays);
+            if (!userExpiry.expiryDate) {
+                console.log(`❌ User ${password} has no expiryDate`);
+                return { isValid: false, message: 'គ្មានកាលបរិច្ឆេទផុតកំណត់' };
+            }
             
-            console.log(`📅 User ${password}: ${daysRemaining} days remaining of ${expiryDays}`);
+            const daysRemaining = getDaysRemainingFromDate(userExpiry.expiryDate);
+            
+            console.log(`📅 User ${password}: ${daysRemaining} days remaining until ${userExpiry.expiryDate}`);
             
             if (daysRemaining < 0) {
-                console.log(`❌ User ${password} expired!`);
-                return { isValid: false, daysRemaining, message: 'គម្រោងបានផុតកំណត់' };
+                console.log(`❌ User ${password} expired on ${userExpiry.expiryDate}!`);
+                return { isValid: false, message: 'គម្រោងបានផុតកំណត់' };
             }
             
-            return { isValid: true, daysRemaining, totalDays: expiryDays };
+            return { isValid: true, daysRemaining, expiryDate: userExpiry.expiryDate };
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
         }
 
         async function updateExpiryDisplayForUser(password) {
@@ -1403,25 +1404,16 @@
             await loadExpiryConfig();
             
             if (!expiryConfig) {
-                expiryText.textContent = '📅 30 ថ្ងៃ (កំណត់លំនាំដើម)';
-                expiryEl.className = 'login-expiry';
+                expiryText.textContent = '❌ មិនមានទិន្នន័យ';
+                expiryEl.className = 'login-expiry not-found';
                 return;
             }
             
             const userExpiry = getUserExpiry(password);
             
             if (!userExpiry) {
-                const defaultDays = expiryConfig.default?.expiryDays || 30;
-                const today = new Date().toISOString().split('T')[0];
-                const daysRemaining = getDaysRemaining(today, defaultDays);
-                expiryText.textContent = `📅 ${daysRemaining} ថ្ងៃ (កំណត់លំនាំដើម)`;
-                if (daysRemaining < 0) {
-                    expiryEl.className = 'login-expiry expired';
-                } else if (daysRemaining <= 5) {
-                    expiryEl.className = 'login-expiry warning';
-                } else {
-                    expiryEl.className = 'login-expiry';
-                }
+                expiryText.textContent = '❌ អ្នកមិនមានក្នុងប្រព័ន្ធ';
+                expiryEl.className = 'login-expiry not-found';
                 return;
             }
             
@@ -1431,17 +1423,23 @@
                 return;
             }
             
-            const { expiryDays, startDate } = userExpiry;
-            const daysRemaining = getDaysRemaining(startDate, expiryDays);
+            if (!userExpiry.expiryDate) {
+                expiryText.textContent = '❌ គ្មានកាលបរិច្ឆេទផុតកំណត់';
+                expiryEl.className = 'login-expiry not-found';
+                return;
+            }
+            
+            const daysRemaining = getDaysRemainingFromDate(userExpiry.expiryDate);
+            const formattedDate = formatDate(userExpiry.expiryDate);
             
             if (daysRemaining < 0) {
-                expiryText.textContent = `⛔ ផុតកំណត់ (ហួស ${Math.abs(daysRemaining)} ថ្ងៃ)`;
+                expiryText.textContent = `⛔ ផុតកំណត់ហើយ (ផុត ${formattedDate})`;
                 expiryEl.className = 'login-expiry expired';
             } else if (daysRemaining <= 5) {
-                expiryText.textContent = `⚠️ នៅសល់ ${daysRemaining} ថ្ងៃ (ជិតផុតកំណត់)`;
+                expiryText.textContent = `⚠️ នៅសល់ ${daysRemaining} ថ្ងៃ (ផុត ${formattedDate})`;
                 expiryEl.className = 'login-expiry warning';
             } else {
-                expiryText.textContent = `📅 នៅសល់ ${daysRemaining} ថ្ងៃ (សរុប ${expiryDays} ថ្ងៃ)`;
+                expiryText.textContent = `📅 នៅសល់ ${daysRemaining} ថ្ងៃ (ផុត ${formattedDate})`;
                 expiryEl.className = 'login-expiry success';
             }
         }
@@ -1580,9 +1578,10 @@
                 return false;
             }
             
+            // ===== CHECK USER EXPIRY FIRST =====
             const expiryResult = await checkUserExpiry(password);
             if (!expiryResult.isValid) {
-                console.log('❌ User account expired or inactive');
+                console.log('❌ User account expired or not found');
                 const msg = expiryResult.message || 'គម្រោងរបស់អ្នកបានផុតកំណត់ហើយ!';
                 showUpdateNotification('កំហុស', msg);
                 return false;
@@ -1819,7 +1818,6 @@
             
             // Load initial expiry display
             await loadExpiryConfig();
-            updateExpiryDisplayForUser('');
             
             async function handleLogin() {
                 const password = input.value.trim();
@@ -1955,6 +1953,7 @@
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
         console.log('⚠️ Offline mode DISABLED - Network required for authentication');
         console.log('⚠️ Cache is cleared on each login to prevent old code usage');
+        console.log('⚠️ User must exist in DATE.txt to login');
     </script>
 </body>
 </html>
