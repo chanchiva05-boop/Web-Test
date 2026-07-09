@@ -1,6 +1,6 @@
 {
   "users": {
-    "TEVA123": {
+    "TEVA": {
       "expiryDays": 30,
       "startDate": "2026-07-01",
       "status": "active"
