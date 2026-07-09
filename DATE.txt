@@ -4,8 +4,8 @@
       "expiryDate": "2026-08-01",
       "status": "active"
     },
-    "USER001": {
-      "expiryDate": "2026-08-01",
+    "TEVA1": {
+      "expiryDate": "2026-08-03",
       "status": "active"
     },
     "USER002": {
