@@ -1,7 +1,7 @@
 {
   "users": {
     "TEVA": {
-      "expiryDate": "2026-07-30",
+      "expiryDate": "2026-07-10",
       "status": "active"
     },
     "TEVA1": {
