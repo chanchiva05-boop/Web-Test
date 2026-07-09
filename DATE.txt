@@ -1,39 +1,104 @@
 {
   "users": {
     "TEVA": {
-      "expiryDays": 7,
+      "expiryDays": 9,
       "startDate": "2026-07-01",
       "status": "active"
     },
-    "TEVA456": {
-      "expiryDays": 15,
+    "User": {
+      "expiryDays": 30,
+      "startDate": "2026-07-02",
+      "status": "active"
+    },
+    "User": {
+      "expiryDays": 30,
+      "startDate": "2026-07-03",
+      "status": "active"
+    },
+    "User": {
+      "expiryDays": 30,
+      "startDate": "2026-07-04",
+      "status": "active"
+    },
+    "User": {
+      "expiryDays": 30,
       "startDate": "2026-07-05",
       "status": "active"
     },
-    "TEVA789": {
-      "expiryDays": 7,
+    "User": {
+      "expiryDays": 15,
+      "startDate": "2026-07-06",
+      "status": "active"
+    },
+    "User": {
+      "expiryDays": 15,
+      "startDate": "2026-07-07",
+      "status": "active"
+    },
+    "User": {
+      "expiryDays": 15,
       "startDate": "2026-07-08",
       "status": "active"
     },
-    "DEMO2026": {
-      "expiryDays": 7,
+    "User": {
+      "expiryDays": 15,
       "startDate": "2026-07-09",
       "status": "active"
     },
-    "ADMIN999": {
-      "expiryDays": 36500,
-      "startDate": "2026-01-01",
+    "User": {
+      "expiryDays": 15,
+      "startDate": "2026-07-10",
       "status": "active"
     },
-    "EXPIRED123": {
-      "expiryDays": 30,
-      "startDate": "2026-06-01",
-      "status": "expired"
-    },
-    "INACTIVE456": {
-      "expiryDays": 30,
+    "User": {
+      "expiryDays": 7,
       "startDate": "2026-07-01",
-      "status": "inactive"
+      "status": "active"
+    },
+    "User": {
+      "expiryDays": 7,
+      "startDate": "2026-07-02",
+      "status": "active"
+    },
+    "User": {
+      "expiryDays": 7,
+      "startDate": "2026-07-03",
+      "status": "active"
+    },
+    "User": {
+      "expiryDays": 7,
+      "startDate": "2026-07-04",
+      "status": "active"
+    },
+    "User": {
+      "expiryDays": 7,
+      "startDate": "2026-07-05",
+      "status": "active"
+    },
+    "User": {
+      "expiryDays": 60,
+      "startDate": "2026-07-01",
+      "status": "active"
+    },
+    "User": {
+      "expiryDays": 60,
+      "startDate": "2026-07-09",
+      "status": "active"
+    },
+    "User": {
+      "expiryDays": 90,
+      "startDate": "2026-07-01",
+      "status": "active"
+    },
+    "User": {
+      "expiryDays": 90,
+      "startDate": "2026-07-09",
+      "status": "active"
+    },
+    "User": {
+      "expiryDays": 365,
+      "startDate": "2026-07-09",
+      "status": "active"
     }
   },
   "default": {
