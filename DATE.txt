@@ -1,0 +1,42 @@
+{
+  "users": {
+    "TEVA123": {
+      "expiryDays": 30,
+      "startDate": "2026-07-01",
+      "status": "active"
+    },
+    "TEVA456": {
+      "expiryDays": 15,
+      "startDate": "2026-07-05",
+      "status": "active"
+    },
+    "TEVA789": {
+      "expiryDays": 7,
+      "startDate": "2026-07-08",
+      "status": "active"
+    },
+    "DEMO2026": {
+      "expiryDays": 7,
+      "startDate": "2026-07-09",
+      "status": "active"
+    },
+    "ADMIN999": {
+      "expiryDays": 36500,
+      "startDate": "2026-01-01",
+      "status": "active"
+    },
+    "EXPIRED123": {
+      "expiryDays": 30,
+      "startDate": "2026-06-01",
+      "status": "expired"
+    },
+    "INACTIVE456": {
+      "expiryDays": 30,
+      "startDate": "2026-07-01",
+      "status": "inactive"
+    }
+  },
+  "default": {
+    "expiryDays": 30
+  }
+}
