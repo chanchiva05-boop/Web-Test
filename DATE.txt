@@ -1,107 +1,84 @@
 {
   "users": {
-    "TEVA": {
-      "expiryDays": 9,
-      "startDate": "2026-07-01",
+    "TEVA001": {
+      "expiryDate": "2026-08-01",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 30,
-      "startDate": "2026-07-02",
+    "TEVA002": {
+      "expiryDate": "2026-08-02",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 30,
-      "startDate": "2026-07-03",
+    "TEVA003": {
+      "expiryDate": "2026-08-03",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 30,
-      "startDate": "2026-07-04",
+    "TEVA004": {
+      "expiryDate": "2026-08-04",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 30,
-      "startDate": "2026-07-05",
+    "TEVA005": {
+      "expiryDate": "2026-08-05",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 15,
-      "startDate": "2026-07-06",
+    "TEVA006": {
+      "expiryDate": "2026-07-24",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 15,
-      "startDate": "2026-07-07",
+    "TEVA007": {
+      "expiryDate": "2026-07-25",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 15,
-      "startDate": "2026-07-08",
+    "TEVA008": {
+      "expiryDate": "2026-07-26",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 15,
-      "startDate": "2026-07-09",
+    "TEVA009": {
+      "expiryDate": "2026-07-27",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 15,
-      "startDate": "2026-07-10",
+    "TEVA010": {
+      "expiryDate": "2026-07-28",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 7,
-      "startDate": "2026-07-01",
+    "TEVA011": {
+      "expiryDate": "2026-07-16",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 7,
-      "startDate": "2026-07-02",
+    "TEVA012": {
+      "expiryDate": "2026-07-17",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 7,
-      "startDate": "2026-07-03",
+    "TEVA013": {
+      "expiryDate": "2026-07-18",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 7,
-      "startDate": "2026-07-04",
+    "TEVA014": {
+      "expiryDate": "2026-07-19",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 7,
-      "startDate": "2026-07-05",
+    "TEVA015": {
+      "expiryDate": "2026-07-20",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 60,
-      "startDate": "2026-07-01",
+    "TEVA016": {
+      "expiryDate": "2026-09-01",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 60,
-      "startDate": "2026-07-09",
+    "TEVA017": {
+      "expiryDate": "2026-09-09",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 90,
-      "startDate": "2026-07-01",
+    "TEVA018": {
+      "expiryDate": "2026-10-01",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 90,
-      "startDate": "2026-07-09",
+    "TEVA019": {
+      "expiryDate": "2026-10-09",
       "status": "active"
     },
-    "User": {
-      "expiryDays": 365,
-      "startDate": "2026-07-09",
+    "TEVA020": {
+      "expiryDate": "2027-07-09",
       "status": "active"
     }
-  },
-  "default": {
-    "expiryDays": 30
   }
 }
