@@ -11,7 +11,7 @@
     
     <meta name="theme-color" content="#0a0a2a">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+   meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="TEVA">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="TEVA">
@@ -632,17 +632,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
-            gap: 4px;
             border: 1px solid rgba(212, 175, 55, 0.08);
         }
-        
-        .login-expiry .expiry-user {
-            font-size: 11px;
-            color: rgba(255,255,255,0.3);
-            letter-spacing: 1px;
-        }
-        
         .login-expiry.warning {
             color: #fbbf24 !important;
             background: rgba(251, 191, 36, 0.1);
@@ -1016,9 +1007,6 @@
                 min-height: 38px;
                 padding: 8px 10px;
             }
-            .login-expiry .expiry-user {
-                font-size: 10px;
-            }
         }
         
         @supports (display: standalone) {
@@ -1038,7 +1026,6 @@
             <div class="login-subtitle">• Secure Access •</div>
             <div class="login-expiry" id="loginExpiry">
                 <span id="expiryText">⏳ កំពុងផ្ទុក...</span>
-                <span class="expiry-user" id="expiryUser"></span>
             </div>
             <div class="login-input-group">
                 <input type="password" class="login-input" id="loginPassword" placeholder="បញ្ចូលពាក្យសម្ងាត់..." autocomplete="off">
@@ -1339,7 +1326,7 @@
         // 6. EXPIRY DATE MANAGEMENT - AUTO SHOW WITHOUT PASSWORD
         // ============================================================
         let expiryConfig = null;
-        let currentDeviceUser = null; // User detected by fingerprint
+        let currentDeviceUser = null;
 
         async function loadExpiryConfig() {
             if (!navigator.onLine) {
@@ -1430,7 +1417,6 @@
         // ===== AUTO SHOW EXPIRY WITHOUT PASSWORD =====
         async function autoShowExpiry() {
             const expiryText = document.getElementById('expiryText');
-            const expiryUser = document.getElementById('expiryUser');
             const expiryEl = document.getElementById('loginExpiry');
             
             if (!expiryText) return;
@@ -1452,7 +1438,6 @@
             
             if (!detectedUser) {
                 expiryText.textContent = '👤 មិនស្គាល់ឧបករណ៍នេះ';
-                expiryUser.textContent = 'សូមបញ្ចូលពាក្យសម្ងាត់ដើម្បីចុះឈ្មោះ';
                 expiryEl.className = 'login-expiry not-found';
                 return;
             }
@@ -1463,21 +1448,18 @@
             
             if (!userExpiry) {
                 expiryText.textContent = '❌ អ្នកមិនមានក្នុងប្រព័ន្ធ';
-                expiryUser.textContent = `👤 ${detectedUser}`;
                 expiryEl.className = 'login-expiry not-found';
                 return;
             }
             
             if (userExpiry.status === 'inactive' || userExpiry.status === 'expired' || userExpiry.expired) {
                 expiryText.textContent = '⛔ គណនីត្រូវបានបិទ';
-                expiryUser.textContent = `👤 ${detectedUser}`;
                 expiryEl.className = 'login-expiry expired';
                 return;
             }
             
             if (!userExpiry.expiryDate) {
                 expiryText.textContent = '❌ គ្មានកាលបរិច្ឆេទផុតកំណត់';
-                expiryUser.textContent = `👤 ${detectedUser}`;
                 expiryEl.className = 'login-expiry not-found';
                 return;
             }
@@ -1485,7 +1467,7 @@
             const daysRemaining = getDaysRemainingFromDate(userExpiry.expiryDate);
             const formattedDate = formatDate(userExpiry.expiryDate);
             
-            // Show expiry info
+            // Show only expiry info (no username)
             if (daysRemaining < 0) {
                 expiryText.textContent = `⛔ ផុតកំណត់ (${formattedDate})`;
                 expiryEl.className = 'login-expiry expired';
@@ -1506,7 +1488,6 @@
                 expiryEl.className = 'login-expiry success';
             }
             
-            expiryUser.textContent = `👤 ${detectedUser}`;
             console.log(`✅ Auto showed expiry for user: ${detectedUser}`);
         }
 
@@ -2013,7 +1994,6 @@
         console.log('⚠️ Offline mode DISABLED - Network required for authentication');
         console.log('⚠️ Cache is cleared on each login to prevent old code usage');
         console.log('✅ AUTO-SHOW EXPIRY: Date displayed automatically without password!');
-        console.log('✅ Device fingerprint used to detect user automatically');
     </script>
 </body>
 </html>
