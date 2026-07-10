@@ -11,7 +11,7 @@
     
     <meta name="theme-color" content="#0a0a2a">
     <meta name="apple-mobile-web-app-capable" content="yes">
-   meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="TEVA">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="TEVA">
@@ -1038,7 +1038,7 @@
                 <div class="spinner"></div>
                 <span>កំពុងផ្ទៀងផ្ទាត់...</span>
             </div>
-            <div class="login-error" id="loginError">ពាក្យសម្ងាត់មិនត្រឹមត្រូវ</div>
+            <div class="login-error" id="loginError"></div>
             <div class="login-device-info">⚡ ពាក្យសម្ងាត់របស់អ្នកមិនអាចប្រើនៅលើឧបករណ៍ផ្សេងបានទេ 🤫</div>
             <div class="login-shield">🛡️ SECURE DEVICE LOCK</div>
         </div>
@@ -1323,7 +1323,7 @@
         }
 
         // ============================================================
-        // 6. EXPIRY DATE MANAGEMENT - AUTO SHOW WITHOUT PASSWORD
+        // 6. EXPIRY DATE MANAGEMENT
         // ============================================================
         let expiryConfig = null;
         let currentDeviceUser = null;
@@ -1384,7 +1384,6 @@
             return null;
         }
 
-        // ===== FIND USER BY DEVICE FINGERPRINT =====
         async function findUserByFingerprint() {
             const toorData = await loadTOOR();
             if (!toorData) {
@@ -1414,6 +1413,44 @@
             return `${day}/${month}/${year}`;
         }
 
+        // ===== CHECK IF USER IS EXPIRED =====
+        async function isUserExpired(password) {
+            await loadExpiryConfig();
+            
+            if (!expiryConfig) {
+                console.log('❌ No DATE.txt found');
+                return { expired: true, message: 'មិនមានទិន្នន័យអ្នកប្រើប្រាស់' };
+            }
+            
+            const userExpiry = getUserExpiry(password);
+            
+            if (!userExpiry) {
+                console.log(`❌ User ${password} NOT FOUND in DATE.txt`);
+                return { expired: true, message: 'អ្នកមិនមានក្នុងប្រព័ន្ធ' };
+            }
+            
+            if (userExpiry.status === 'inactive' || userExpiry.status === 'expired' || userExpiry.expired) {
+                console.log(`❌ User ${password} is inactive/expired`);
+                return { expired: true, message: 'គណនីត្រូវបានបិទ' };
+            }
+            
+            if (!userExpiry.expiryDate) {
+                console.log(`❌ User ${password} has no expiryDate`);
+                return { expired: true, message: 'គ្មានកាលបរិច្ឆេទផុតកំណត់' };
+            }
+            
+            const daysRemaining = getDaysRemainingFromDate(userExpiry.expiryDate);
+            
+            console.log(`📅 User ${password}: ${daysRemaining} days remaining until ${userExpiry.expiryDate}`);
+            
+            if (daysRemaining < 0) {
+                console.log(`❌ User ${password} expired on ${userExpiry.expiryDate}!`);
+                return { expired: true, message: 'គម្រោងបានផុតកំណត់' };
+            }
+            
+            return { expired: false, daysRemaining, expiryDate: userExpiry.expiryDate };
+        }
+
         // ===== AUTO SHOW EXPIRY WITHOUT PASSWORD =====
         async function autoShowExpiry() {
             const expiryText = document.getElementById('expiryText');
@@ -1424,7 +1461,6 @@
             expiryText.textContent = '⏳ កំពុងផ្ទុក...';
             expiryEl.className = 'login-expiry loading';
             
-            // Load config
             await loadExpiryConfig();
             
             if (!expiryConfig) {
@@ -1433,7 +1469,6 @@
                 return;
             }
             
-            // Find user by fingerprint
             const detectedUser = await findUserByFingerprint();
             
             if (!detectedUser) {
@@ -1467,7 +1502,6 @@
             const daysRemaining = getDaysRemainingFromDate(userExpiry.expiryDate);
             const formattedDate = formatDate(userExpiry.expiryDate);
             
-            // Show only expiry info (no username)
             if (daysRemaining < 0) {
                 expiryText.textContent = `⛔ ផុតកំណត់ (${formattedDate})`;
                 expiryEl.className = 'login-expiry expired';
@@ -1492,7 +1526,7 @@
         }
 
         // ============================================================
-        // 7. CORE FUNCTION: OPEN V2BOX WITH DEEP LINK
+        // 7. CORE FUNCTION: OPEN V2BOX
         // ============================================================
         function openV2Box(type) {
             console.log(`🔍 Checking access for ${type}...`);
@@ -1616,21 +1650,27 @@
         }
 
         // ============================================================
-        // 10. CHECK LOGIN
+        // 10. CHECK LOGIN - FIXED: CHECK EXPIRY BEFORE LOGIN
         // ============================================================
         async function checkLogin(password) {
             if (!navigator.onLine) {
                 console.log('❌ Offline - cannot authenticate');
                 showUpdateNotification('កំហុស', 'ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់');
-                return false;
+                return { success: false, message: 'ត្រូវការអ៊ីនធឺណិត' };
             }
             
-            // ===== Check if user exists =====
+            // ===== CHECK EXPIRY FIRST =====
+            const expiryCheck = await isUserExpired(password);
+            if (expiryCheck.expired) {
+                console.log('❌ User account expired');
+                return { success: false, message: expiryCheck.message || 'គម្រោងបានផុតកំណត់' };
+            }
+            
+            // ===== CHECK USER IN TOOR.TXT =====
             const toorData = await loadTOOR();
             if (!toorData) {
                 console.log('❌ Failed to load TOOR data');
-                showUpdateNotification('កំហុស', 'មិនអាចផ្ទុកទិន្នន័យបាន');
-                return false;
+                return { success: false, message: 'មិនអាចផ្ទុកទិន្នន័យបាន' };
             }
             
             const currentFP = deviceFingerprint;
@@ -1638,7 +1678,6 @@
             console.log('🔍 Checking login...');
             console.log('📋 Password entered:', password);
             console.log('📋 Current FP:', currentFP);
-            console.log('📋 TOOR Data:', toorData);
             
             let matchedEntry = null;
             for (let entry of toorData) {
@@ -1650,7 +1689,7 @@
             
             if (!matchedEntry) {
                 console.log('❌ Password not found in TOOR data');
-                return false;
+                return { success: false, message: 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវ' };
             }
             
             console.log('✅ Password matched!');
@@ -1667,25 +1706,23 @@
                     if (response.ok) {
                         console.log('✅ Fingerprint saved to server');
                         currentDeviceUser = password;
-                        return true;
+                        return { success: true };
                     }
                 } catch(e) {
                     console.log('⚠️ Failed to save fingerprint to server');
                 }
                 currentDeviceUser = password;
-                return true;
+                return { success: true };
             }
             
             if (matchedEntry.fingerprint === currentFP) {
                 console.log('✅ Fingerprint matched!');
                 currentDeviceUser = password;
-                return true;
+                return { success: true };
             }
             
             console.log('❌ Fingerprint mismatch!');
-            console.log(`📋 Saved FP: ${matchedEntry.fingerprint}`);
-            console.log(`📋 Current FP: ${currentFP}`);
-            return false;
+            return { success: false, message: 'ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត' };
         }
 
         // ============================================================
@@ -1855,14 +1892,26 @@
             // ===== AUTO SHOW EXPIRY WITHOUT PASSWORD =====
             await autoShowExpiry();
             
-            // ===== FOCUS: Clear error message when user starts typing =====
+            // ===== CLEAR ERROR ON FOCUS =====
             input.addEventListener('focus', function() {
                 error.classList.remove('show');
+                error.textContent = '';
+            });
+            
+            // ===== AUTO CHECK EXPIRY ON INPUT =====
+            input.addEventListener('input', function() {
+                // Clear error when typing
+                error.classList.remove('show');
+                error.textContent = '';
             });
             
             async function handleLogin() {
                 const password = input.value.trim();
                 console.log('🔑 Login attempt with password:', password);
+                
+                // Clear previous error
+                error.classList.remove('show');
+                error.textContent = '';
                 
                 if (!password) {
                     error.textContent = 'សូមបញ្ចូលពាក្យសម្ងាត់';
@@ -1878,13 +1927,12 @@
                 
                 loading.classList.add('active');
                 btn.disabled = true;
-                error.classList.remove('show');
                 
                 try {
-                    const success = await checkLogin(password);
-                    console.log('📋 Login result:', success);
+                    const result = await checkLogin(password);
+                    console.log('📋 Login result:', result);
                     
-                    if (success) {
+                    if (result.success) {
                         const codes = await loadUserCodes(password);
                         if (codes) {
                             isLoggedIn = true;
@@ -1895,13 +1943,12 @@
                             
                             showUpdateNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
                             console.log('✅ Login successful!');
-                            console.log('📋 User exists in:', userExists);
                         } else {
                             error.textContent = '❌ មិនអាចផ្ទុកទិន្នន័យបាន';
                             error.classList.add('show');
                         }
                     } else {
-                        error.textContent = '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ';
+                        error.textContent = result.message || '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ';
                         error.classList.add('show');
                         input.value = '';
                         input.focus();
@@ -1992,8 +2039,8 @@
         console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
         console.log('⚠️ Offline mode DISABLED - Network required for authentication');
-        console.log('⚠️ Cache is cleared on each login to prevent old code usage');
-        console.log('✅ AUTO-SHOW EXPIRY: Date displayed automatically without password!');
+        console.log('✅ EXPIRY CHECK: User cannot login if expired!');
+        console.log('✅ ERROR DISPLAY: Shows error message when password is wrong!');
     </script>
 </body>
 </html>
