@@ -623,16 +623,26 @@
             color: rgba(212, 175, 55, 0.7);
             margin-bottom: 20px;
             letter-spacing: 0.5px;
-            min-height: 30px;
+            min-height: 44px;
             transition: all 0.3s ease;
-            padding: 4px 8px;
+            padding: 10px 12px;
             border-radius: 12px;
             background: rgba(255,255,255,0.03);
             font-weight: 500;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-direction: column;
+            gap: 4px;
+            border: 1px solid rgba(212, 175, 55, 0.08);
         }
+        
+        .login-expiry .expiry-user {
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 1px;
+        }
+        
         .login-expiry.warning {
             color: #fbbf24 !important;
             background: rgba(251, 191, 36, 0.1);
@@ -659,11 +669,6 @@
             background: rgba(255, 68, 68, 0.12);
             border: 1px solid rgba(255, 68, 68, 0.25);
             font-weight: 700;
-        }
-        .login-expiry.typing {
-            color: rgba(212, 175, 55, 0.5);
-            background: rgba(255,255,255,0.02);
-            border: 1px dashed rgba(212, 175, 55, 0.15);
         }
         .login-expiry.loading {
             color: rgba(212, 175, 55, 0.6);
@@ -1008,8 +1013,11 @@
             }
             .login-expiry {
                 font-size: 12px;
-                min-height: 26px;
-                padding: 3px 6px;
+                min-height: 38px;
+                padding: 8px 10px;
+            }
+            .login-expiry .expiry-user {
+                font-size: 10px;
             }
         }
         
@@ -1029,7 +1037,8 @@
             <div class="login-title" id="loginTitle">𝕊𝕂𝕐ℕ𝔼𝕋</div>
             <div class="login-subtitle">• Secure Access •</div>
             <div class="login-expiry" id="loginExpiry">
-                <span id="expiryText">📝 ចាប់ផ្តើមវាយពាក្យសម្ងាត់...</span>
+                <span id="expiryText">⏳ កំពុងផ្ទុក...</span>
+                <span class="expiry-user" id="expiryUser"></span>
             </div>
             <div class="login-input-group">
                 <input type="password" class="login-input" id="loginPassword" placeholder="បញ្ចូលពាក្យសម្ងាត់..." autocomplete="off">
@@ -1327,12 +1336,10 @@
         }
 
         // ============================================================
-        // 6. EXPIRY DATE MANAGEMENT - AUTO DISPLAY ON TYPING
+        // 6. EXPIRY DATE MANAGEMENT - AUTO SHOW WITHOUT PASSWORD
         // ============================================================
         let expiryConfig = null;
-        let verifiedPassword = null;
-        let lastCheckedPassword = '';
-        let autoUpdateTimeout = null;
+        let currentDeviceUser = null; // User detected by fingerprint
 
         async function loadExpiryConfig() {
             if (!navigator.onLine) {
@@ -1390,90 +1397,26 @@
             return null;
         }
 
-        // ===== VERIFY DEVICE FOR USER =====
-        async function verifyDeviceForUser(password) {
-            if (verifiedPassword === password) {
-                console.log('✅ Already verified for this user');
-                return true;
-            }
-            
+        // ===== FIND USER BY DEVICE FINGERPRINT =====
+        async function findUserByFingerprint() {
             const toorData = await loadTOOR();
             if (!toorData) {
-                console.log('❌ Failed to load TOOR data for verification');
-                return false;
+                console.log('❌ Failed to load TOOR data');
+                return null;
             }
             
             const currentFP = getDeviceFingerprint();
+            console.log('🔍 Searching for user with FP:', currentFP);
             
-            console.log('🔍 Verifying device for user:', password);
-            console.log('📋 Current FP:', currentFP);
-            
-            let matchedEntry = null;
             for (let entry of toorData) {
-                if (entry.password === password) {
-                    matchedEntry = entry;
-                    break;
+                if (entry.fingerprint && entry.fingerprint === currentFP) {
+                    console.log('✅ Found user by fingerprint:', entry.password);
+                    return entry.password;
                 }
             }
             
-            if (!matchedEntry) {
-                console.log('❌ User not found in TOOR.txt');
-                return false;
-            }
-            
-            if (!matchedEntry.fingerprint) {
-                console.log('🔐 No fingerprint saved, allowing access');
-                verifiedPassword = password;
-                return true;
-            }
-            
-            if (matchedEntry.fingerprint === currentFP) {
-                console.log('✅ Device fingerprint matched!');
-                verifiedPassword = password;
-                return true;
-            }
-            
-            console.log('❌ Device fingerprint mismatch!');
-            console.log(`📋 Saved FP: ${matchedEntry.fingerprint}`);
-            console.log(`📋 Current FP: ${currentFP}`);
-            return false;
-        }
-
-        async function checkUserExpiry(password) {
-            await loadExpiryConfig();
-            
-            if (!expiryConfig) {
-                console.log('❌ No DATE.txt found - cannot authenticate');
-                return { isValid: false, message: 'មិនមានទិន្នន័យអ្នកប្រើប្រាស់' };
-            }
-            
-            const userExpiry = getUserExpiry(password);
-            
-            if (!userExpiry) {
-                console.log(`❌ User ${password} NOT FOUND in DATE.txt`);
-                return { isValid: false, message: 'អ្នកមិនមានក្នុងប្រព័ន្ធ' };
-            }
-            
-            if (userExpiry.expired || userExpiry.status === 'inactive' || userExpiry.status === 'expired') {
-                console.log(`❌ User ${password} is inactive/expired`);
-                return { isValid: false, message: 'គណនីត្រូវបានបិទ' };
-            }
-            
-            if (!userExpiry.expiryDate) {
-                console.log(`❌ User ${password} has no expiryDate`);
-                return { isValid: false, message: 'គ្មានកាលបរិច្ឆេទផុតកំណត់' };
-            }
-            
-            const daysRemaining = getDaysRemainingFromDate(userExpiry.expiryDate);
-            
-            console.log(`📅 User ${password}: ${daysRemaining} days remaining until ${userExpiry.expiryDate}`);
-            
-            if (daysRemaining < 0) {
-                console.log(`❌ User ${password} expired on ${userExpiry.expiryDate}!`);
-                return { isValid: false, message: 'គម្រោងបានផុតកំណត់' };
-            }
-            
-            return { isValid: true, daysRemaining, expiryDate: userExpiry.expiryDate };
+            console.log('❌ No user found with this fingerprint');
+            return null;
         }
 
         function formatDate(dateStr) {
@@ -1484,109 +1427,87 @@
             return `${day}/${month}/${year}`;
         }
 
-        // ===== AUTO UPDATE EXPIRY DISPLAY - CALLED ON EVERY KEY PRESS =====
-        async function updateExpiryDisplayForUser(password) {
+        // ===== AUTO SHOW EXPIRY WITHOUT PASSWORD =====
+        async function autoShowExpiry() {
             const expiryText = document.getElementById('expiryText');
+            const expiryUser = document.getElementById('expiryUser');
             const expiryEl = document.getElementById('loginExpiry');
+            
             if (!expiryText) return;
             
-            // Clear previous timeout
-            if (autoUpdateTimeout) {
-                clearTimeout(autoUpdateTimeout);
-            }
-            
-            // Show typing indicator
-            if (!password || password.length === 0) {
-                expiryText.textContent = '📝 ចាប់ផ្តើមវាយពាក្យសម្ងាត់...';
-                expiryEl.className = 'login-expiry typing';
-                return;
-            }
-            
-            if (password.length < 4) {
-                expiryText.textContent = `🔑 វាយបន្ត (${password.length}/4+)`;
-                expiryEl.className = 'login-expiry typing';
-                return;
-            }
-            
-            // Show loading when checking
-            expiryText.textContent = '⏳ កំពុងផ្ទៀងផ្ទាត់...';
+            expiryText.textContent = '⏳ កំពុងផ្ទុក...';
             expiryEl.className = 'login-expiry loading';
             
-            // Auto update after 400ms delay (to prevent too many requests)
-            autoUpdateTimeout = setTimeout(async () => {
-                try {
-                    // ===== FIRST: Verify device ownership =====
-                    const isVerified = await verifyDeviceForUser(password);
-                    
-                    if (!isVerified) {
-                        expiryText.textContent = '🔒 ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត';
-                        expiryEl.className = 'login-expiry denied';
-                        console.log(`🔒 Device not verified for user: ${password}`);
-                        return;
-                    }
-                    
-                    // ===== SECOND: Check expiry =====
-                    await loadExpiryConfig();
-                    
-                    if (!expiryConfig) {
-                        expiryText.textContent = '❌ មិនមានទិន្នន័យ';
-                        expiryEl.className = 'login-expiry not-found';
-                        return;
-                    }
-                    
-                    const userExpiry = getUserExpiry(password);
-                    
-                    if (!userExpiry) {
-                        expiryText.textContent = '❌ អ្នកមិនមានក្នុងប្រព័ន្ធ';
-                        expiryEl.className = 'login-expiry not-found';
-                        return;
-                    }
-                    
-                    if (userExpiry.status === 'inactive' || userExpiry.status === 'expired' || userExpiry.expired) {
-                        expiryText.textContent = '⛔ គណនីត្រូវបានបិទ';
-                        expiryEl.className = 'login-expiry expired';
-                        return;
-                    }
-                    
-                    if (!userExpiry.expiryDate) {
-                        expiryText.textContent = '❌ គ្មានកាលបរិច្ឆេទផុតកំណត់';
-                        expiryEl.className = 'login-expiry not-found';
-                        return;
-                    }
-                    
-                    const daysRemaining = getDaysRemainingFromDate(userExpiry.expiryDate);
-                    const formattedDate = formatDate(userExpiry.expiryDate);
-                    
-                    // Show expiry info with icon based on status
-                    if (daysRemaining < 0) {
-                        expiryText.textContent = `⛔ ផុតកំណត់ (${formattedDate})`;
-                        expiryEl.className = 'login-expiry expired';
-                    } else if (daysRemaining === 0) {
-                        expiryText.textContent = `⚠️ ផុតកំណត់ថ្ងៃនេះ (${formattedDate})`;
-                        expiryEl.className = 'login-expiry warning';
-                    } else if (daysRemaining <= 3) {
-                        expiryText.textContent = `⚠️ នៅសល់ ${daysRemaining} ថ្ងៃ (${formattedDate})`;
-                        expiryEl.className = 'login-expiry warning';
-                    } else if (daysRemaining <= 7) {
-                        expiryText.textContent = `📅 នៅសល់ ${daysRemaining} ថ្ងៃ (${formattedDate})`;
-                        expiryEl.className = 'login-expiry warning';
-                    } else if (daysRemaining <= 15) {
-                        expiryText.textContent = `📅 នៅសល់ ${daysRemaining} ថ្ងៃ (${formattedDate})`;
-                        expiryEl.className = 'login-expiry success';
-                    } else {
-                        expiryText.textContent = `📅 នៅសល់ ${daysRemaining} ថ្ងៃ (${formattedDate})`;
-                        expiryEl.className = 'login-expiry success';
-                    }
-                    
-                    // Update last checked password
-                    lastCheckedPassword = password;
-                    
-                } catch (error) {
-                    console.error('❌ Error updating expiry display:', error);
-                    expiryText.textContent = '⚠️ មានបញ្ហាក្នុងការផ្ទៀងផ្ទាត់';
-                    expiryEl.className = 'login-expiry not-found';
-                }
-            }, 400); // 400ms delay after user stops typing
+            // Load config
+            await loadExpiryConfig();
+            
+            if (!expiryConfig) {
+                expiryText.textContent = '❌ មិនមានទិន្នន័យ';
+                expiryEl.className = 'login-expiry not-found';
+                return;
+            }
+            
+            // Find user by fingerprint
+            const detectedUser = await findUserByFingerprint();
+            
+            if (!detectedUser) {
+                expiryText.textContent = '👤 មិនស្គាល់ឧបករណ៍នេះ';
+                expiryUser.textContent = 'សូមបញ្ចូលពាក្យសម្ងាត់ដើម្បីចុះឈ្មោះ';
+                expiryEl.className = 'login-expiry not-found';
+                return;
+            }
+            
+            currentDeviceUser = detectedUser;
+            
+            const userExpiry = getUserExpiry(detectedUser);
+            
+            if (!userExpiry) {
+                expiryText.textContent = '❌ អ្នកមិនមានក្នុងប្រព័ន្ធ';
+                expiryUser.textContent = `👤 ${detectedUser}`;
+                expiryEl.className = 'login-expiry not-found';
+                return;
+            }
+            
+            if (userExpiry.status === 'inactive' || userExpiry.status === 'expired' || userExpiry.expired) {
+                expiryText.textContent = '⛔ គណនីត្រូវបានបិទ';
+                expiryUser.textContent = `👤 ${detectedUser}`;
+                expiryEl.className = 'login-expiry expired';
+                return;
+            }
+            
+            if (!userExpiry.expiryDate) {
+                expiryText.textContent = '❌ គ្មានកាលបរិច្ឆេទផុតកំណត់';
+                expiryUser.textContent = `👤 ${detectedUser}`;
+                expiryEl.className = 'login-expiry not-found';
+                return;
+            }
+            
+            const daysRemaining = getDaysRemainingFromDate(userExpiry.expiryDate);
+            const formattedDate = formatDate(userExpiry.expiryDate);
+            
+            // Show expiry info
+            if (daysRemaining < 0) {
+                expiryText.textContent = `⛔ ផុតកំណត់ (${formattedDate})`;
+                expiryEl.className = 'login-expiry expired';
+            } else if (daysRemaining === 0) {
+                expiryText.textContent = `⚠️ ផុតកំណត់ថ្ងៃនេះ (${formattedDate})`;
+                expiryEl.className = 'login-expiry warning';
+            } else if (daysRemaining <= 3) {
+                expiryText.textContent = `⚠️ នៅសល់ ${daysRemaining} ថ្ងៃ (${formattedDate})`;
+                expiryEl.className = 'login-expiry warning';
+            } else if (daysRemaining <= 7) {
+                expiryText.textContent = `📅 នៅសល់ ${daysRemaining} ថ្ងៃ (${formattedDate})`;
+                expiryEl.className = 'login-expiry warning';
+            } else if (daysRemaining <= 15) {
+                expiryText.textContent = `📅 នៅសល់ ${daysRemaining} ថ្ងៃ (${formattedDate})`;
+                expiryEl.className = 'login-expiry success';
+            } else {
+                expiryText.textContent = `📅 នៅសល់ ${daysRemaining} ថ្ងៃ (${formattedDate})`;
+                expiryEl.className = 'login-expiry success';
+            }
+            
+            expiryUser.textContent = `👤 ${detectedUser}`;
+            console.log(`✅ Auto showed expiry for user: ${detectedUser}`);
         }
 
         // ============================================================
@@ -1723,23 +1644,7 @@
                 return false;
             }
             
-            // ===== FIRST: Verify device ownership =====
-            const isVerified = await verifyDeviceForUser(password);
-            if (!isVerified) {
-                console.log('❌ Device not verified for this user');
-                showUpdateNotification('កំហុស', 'ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត');
-                return false;
-            }
-            
-            // ===== SECOND: Check expiry =====
-            const expiryResult = await checkUserExpiry(password);
-            if (!expiryResult.isValid) {
-                console.log('❌ User account expired or not found');
-                const msg = expiryResult.message || 'គម្រោងរបស់អ្នកបានផុតកំណត់ហើយ!';
-                showUpdateNotification('កំហុស', msg);
-                return false;
-            }
-            
+            // ===== Check if user exists =====
             const toorData = await loadTOOR();
             if (!toorData) {
                 console.log('❌ Failed to load TOOR data');
@@ -1780,19 +1685,19 @@
                     });
                     if (response.ok) {
                         console.log('✅ Fingerprint saved to server');
-                        verifiedPassword = password;
+                        currentDeviceUser = password;
                         return true;
                     }
                 } catch(e) {
                     console.log('⚠️ Failed to save fingerprint to server');
                 }
-                verifiedPassword = password;
+                currentDeviceUser = password;
                 return true;
             }
             
             if (matchedEntry.fingerprint === currentFP) {
                 console.log('✅ Fingerprint matched!');
-                verifiedPassword = password;
+                currentDeviceUser = password;
                 return true;
             }
             
@@ -1966,26 +1871,13 @@
             overlay.classList.add('active');
             console.log('🔐 Showing login screen');
             
-            // ===== AUTO UPDATE EXPIRY DISPLAY ON EVERY KEY PRESS =====
-            input.addEventListener('input', function() {
-                const password = this.value.trim();
-                // Call auto update function on every keystroke
-                updateExpiryDisplayForUser(password);
-            });
+            // ===== AUTO SHOW EXPIRY WITHOUT PASSWORD =====
+            await autoShowExpiry();
             
             // ===== FOCUS: Clear error message when user starts typing =====
             input.addEventListener('focus', function() {
                 error.classList.remove('show');
             });
-            
-            // Load initial expiry display
-            await loadExpiryConfig();
-            // Show initial message
-            const expiryText = document.getElementById('expiryText');
-            if (expiryText) {
-                expiryText.textContent = '📝 ចាប់ផ្តើមវាយពាក្យសម្ងាត់...';
-                document.getElementById('loginExpiry').className = 'login-expiry typing';
-            }
             
             async function handleLogin() {
                 const password = input.value.trim();
@@ -2028,16 +1920,10 @@
                             error.classList.add('show');
                         }
                     } else {
-                        error.textContent = '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ ឬគម្រោងបានផុតកំណត់';
+                        error.textContent = '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ';
                         error.classList.add('show');
                         input.value = '';
                         input.focus();
-                        // Reset expiry display
-                        const expiryText = document.getElementById('expiryText');
-                        if (expiryText) {
-                            expiryText.textContent = '📝 ចាប់ផ្តើមវាយពាក្យសម្ងាត់...';
-                            document.getElementById('loginExpiry').className = 'login-expiry typing';
-                        }
                         console.log('❌ Login failed');
                     }
                 } catch (err) {
@@ -2126,8 +2012,8 @@
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
         console.log('⚠️ Offline mode DISABLED - Network required for authentication');
         console.log('⚠️ Cache is cleared on each login to prevent old code usage');
-        console.log('⚠️ User must exist in DATE.txt and device must be verified to login');
-        console.log('✅ Auto-expiry display enabled - shows date while typing');
+        console.log('✅ AUTO-SHOW EXPIRY: Date displayed automatically without password!');
+        console.log('✅ Device fingerprint used to detect user automatically');
     </script>
 </body>
-    </html>
+</html>
