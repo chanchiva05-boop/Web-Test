@@ -1419,24 +1419,24 @@
             
             if (!expiryConfig) {
                 console.log('❌ No DATE.txt found');
-                return { expired: true, message: 'មិនមានទិន្នន័យអ្នកប្រើប្រាស់' };
+                return { expired: true, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
             }
             
             const userExpiry = getUserExpiry(password);
             
             if (!userExpiry) {
                 console.log(`❌ User ${password} NOT FOUND in DATE.txt`);
-                return { expired: true, message: 'អ្នកមិនមានក្នុងប្រព័ន្ធ' };
+                return { expired: true, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
             }
             
             if (userExpiry.status === 'inactive' || userExpiry.status === 'expired' || userExpiry.expired) {
                 console.log(`❌ User ${password} is inactive/expired`);
-                return { expired: true, message: 'គណនីត្រូវបានបិទ' };
+                return { expired: true, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
             }
             
             if (!userExpiry.expiryDate) {
                 console.log(`❌ User ${password} has no expiryDate`);
-                return { expired: true, message: 'គ្មានកាលបរិច្ឆេទផុតកំណត់' };
+                return { expired: true, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
             }
             
             const daysRemaining = getDaysRemainingFromDate(userExpiry.expiryDate);
@@ -1445,7 +1445,7 @@
             
             if (daysRemaining < 0) {
                 console.log(`❌ User ${password} expired on ${userExpiry.expiryDate}!`);
-                return { expired: true, message: 'គម្រោងបានផុតកំណត់' };
+                return { expired: true, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
             }
             
             return { expired: false, daysRemaining, expiryDate: userExpiry.expiryDate };
@@ -1482,13 +1482,13 @@
             const userExpiry = getUserExpiry(detectedUser);
             
             if (!userExpiry) {
-                expiryText.textContent = '❌ អ្នកមិនមានក្នុងប្រព័ន្ធ';
+                expiryText.textContent = '❌ អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!';
                 expiryEl.className = 'login-expiry not-found';
                 return;
             }
             
             if (userExpiry.status === 'inactive' || userExpiry.status === 'expired' || userExpiry.expired) {
-                expiryText.textContent = '⛔ គណនីត្រូវបានបិទ';
+                expiryText.textContent = '⛔ គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់';
                 expiryEl.className = 'login-expiry expired';
                 return;
             }
@@ -1650,7 +1650,7 @@
         }
 
         // ============================================================
-        // 10. CHECK LOGIN - FIXED: CHECK EXPIRY BEFORE LOGIN
+        // 10. CHECK LOGIN - FIXED WITH CORRECT ERROR MESSAGES
         // ============================================================
         async function checkLogin(password) {
             if (!navigator.onLine) {
@@ -1663,7 +1663,7 @@
             const expiryCheck = await isUserExpired(password);
             if (expiryCheck.expired) {
                 console.log('❌ User account expired');
-                return { success: false, message: expiryCheck.message || 'គម្រោងបានផុតកំណត់' };
+                return { success: false, message: expiryCheck.message || 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
             }
             
             // ===== CHECK USER IN TOOR.TXT =====
@@ -1680,20 +1680,25 @@
             console.log('📋 Current FP:', currentFP);
             
             let matchedEntry = null;
+            let userExistsInToor = false;
+            
             for (let entry of toorData) {
                 if (entry.password === password) {
                     matchedEntry = entry;
+                    userExistsInToor = true;
                     break;
                 }
             }
             
-            if (!matchedEntry) {
+            // ===== CASE 1: Password NOT found in TOOR.TXT =====
+            if (!userExistsInToor) {
                 console.log('❌ Password not found in TOOR data');
-                return { success: false, message: 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវ' };
+                return { success: false, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
             }
             
             console.log('✅ Password matched!');
             
+            // ===== CASE 2: Password found but no fingerprint =====
             if (!matchedEntry.fingerprint) {
                 console.log('🔐 No fingerprint, saving current device...');
                 matchedEntry.fingerprint = currentFP;
@@ -1715,14 +1720,16 @@
                 return { success: true };
             }
             
-            if (matchedEntry.fingerprint === currentFP) {
-                console.log('✅ Fingerprint matched!');
-                currentDeviceUser = password;
-                return { success: true };
+            // ===== CASE 3: Password found but fingerprint MISMATCH =====
+            if (matchedEntry.fingerprint !== currentFP) {
+                console.log('❌ Fingerprint mismatch!');
+                return { success: false, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
             }
             
-            console.log('❌ Fingerprint mismatch!');
-            return { success: false, message: 'ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត' };
+            // ===== CASE 4: Password found and fingerprint MATCHES =====
+            console.log('✅ Fingerprint matched!');
+            currentDeviceUser = password;
+            return { success: true };
         }
 
         // ============================================================
@@ -1948,6 +1955,7 @@
                             error.classList.add('show');
                         }
                     } else {
+                        // ===== USE THE EXACT ERROR MESSAGE FROM checkLogin =====
                         error.textContent = result.message || '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ';
                         error.classList.add('show');
                         input.value = '';
@@ -2040,7 +2048,10 @@
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
         console.log('⚠️ Offline mode DISABLED - Network required for authentication');
         console.log('✅ EXPIRY CHECK: User cannot login if expired!');
-        console.log('✅ ERROR DISPLAY: Shows error message when password is wrong!');
+        console.log('✅ ERROR DISPLAY: Shows proper error messages!');
+        console.log('📌 CASE 1: Wrong password → "ពាក្យសម្ងាត់មិនត្រឹមត្រូវ"');
+        console.log('📌 CASE 2: Expired account → "គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់"');
+        console.log('📌 CASE 3: No account/Fingerprint mismatch → "អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!"');
     </script>
 </body>
 </html>
