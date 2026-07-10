@@ -1,4 +1,4 @@
-const CACHE_NAME = 'teva-v15';
+const CACHE_NAME = 'teva-v16';
 const urlsToCache = [
   './',
   './index.html',
