@@ -758,15 +758,22 @@
         
         .login-error {
             color: #ff6b6b;
-            font-size: 14px;
+            font-size: 15px;
             margin-top: 14px;
-            min-height: 24px;
+            min-height: 30px;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            padding: 8px 12px;
+            border-radius: 12px;
+            background: rgba(255, 0, 0, 0.08);
+            border: 1px solid rgba(255, 0, 0, 0.15);
+            font-weight: 600;
+            transform: translateY(-5px);
         }
         
         .login-error.show {
             opacity: 1;
+            transform: translateY(0);
         }
         
         .login-device-info {
@@ -1006,6 +1013,11 @@
                 font-size: 12px;
                 min-height: 38px;
                 padding: 8px 10px;
+            }
+            .login-error {
+                font-size: 13px;
+                min-height: 26px;
+                padding: 6px 10px;
             }
         }
         
@@ -1903,13 +1915,14 @@
             input.addEventListener('focus', function() {
                 error.classList.remove('show');
                 error.textContent = '';
+                error.style.borderColor = 'rgba(255,0,0,0.15)';
             });
             
-            // ===== AUTO CHECK EXPIRY ON INPUT =====
+            // ===== CLEAR ERROR ON INPUT =====
             input.addEventListener('input', function() {
-                // Clear error when typing
                 error.classList.remove('show');
                 error.textContent = '';
+                error.style.borderColor = 'rgba(255,0,0,0.15)';
             });
             
             async function handleLogin() {
@@ -1919,16 +1932,19 @@
                 // Clear previous error
                 error.classList.remove('show');
                 error.textContent = '';
+                error.style.borderColor = 'rgba(255,0,0,0.15)';
                 
                 if (!password) {
                     error.textContent = 'សូមបញ្ចូលពាក្យសម្ងាត់';
                     error.classList.add('show');
+                    error.style.borderColor = 'rgba(255,200,0,0.3)';
                     return;
                 }
                 
                 if (!navigator.onLine) {
                     error.textContent = '❌ ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់';
                     error.classList.add('show');
+                    error.style.borderColor = 'rgba(255,200,0,0.3)';
                     return;
                 }
                 
@@ -1947,17 +1963,20 @@
                             sessionStorage.setItem('teva_password', password);
                             overlay.classList.remove('active');
                             error.classList.remove('show');
+                            error.textContent = '';
                             
                             showUpdateNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
                             console.log('✅ Login successful!');
                         } else {
                             error.textContent = '❌ មិនអាចផ្ទុកទិន្នន័យបាន';
                             error.classList.add('show');
+                            error.style.borderColor = 'rgba(255,0,0,0.3)';
                         }
                     } else {
                         // ===== USE THE EXACT ERROR MESSAGE FROM checkLogin =====
                         error.textContent = result.message || '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ';
                         error.classList.add('show');
+                        error.style.borderColor = 'rgba(255,0,0,0.3)';
                         input.value = '';
                         input.focus();
                         console.log('❌ Login failed');
@@ -1966,6 +1985,7 @@
                     console.error('❌ Login error:', err);
                     error.textContent = '❌ មានបញ្ហាក្នុងការផ្ទៀងផ្ទាត់';
                     error.classList.add('show');
+                    error.style.borderColor = 'rgba(255,0,0,0.3)';
                 } finally {
                     loading.classList.remove('active');
                     btn.disabled = false;
@@ -2048,7 +2068,6 @@
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
         console.log('⚠️ Offline mode DISABLED - Network required for authentication');
         console.log('✅ EXPIRY CHECK: User cannot login if expired!');
-        console.log('✅ ERROR DISPLAY: Shows proper error messages!');
         console.log('📌 CASE 1: Wrong password → "ពាក្យសម្ងាត់មិនត្រឹមត្រូវ"');
         console.log('📌 CASE 2: Expired account → "គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់"');
         console.log('📌 CASE 3: No account/Fingerprint mismatch → "អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!"');
