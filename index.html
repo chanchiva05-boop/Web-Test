@@ -758,17 +758,18 @@
         
         .login-error {
             color: #ff6b6b;
-            font-size: 15px;
+            font-size: 16px;
             margin-top: 14px;
-            min-height: 30px;
+            min-height: 36px;
             opacity: 0;
             transition: opacity 0.3s ease, transform 0.3s ease;
-            padding: 8px 12px;
+            padding: 10px 14px;
             border-radius: 12px;
-            background: rgba(255, 0, 0, 0.08);
-            border: 1px solid rgba(255, 0, 0, 0.15);
-            font-weight: 600;
+            background: rgba(255, 0, 0, 0.1);
+            border: 2px solid rgba(255, 0, 0, 0.2);
+            font-weight: 700;
             transform: translateY(-5px);
+            text-shadow: 0 0 10px rgba(255,0,0,0.3);
         }
         
         .login-error.show {
@@ -1015,9 +1016,9 @@
                 padding: 8px 10px;
             }
             .login-error {
-                font-size: 13px;
-                min-height: 26px;
-                padding: 6px 10px;
+                font-size: 14px;
+                min-height: 30px;
+                padding: 8px 12px;
             }
         }
         
@@ -1662,13 +1663,12 @@
         }
 
         // ============================================================
-        // 10. CHECK LOGIN - FIXED WITH CORRECT ERROR MESSAGES
+        // 10. CHECK LOGIN - SIMPLIFIED WITH DIRECT ERROR MESSAGES
         // ============================================================
         async function checkLogin(password) {
             if (!navigator.onLine) {
                 console.log('❌ Offline - cannot authenticate');
-                showUpdateNotification('កំហុស', 'ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់');
-                return { success: false, message: 'ត្រូវការអ៊ីនធឺណិត' };
+                return { success: false, message: '❌ ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់' };
             }
             
             // ===== CHECK EXPIRY FIRST =====
@@ -1682,7 +1682,7 @@
             const toorData = await loadTOOR();
             if (!toorData) {
                 console.log('❌ Failed to load TOOR data');
-                return { success: false, message: 'មិនអាចផ្ទុកទិន្នន័យបាន' };
+                return { success: false, message: '❌ មិនអាចផ្ទុកទិន្នន័យបាន' };
             }
             
             const currentFP = deviceFingerprint;
@@ -1705,7 +1705,7 @@
             // ===== CASE 1: Password NOT found in TOOR.TXT =====
             if (!userExistsInToor) {
                 console.log('❌ Password not found in TOOR data');
-                return { success: false, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
+                return { success: false, message: '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ' };
             }
             
             console.log('✅ Password matched!');
@@ -1735,7 +1735,7 @@
             // ===== CASE 3: Password found but fingerprint MISMATCH =====
             if (matchedEntry.fingerprint !== currentFP) {
                 console.log('❌ Fingerprint mismatch!');
-                return { success: false, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
+                return { success: false, message: '❌ អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
             }
             
             // ===== CASE 4: Password found and fingerprint MATCHES =====
@@ -1888,7 +1888,7 @@
         }
 
         // ============================================================
-        // 15. INITIALIZE LOGIN SYSTEM
+        // 15. INITIALIZE LOGIN SYSTEM - FIXED ERROR DISPLAY
         // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
@@ -1915,14 +1915,12 @@
             input.addEventListener('focus', function() {
                 error.classList.remove('show');
                 error.textContent = '';
-                error.style.borderColor = 'rgba(255,0,0,0.15)';
             });
             
             // ===== CLEAR ERROR ON INPUT =====
             input.addEventListener('input', function() {
                 error.classList.remove('show');
                 error.textContent = '';
-                error.style.borderColor = 'rgba(255,0,0,0.15)';
             });
             
             async function handleLogin() {
@@ -1932,19 +1930,16 @@
                 // Clear previous error
                 error.classList.remove('show');
                 error.textContent = '';
-                error.style.borderColor = 'rgba(255,0,0,0.15)';
                 
                 if (!password) {
                     error.textContent = 'សូមបញ្ចូលពាក្យសម្ងាត់';
                     error.classList.add('show');
-                    error.style.borderColor = 'rgba(255,200,0,0.3)';
                     return;
                 }
                 
                 if (!navigator.onLine) {
                     error.textContent = '❌ ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់';
                     error.classList.add('show');
-                    error.style.borderColor = 'rgba(255,200,0,0.3)';
                     return;
                 }
                 
@@ -1970,22 +1965,21 @@
                         } else {
                             error.textContent = '❌ មិនអាចផ្ទុកទិន្នន័យបាន';
                             error.classList.add('show');
-                            error.style.borderColor = 'rgba(255,0,0,0.3)';
                         }
                     } else {
-                        // ===== USE THE EXACT ERROR MESSAGE FROM checkLogin =====
+                        // ===== DISPLAY THE EXACT ERROR MESSAGE =====
                         error.textContent = result.message || '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ';
                         error.classList.add('show');
-                        error.style.borderColor = 'rgba(255,0,0,0.3)';
+                        console.log('❌ Login failed:', error.textContent);
+                        
+                        // Clear input and refocus
                         input.value = '';
-                        input.focus();
-                        console.log('❌ Login failed');
+                        setTimeout(() => input.focus(), 300);
                     }
                 } catch (err) {
                     console.error('❌ Login error:', err);
                     error.textContent = '❌ មានបញ្ហាក្នុងការផ្ទៀងផ្ទាត់';
                     error.classList.add('show');
-                    error.style.borderColor = 'rgba(255,0,0,0.3)';
                 } finally {
                     loading.classList.remove('active');
                     btn.disabled = false;
@@ -2067,10 +2061,9 @@
         console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
         console.log('⚠️ Offline mode DISABLED - Network required for authentication');
-        console.log('✅ EXPIRY CHECK: User cannot login if expired!');
-        console.log('📌 CASE 1: Wrong password → "ពាក្យសម្ងាត់មិនត្រឹមត្រូវ"');
+        console.log('📌 CASE 1: Wrong password → "❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ"');
         console.log('📌 CASE 2: Expired account → "គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់"');
-        console.log('📌 CASE 3: No account/Fingerprint mismatch → "អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!"');
+        console.log('📌 CASE 3: No account/Fingerprint mismatch → "❌ អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!"');
     </script>
 </body>
 </html>
