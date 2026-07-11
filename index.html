@@ -1663,7 +1663,7 @@
         }
 
         // ============================================================
-        // 10. CHECK LOGIN - SIMPLIFIED WITH DIRECT ERROR MESSAGES
+        // 10. CHECK LOGIN - FIXED WITH CORRECT FALLBACK MESSAGES
         // ============================================================
         async function checkLogin(password) {
             if (!navigator.onLine) {
@@ -1671,14 +1671,7 @@
                 return { success: false, message: '❌ ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់' };
             }
             
-            // ===== CHECK EXPIRY FIRST =====
-            const expiryCheck = await isUserExpired(password);
-            if (expiryCheck.expired) {
-                console.log('❌ User account expired');
-                return { success: false, message: expiryCheck.message || 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
-            }
-            
-            // ===== CHECK USER IN TOOR.TXT =====
+            // ===== CHECK USER IN TOOR.TXT FIRST =====
             const toorData = await loadTOOR();
             if (!toorData) {
                 console.log('❌ Failed to load TOOR data');
@@ -1705,12 +1698,18 @@
             // ===== CASE 1: Password NOT found in TOOR.TXT =====
             if (!userExistsInToor) {
                 console.log('❌ Password not found in TOOR data');
-                return { success: false, message: '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ' };
+                return { success: false, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
             }
             
             console.log('✅ Password matched!');
             
-            // ===== CASE 2: Password found but no fingerprint =====
+            // ===== CASE 2: Password found but fingerprint MISMATCH =====
+            if (matchedEntry.fingerprint && matchedEntry.fingerprint !== currentFP) {
+                console.log('❌ Fingerprint mismatch!');
+                return { success: false, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
+            }
+            
+            // ===== CASE 3: Password found but no fingerprint =====
             if (!matchedEntry.fingerprint) {
                 console.log('🔐 No fingerprint, saving current device...');
                 matchedEntry.fingerprint = currentFP;
@@ -1723,24 +1722,24 @@
                     if (response.ok) {
                         console.log('✅ Fingerprint saved to server');
                         currentDeviceUser = password;
-                        return { success: true };
+                        // Continue to expiry check below
                     }
                 } catch(e) {
                     console.log('⚠️ Failed to save fingerprint to server');
                 }
                 currentDeviceUser = password;
-                return { success: true };
+                // Continue to expiry check below
             }
             
-            // ===== CASE 3: Password found but fingerprint MISMATCH =====
-            if (matchedEntry.fingerprint !== currentFP) {
-                console.log('❌ Fingerprint mismatch!');
-                return { success: false, message: '❌ អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
+            // ===== CHECK EXPIRY =====
+            const expiryCheck = await isUserExpired(password);
+            if (expiryCheck.expired) {
+                console.log('❌ User account expired');
+                return { success: false, message: expiryCheck.message || 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
             }
             
-            // ===== CASE 4: Password found and fingerprint MATCHES =====
-            console.log('✅ Fingerprint matched!');
-            currentDeviceUser = password;
+            // ===== CASE 4: Password found, fingerprint matches, and NOT expired =====
+            console.log('✅ All checks passed! Login successful.');
             return { success: true };
         }
 
@@ -1888,7 +1887,7 @@
         }
 
         // ============================================================
-        // 15. INITIALIZE LOGIN SYSTEM - FIXED: ERROR STAYS UNTIL USER TYPES
+        // 15. INITIALIZE LOGIN SYSTEM
         // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
@@ -1911,17 +1910,11 @@
             // ===== AUTO SHOW EXPIRY WITHOUT PASSWORD =====
             await autoShowExpiry();
             
-            // ===== FUNCTION TO HIDE ERROR ONLY WHEN USER STARTS TYPING =====
-            function clearErrorOnTyping() {
-                error.classList.remove('show');
-                error.textContent = '';
-            }
-            
-            // ===== CLEAR ERROR ONLY WHEN USER TYPES (NOT ON FOCUS) =====
+            // ===== CLEAR ERROR ONLY WHEN USER TYPES =====
             input.addEventListener('input', function() {
-                // Only clear if there's an error showing
                 if (error.classList.contains('show')) {
-                    clearErrorOnTyping();
+                    error.classList.remove('show');
+                    error.textContent = '';
                 }
             });
             
@@ -1969,14 +1962,13 @@
                             error.classList.add('show');
                         }
                     } else {
-                        // ===== SHOW ERROR - IT WILL STAY UNTIL USER TYPES =====
+                        // ===== DISPLAY FALLBACK ERROR =====
                         error.textContent = result.message || '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ';
                         error.classList.add('show');
                         console.log('❌ Login failed:', error.textContent);
                         
                         // Clear input but keep error showing
                         input.value = '';
-                        // Do NOT clear error here - it stays until user types
                     }
                 } catch (err) {
                     console.error('❌ Login error:', err);
@@ -1985,7 +1977,6 @@
                 } finally {
                     loading.classList.remove('active');
                     btn.disabled = false;
-                    // Focus input but error stays
                     setTimeout(() => input.focus(), 100);
                 }
             }
@@ -2065,10 +2056,10 @@
         console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
         console.log('⚠️ Offline mode DISABLED - Network required for authentication');
-        console.log('📌 Fallback behavior: Error stays until user starts typing');
-        console.log('📌 CASE 1: Wrong password → "❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ"');
-        console.log('📌 CASE 2: Expired account → "គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់"');
-        console.log('📌 CASE 3: No account/Fingerprint mismatch → "❌ អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!"');
+        console.log('📌 Fallback messages:');
+        console.log('  1. Wrong password → "ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ"');
+        console.log('  2. Expired account → "គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់"');
+        console.log('  3. No account → "អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!"');
     </script>
 </body>
 </html>
