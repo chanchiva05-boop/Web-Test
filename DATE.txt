@@ -5,7 +5,7 @@
       "status": "active"
     },
     "iphone": {
-      "expiryDate": "2026-07-11",
+      "expiryDate": "2026-07-05",
       "status": "active"
     },
     "USER002": {
