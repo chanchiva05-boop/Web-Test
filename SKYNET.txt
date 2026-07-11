@@ -1,0 +1,240 @@
+{
+  "users": {
+    "TEVA": {
+      "password": "TEVA",
+      "fingerprint": "FP_49f39f41",
+      "expiryDate": "2026-07-11",
+      "status": "active",
+      "links": {
+        "metfone": "https://raw.githubusercontent.com/sokc7618-boop/Kajabahagahbsbajajajsnanajajaj/main/4b3d481a-9c11-4b43-be56-42a3d250325c.txt",
+        "cellcard": "https://raw.githubusercontent.com/sokc7618-boop/Kajabahagahbsbajajajsnanajajaj/main/4b3d481a-9c11-4b43-be56-42a3d250325c_cellcard.txt",
+        "smart": "https://raw.githubusercontent.com/sokc7618-boop/Kajabahagahbsbajajajsnanajajaj/main/4b3d481a-9c11-4b43-be56-42a3d250325c_smart.txt"
+      }
+    },
+    "iphone": {
+      "password": "iphone",
+      "fingerprint": "FP_10d686b4",
+      "expiryDate": "2026-07-05",
+      "status": "active",
+      "links": {
+        "metfone": "https://raw.githubusercontent.com/sokc7618-boop/Kajabahagahbsbajajajsnanajajaj/main/a99285ed-30de-4a46-8064-52fbf5c7e09a.txt",
+        "cellcard": "https://raw.githubusercontent.com/sokc7618-boop/Kajabahagahbsbajajajsnanajajaj/main/a99285ed-30de-4a46-8064-52fbf5c7e09a_cellcard.txt",
+        "smart": "https://raw.githubusercontent.com/sokc7618-boop/Kajabahagahbsbajajajsnanajajaj/main/a99285ed-30de-4a46-8064-52fbf5c7e09a_smart.txt"
+      }
+    },
+    "USER002": {
+      "password": "USER002",
+      "fingerprint": "",
+      "expiryDate": "2026-08-02",
+      "status": "active",
+      "links": {
+        "metfone": "",
+        "cellcard": "",
+        "smart": ""
+      }
+    },
+    "USER003": {
+      "password": "USER003",
+      "fingerprint": "",
+      "expiryDate": "2026-08-03",
+      "status": "active",
+      "links": {
+        "metfone": "https://raw.githubusercontent.com/.../user003_metfone.txt",
+        "cellcard": "https://raw.githubusercontent.com/.../user003_cellcard.txt",
+        "smart": "https://raw.githubusercontent.com/.../user003_metfone.txt"
+      }
+    },
+    "USER004": {
+      "password": "USER004",
+      "fingerprint": "",
+      "expiryDate": "2026-08-04",
+      "status": "active",
+      "links": {
+        "metfone": "https://raw.githubusercontent.com/.../user004_metfone.txt",
+        "cellcard": "https://raw.githubusercontent.com/.../user004_cellcard.txt",
+        "smart": "https://raw.githubusercontent.com/.../user004_metfone.txt"
+      }
+    },
+    "USER005": {
+      "password": "USER005",
+      "fingerprint": "",
+      "expiryDate": "2026-08-05",
+      "status": "active",
+      "links": {
+        "metfone": "https://raw.githubusercontent.com/.../user005_metfone.txt",
+        "cellcard": "https://raw.githubusercontent.com/.../user004_cellcard.txt",
+        "smart": "https://raw.githubusercontent.com/.../user005_metfone.txt"
+      }
+    },
+    "USER006": {
+      "password": "USER006",
+      "fingerprint": "",
+      "expiryDate": "2026-07-24",
+      "status": "active",
+      "links": {
+        "metfone": "",
+        "cellcard": "",
+        "smart": ""
+      }
+    },
+    "USER007": {
+      "password": "USER007",
+      "fingerprint": "",
+      "expiryDate": "2026-07-25",
+      "status": "active",
+      "links": {
+        "metfone": "",
+        "cellcard": "",
+        "smart": ""
+      }
+    },
+    "USER008": {
+      "password": "USER008",
+      "fingerprint": "",
+      "expiryDate": "2026-07-26",
+      "status": "active",
+      "links": {
+        "metfone": "",
+        "cellcard": "",
+        "smart": ""
+      }
+    },
+    "USER009": {
+      "password": "USER009",
+      "fingerprint": "",
+      "expiryDate": "2026-07-27",
+      "status": "active",
+      "links": {
+        "metfone": "",
+        "cellcard": "",
+        "smart": ""
+      }
+    },
+    "USER010": {
+      "password": "USER010",
+      "fingerprint": "",
+      "expiryDate": "2026-07-28",
+      "status": "active",
+      "links": {
+        "metfone": "",
+        "cellcard": "",
+        "smart": ""
+      }
+    },
+    "USER011": {
+      "password": "USER011",
+      "fingerprint": "",
+      "expiryDate": "2026-07-16",
+      "status": "active",
+      "links": {
+        "metfone": "",
+        "cellcard": "",
+        "smart": ""
+      }
+    },
+    "USER012": {
+      "password": "USER012",
+      "fingerprint": "",
+      "expiryDate": "2026-07-17",
+      "status": "active",
+      "links": {
+        "metfone": "",
+        "cellcard": "",
+        "smart": ""
+      }
+    },
+    "USER013": {
+      "password": "USER013",
+      "fingerprint": "",
+      "expiryDate": "2026-07-18",
+      "status": "active",
+      "links": {
+        "metfone": "",
+        "cellcard": "",
+        "smart": ""
+      }
+    },
+    "USER014": {
+      "password": "USER014",
+      "fingerprint": "",
+      "expiryDate": "2026-07-19",
+      "status": "active",
+      "links": {
+        "metfone": "",
+        "cellcard": "",
+        "smart": ""
+      }
+    },
+    "USER015": {
+      "password": "USER015",
+      "fingerprint": "",
+      "expiryDate": "2026-07-20",
+      "status": "active",
+      "links": {
+        "metfone": "",
+        "cellcard": "",
+        "smart": ""
+      }
+    },
+    "USER016": {
+      "password": "USER016",
+      "fingerprint": "",
+      "expiryDate": "2026-09-01",
+      "status": "active",
+      "links": {
+        "metfone": "",
+        "cellcard": "",
+        "smart": ""
+      }
+    },
+    "USER017": {
+      "password": "USER017",
+      "fingerprint": "",
+      "expiryDate": "2026-09-09",
+      "status": "active",
+      "links": {
+        "metfone": "",
+        "cellcard": "",
+        "smart": ""
+      }
+    },
+    "USER018": {
+      "password": "USER018",
+      "fingerprint": "",
+      "expiryDate": "2026-10-01",
+      "status": "active",
+      "links": {
+        "metfone": "",
+        "cellcard": "",
+        "smart": ""
+      }
+    },
+    "USER019": {
+      "password": "USER019",
+      "fingerprint": "",
+      "expiryDate": "2026-10-09",
+      "status": "active",
+      "links": {
+        "metfone": "",
+        "cellcard": "",
+        "smart": ""
+      }
+    },
+    "USER020": {
+      "password": "USER0020",
+      "fingerprint": "",
+      "expiryDate": "2027-07-09",
+      "status": "active",
+      "links": {
+        "metfone": "",
+        "cellcard": "",
+        "smart": ""
+      }
+    }
+  },
+  "summary": {
+    "totalUsers": 21,
+    "lastUpdated": "2026-07-12",
+    "services": ["metfone", "cellcard", "smart"]
+  }
+}
