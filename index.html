@@ -1888,7 +1888,7 @@
         }
 
         // ============================================================
-        // 15. INITIALIZE LOGIN SYSTEM - FIXED ERROR DISPLAY
+        // 15. INITIALIZE LOGIN SYSTEM - FIXED: ERROR STAYS UNTIL USER TYPES
         // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
@@ -1911,16 +1911,18 @@
             // ===== AUTO SHOW EXPIRY WITHOUT PASSWORD =====
             await autoShowExpiry();
             
-            // ===== CLEAR ERROR ON FOCUS =====
-            input.addEventListener('focus', function() {
+            // ===== FUNCTION TO HIDE ERROR ONLY WHEN USER STARTS TYPING =====
+            function clearErrorOnTyping() {
                 error.classList.remove('show');
                 error.textContent = '';
-            });
+            }
             
-            // ===== CLEAR ERROR ON INPUT =====
+            // ===== CLEAR ERROR ONLY WHEN USER TYPES (NOT ON FOCUS) =====
             input.addEventListener('input', function() {
-                error.classList.remove('show');
-                error.textContent = '';
+                // Only clear if there's an error showing
+                if (error.classList.contains('show')) {
+                    clearErrorOnTyping();
+                }
             });
             
             async function handleLogin() {
@@ -1967,14 +1969,14 @@
                             error.classList.add('show');
                         }
                     } else {
-                        // ===== DISPLAY THE EXACT ERROR MESSAGE =====
+                        // ===== SHOW ERROR - IT WILL STAY UNTIL USER TYPES =====
                         error.textContent = result.message || '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ';
                         error.classList.add('show');
                         console.log('❌ Login failed:', error.textContent);
                         
-                        // Clear input and refocus
+                        // Clear input but keep error showing
                         input.value = '';
-                        setTimeout(() => input.focus(), 300);
+                        // Do NOT clear error here - it stays until user types
                     }
                 } catch (err) {
                     console.error('❌ Login error:', err);
@@ -1983,6 +1985,8 @@
                 } finally {
                     loading.classList.remove('active');
                     btn.disabled = false;
+                    // Focus input but error stays
+                    setTimeout(() => input.focus(), 100);
                 }
             }
             
@@ -2061,6 +2065,7 @@
         console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
         console.log('⚠️ Offline mode DISABLED - Network required for authentication');
+        console.log('📌 Fallback behavior: Error stays until user starts typing');
         console.log('📌 CASE 1: Wrong password → "❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ"');
         console.log('📌 CASE 2: Expired account → "គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់"');
         console.log('📌 CASE 3: No account/Fingerprint mismatch → "❌ អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!"');
