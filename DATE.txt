@@ -1,7 +1,7 @@
 {
   "users": {
     "TEVA": {
-      "expiryDate": "2026-07-14",
+      "expiryDate": "2026-07-04",
       "status": "active"
     },
     "iphone": {
