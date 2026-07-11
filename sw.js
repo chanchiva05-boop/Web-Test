@@ -1,4 +1,4 @@
-const CACHE_NAME = 'teva-v16';
+const CACHE_NAME = 'teva-v17';
 const urlsToCache = [
   './',
   './index.html',
@@ -58,7 +58,9 @@ function cacheFirst(request) {
 self.addEventListener('fetch', event => {
   const url = event.request.url;
   
-  if (url.includes('METFONE.txt') || 
+  // ប្រើ SKYNET.txt ជំនួសឯកសារទាំងអស់
+  if (url.includes('SKYNET.txt') || 
+      url.includes('METFONE.txt') || 
       url.includes('CELLCARD.txt') || 
       url.includes('METFONE1.txt') ||
       url.includes('TOOR.txt') ||
