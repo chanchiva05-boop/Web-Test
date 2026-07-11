@@ -1663,7 +1663,7 @@
         }
 
         // ============================================================
-        // 10. CHECK LOGIN - FIXED WITH 3 FALLBACK CASES
+        // 10. CHECK LOGIN - FIXED FALLBACK MESSAGES
         // ============================================================
         async function checkLogin(password) {
             if (!navigator.onLine) {
@@ -1671,7 +1671,7 @@
                 return { success: false, message: '❌ ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់' };
             }
             
-            // ===== CHECK USER IN TOOR.TXT =====
+            // ===== LOAD TOOR DATA =====
             const toorData = await loadTOOR();
             if (!toorData) {
                 console.log('❌ Failed to load TOOR data');
@@ -1684,65 +1684,42 @@
             console.log('📋 Password entered:', password);
             console.log('📋 Current FP:', currentFP);
             
-            let matchedEntry = null;
-            let userExistsInToor = false;
+            // ===== FIND USER BY FINGERPRINT =====
+            let userByFP = null;
+            let userEntry = null;
             
             for (let entry of toorData) {
-                if (entry.password === password) {
-                    matchedEntry = entry;
-                    userExistsInToor = true;
+                if (entry.fingerprint === currentFP) {
+                    userByFP = entry.password;
+                    userEntry = entry;
                     break;
                 }
             }
             
-            // ===== CASE 1: Password NOT found in TOOR.TXT =====
-            if (!userExistsInToor) {
-                console.log('❌ Password not found in TOOR data');
+            console.log('📋 User by fingerprint:', userByFP);
+            
+            // ===== CASE 1: No fingerprint found in TOOR.TXT =====
+            if (!userByFP) {
+                console.log('❌ No fingerprint found in TOOR data');
                 return { success: false, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
             }
             
-            console.log('✅ Password matched!');
-            
-            // ===== CASE 2: Password found but fingerprint MISMATCH =====
-            if (matchedEntry.fingerprint && matchedEntry.fingerprint !== currentFP) {
-                console.log('❌ Fingerprint mismatch!');
-                return { success: false, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
+            // ===== CASE 2: Fingerprint found but password is WRONG =====
+            if (password !== userByFP) {
+                console.log('❌ Wrong password!');
+                return { success: false, message: 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ' };
             }
             
-            // ===== CASE 2.5: Password found but fingerprint is empty (new device) =====
-            if (!matchedEntry.fingerprint) {
-                console.log('🔐 No fingerprint, saving current device...');
-                matchedEntry.fingerprint = currentFP;
-                try {
-                    const response = await fetch('TOOR.txt', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(toorData)
-                    });
-                    if (response.ok) {
-                        console.log('✅ Fingerprint saved to server');
-                        currentDeviceUser = password;
-                    }
-                } catch(e) {
-                    console.log('⚠️ Failed to save fingerprint to server');
-                }
-                currentDeviceUser = password;
-                // Continue to expiry check below
-            }
+            console.log('✅ Password matched with fingerprint!');
             
-            // ===== CHECK EXPIRY =====
+            // ===== CASE 3: Password correct, check expiry =====
             const expiryCheck = await isUserExpired(password);
             if (expiryCheck.expired) {
                 console.log('❌ User account expired');
-                return { success: false, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
+                return { success: false, message: expiryCheck.message || 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
             }
             
-            // ===== CASE 3: Password found, fingerprint matches, but password is WRONG =====
-            // This case is actually impossible because we already matched the password above.
-            // The "wrong password" case is when user enters a password that doesn't match any in TOOR.txt
-            // But we already handled that in CASE 1.
-            
-            // ===== SUCCESS: All checks passed =====
+            // ===== CASE 4: All checks passed! =====
             console.log('✅ All checks passed! Login successful.');
             return { success: true };
         }
@@ -2059,7 +2036,6 @@
         console.log('📱 TEVA App Loaded Successfully');
         console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
-        console.log('⚠️ Offline mode DISABLED - Network required for authentication');
         console.log('📌 Fallback messages:');
         console.log('  1. Wrong password → "ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ"');
         console.log('  2. Expired account → "គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់"');
