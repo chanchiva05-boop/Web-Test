@@ -17,6 +17,10 @@
     <meta name="application-name" content="TEVA">
     <meta name="msapplication-TileColor" content="#0a0a2a">
     
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
     <style>
         @font-face {
             font-family: 'Khmer OS Battambang';
@@ -1122,6 +1126,24 @@
     
     <script>
         // ============================================================
+        // FIREBASE CONFIG
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyA-RvOzR03Ic4HefKdBycXYIK7AZyjcVn4",
+            authDomain: "skynet-dec0e.firebaseapp.com",
+            databaseURL: "https://skynet-dec0e-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "skynet-dec0e",
+            storageBucket: "skynet-dec0e.firebasestorage.app",
+            messagingSenderId: "771361401451",
+            appId: "1:771361401451:web:ad0389550229089003df2e"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        console.log('✅ Firebase connected!');
+
+        // ============================================================
         // 1. VERSION DATE MANAGEMENT
         // ============================================================
         let lastUpdateTime = null;
@@ -1236,7 +1258,7 @@
         }
         
         // ============================================================
-        // 5. LOAD USER-SPECIFIC CODES FROM SKYNET.TXT
+        // 5. LOAD USER-SPECIFIC CODES FROM FIREBASE
         // ============================================================
         let userCodes = {
             metfone: '',
@@ -1253,36 +1275,26 @@
 
         async function loadSkyNetData() {
             if (!navigator.onLine) {
-                console.log('❌ Offline - cannot load SKYNET.txt');
+                console.log('❌ Offline - cannot load from Firebase');
                 return null;
             }
             
             try {
-                const response = await fetch('SKYNET.txt?' + Date.now() + '_' + Math.random().toString(36).substring(2, 8), { 
-                    cache: 'no-store',
-                    headers: { 
-                        'Cache-Control': 'no-cache, no-store, must-revalidate',
-                        'Pragma': 'no-cache',
-                        'Expires': '0'
-                    }
-                });
-                if (response.ok) {
-                    const data = await response.text();
-                    try {
-                        const parsed = JSON.parse(data);
-                        skyNetData = parsed;
-                        console.log('✅ Loaded SKYNET.txt successfully');
-                        return parsed;
-                    } catch(e) {
-                        console.log('❌ Invalid JSON in SKYNET.txt:', e);
-                        return null;
-                    }
+                const snapshot = await database.ref('/').once('value');
+                const data = snapshot.val();
+                
+                if (data) {
+                    skyNetData = data;
+                    console.log('✅ Loaded data from Firebase successfully');
+                    return data;
+                } else {
+                    console.log('❌ No data found in Firebase');
+                    return null;
                 }
-            } catch(e) {
-                console.log('❌ Failed to load SKYNET.txt:', e);
+            } catch (error) {
+                console.error('❌ Firebase load error:', error);
                 return null;
             }
-            return null;
         }
 
         async function loadUserCodes(password) {
@@ -1291,7 +1303,7 @@
             userCodes = { metfone: '', cellcard: '', smart: '' };
             userExists = { metfone: false, cellcard: false, smart: false };
             
-            console.log('🔄 Loading user codes from SKYNET.txt for:', password);
+            console.log('🔄 Loading user codes from Firebase for:', password);
             
             if (!navigator.onLine) {
                 console.log('❌ Offline - cannot authenticate');
@@ -1301,13 +1313,13 @@
             
             const data = await loadSkyNetData();
             if (!data || !data.users) {
-                console.log('❌ No SKYNET data available');
+                console.log('❌ No Firebase data available');
                 return null;
             }
             
             if (data.users[password]) {
                 const userData = data.users[password];
-                console.log('✅ Found user in SKYNET.txt');
+                console.log('✅ Found user in Firebase');
                 
                 if (userData.links) {
                     if (userData.links.metfone) {
@@ -1329,7 +1341,7 @@
                 return userCodes;
             }
             
-            console.log('❌ User not found in SKYNET.txt');
+            console.log('❌ User not found in Firebase');
             return null;
         }
 
@@ -1376,7 +1388,7 @@
         async function findUserByFingerprint() {
             const data = await loadSkyNetData();
             if (!data || !data.users) {
-                console.log('❌ Failed to load SKYNET data');
+                console.log('❌ Failed to load Firebase data');
                 return null;
             }
             
@@ -1407,14 +1419,14 @@
             await loadExpiryConfig();
             
             if (!expiryConfig || !expiryConfig.users) {
-                console.log('❌ No SKYNET data found');
+                console.log('❌ No Firebase data found');
                 return { expired: true, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
             }
             
             const userExpiry = getUserExpiry(password);
             
             if (!userExpiry) {
-                console.log(`❌ User ${password} NOT FOUND in SKYNET data`);
+                console.log(`❌ User ${password} NOT FOUND in Firebase data`);
                 return { expired: true, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
             }
             
@@ -1605,7 +1617,7 @@
         });
         
         // ============================================================
-        // 9. LOAD TOOR DATA FROM SKYNET.TXT
+        // 9. LOAD TOOR DATA FROM FIREBASE
         // ============================================================
         async function loadTOOR() {
             if (!navigator.onLine) {
@@ -1638,7 +1650,7 @@
             
             const data = await loadSkyNetData();
             if (!data || !data.users) {
-                console.log('❌ Failed to load SKYNET data');
+                console.log('❌ Failed to load Firebase data');
                 return { success: false, message: '❌ មិនអាចផ្ទុកទិន្នន័យបាន' };
             }
             
@@ -1662,7 +1674,7 @@
             console.log('📋 User by fingerprint:', userByFP);
             
             if (!userByFP) {
-                console.log('❌ No fingerprint found in SKYNET data');
+                console.log('❌ No fingerprint found in Firebase data');
                 return { success: false, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
             }
             
