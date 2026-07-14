@@ -1640,7 +1640,7 @@
         }
 
         // ============================================================
-        // 10. CHECK LOGIN
+        // 10. CHECK LOGIN (FIXED ✅)
         // ============================================================
         async function checkLogin(password) {
             if (!navigator.onLine) {
@@ -1660,30 +1660,33 @@
             console.log('📋 Password entered:', password);
             console.log('📋 Current FP:', currentFP);
             
-            let userByFP = null;
-            let userEntry = null;
+            // ស្វែងរក User ដោយ Fingerprint
+            let foundUser = null;
+            let foundUserId = null;
             
             for (const [key, value] of Object.entries(data.users)) {
                 if (value.fingerprint === currentFP) {
-                    userByFP = key;
-                    userEntry = value;
+                    foundUser = value;
+                    foundUserId = key;
                     break;
                 }
             }
             
-            console.log('📋 User by fingerprint:', userByFP);
+            console.log('📋 Found user by fingerprint:', foundUserId);
+            console.log('📋 Password in database:', foundUser ? foundUser.password : 'NOT FOUND');
             
-            if (!userByFP) {
+            if (!foundUser) {
                 console.log('❌ No fingerprint found in Firebase data');
                 return { success: false, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
             }
             
-            if (password !== userByFP) {
-                console.log('❌ Wrong password!');
+            // ✅ ប្រៀបធៀបជាមួយ Password ក្នុង Database (មិនមែន Username)
+            if (password !== foundUser.password) {
+                console.log('❌ Wrong password! (Expected: ' + foundUser.password + ')');
                 return { success: false, message: 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ' };
             }
             
-            console.log('✅ Password matched with fingerprint!');
+            console.log('✅ Password matched with database!');
             
             const expiryCheck = await isUserExpired(password);
             if (expiryCheck.expired) {
