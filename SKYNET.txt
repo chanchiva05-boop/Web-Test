@@ -3,7 +3,7 @@
     "TEVA": {
       "password": "TEVA",
       "fingerprint": "FP_49f39f41",
-      "expiryDate": "2026-07-11",
+      "expiryDate": "2026-07-29",
       "status": "active",
       "links": {
         "metfone": "https://raw.githubusercontent.com/sokc7618-boop/Kajabahagahbsbajajajsnanajajaj/main/4b3d481a-9c11-4b43-be56-42a3d250325c.txt",
