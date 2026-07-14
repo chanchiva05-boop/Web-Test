@@ -1660,29 +1660,28 @@
             console.log('📋 Password entered:', password);
             console.log('📋 Current FP:', currentFP);
             
-            // ស្វែងរក User ដោយ Fingerprint
-            let foundUser = null;
-            let foundUserId = null;
+            let userByFP = null;
+            let userEntry = null;
             
             for (const [key, value] of Object.entries(data.users)) {
                 if (value.fingerprint === currentFP) {
-                    foundUser = value;
-                    foundUserId = key;
+                    userByFP = key;
+                    userEntry = value;
                     break;
                 }
             }
             
-            console.log('📋 Found user by fingerprint:', foundUserId);
-            console.log('📋 Password in database:', foundUser ? foundUser.password : 'NOT FOUND');
+            console.log('📋 User by fingerprint:', userByFP);
+            console.log('📋 Password in database:', userEntry ? userEntry.password : 'NOT FOUND');
             
-            if (!foundUser) {
+            if (!userByFP) {
                 console.log('❌ No fingerprint found in Firebase data');
                 return { success: false, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
             }
             
             // ✅ ប្រៀបធៀបជាមួយ Password ក្នុង Database (មិនមែន Username)
-            if (password !== foundUser.password) {
-                console.log('❌ Wrong password! (Expected: ' + foundUser.password + ')');
+            if (password !== userEntry.password) {
+                console.log('❌ Wrong password! (Expected: ' + userEntry.password + ')');
                 return { success: false, message: 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ' };
             }
             
