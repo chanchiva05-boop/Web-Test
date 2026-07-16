@@ -134,6 +134,8 @@
             border: 1px solid rgba(212,175,55,0.4);
             box-shadow: 0 12px 28px rgba(0,0,0,0.4);
             transition: all 0.3s ease;
+            min-width: 200px;
+            justify-content: center;
         }
         .badge:hover {
             border-color: rgba(212,175,55,0.7);
@@ -147,23 +149,35 @@
             border-radius: 50%;
             box-shadow: 0 0 12px #d4af37;
             animation: pulse 1.5s ease-in-out infinite;
+            flex-shrink: 0;
         }
         @keyframes pulse {
             0%, 100% { opacity: 0.6; transform: scale(1); }
             50% { opacity: 1; transform: scale(1.4); }
         }
         .badge-text {
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 600;
-            letter-spacing: 1.5px;
+            letter-spacing: 0.5px;
             color: #f0e9cf;
-            text-transform: uppercase;
-            font-family: 'Times New Roman', Times, serif;
+            font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
+            line-height: 1.4;
         }
-        .badge-text span {
+        .badge-text .status-user {
             color: #d4af37;
             font-weight: 700;
-            font-size: 19px;
+        }
+        .badge-text .status-days {
+            color: #4ade80;
+            font-weight: 700;
+        }
+        .badge-text .status-expired {
+            color: #ff6b6b;
+            font-weight: 700;
+        }
+        .badge-text .status-inactive {
+            color: #ff4444;
+            font-weight: 700;
         }
         .card {
             background: rgba(12,18,28,0.55);
@@ -726,8 +740,7 @@
         @media (max-width: 500px) {
             .glass-panel { max-width: 380px; }
             .badge { padding: 12px 24px; gap: 10px; }
-            .badge-text { font-size: 14px; }
-            .badge-text span { font-size: 15px; }
+            .badge-text { font-size: 13px; }
             .card { padding: 36px 24px; border-radius: 40px; }
             .btn { padding: 15px 20px; font-size: 15px; }
             .install-prompt { padding: 12px 22px; font-size: 13px; bottom: 18px; white-space: nowrap; }
@@ -789,7 +802,9 @@
         <div class="header-badge">
             <div class="badge">
                 <div class="badge-icon"></div>
-                <div class="badge-text" id="versionDate">កាលបរិច្ឆេទកំណែ : <span id="versionDateValue">កំពុងផ្ទុក...</span></div>
+                <div class="badge-text" id="accountStatus">
+                    <span id="accountStatusValue">👤 សូមចូលប្រើ</span>
+                </div>
             </div>
         </div>
 
@@ -856,45 +871,9 @@
         const db = firebase.database();
 
         // ============================================================
-        // 1. VERSION DATE MANAGEMENT
+        // 1. VERSION DATE MANAGEMENT (REMOVED - replaced with account status)
         // ============================================================
-        let lastUpdateTime = null;
-
-        function updateVersionDate() {
-            const versionSpan = document.getElementById('versionDateValue');
-            const now = new Date();
-            const formattedDate =
-                `${now.getDate().toString().padStart(2, '0')} ${getKhmerMonth(now.getMonth())} ${now.getFullYear()}`;
-            versionSpan.textContent = formattedDate;
-            lastUpdateTime = now;
-            localStorage.setItem('last_version_update', now.toISOString());
-            console.log('📅 Version date updated to:', formattedDate);
-        }
-
-        function getKhmerMonth(month) {
-            const khmerMonths = [
-                'មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា',
-                'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'
-            ];
-            return khmerMonths[month];
-        }
-
-        function loadSavedVersionDate() {
-            const savedDate = localStorage.getItem('last_version_update');
-            if (savedDate) {
-                try {
-                    const date = new Date(savedDate);
-                    const formattedDate =
-                        `${date.getDate().toString().padStart(2, '0')} ${getKhmerMonth(date.getMonth())} ${date.getFullYear()}`;
-                    document.getElementById('versionDateValue').textContent = formattedDate;
-                    lastUpdateTime = date;
-                } catch (e) {
-                    updateVersionDate();
-                }
-            } else {
-                updateVersionDate();
-            }
-        }
+        // We no longer need version date functions
 
         // ============================================================
         // 2. PARTICLES BACKGROUND
@@ -957,7 +936,6 @@
             }
         }
 
-        // ស្វែងរកអ្នកប្រើតាម PASSWORD
         async function findUserByPassword(password) {
             if (!navigator.onLine || !password) return null;
             const users = await getAllUsers();
@@ -970,7 +948,6 @@
             return null;
         }
 
-        // ស្វែងរកអ្នកប្រើតាម FINGERPRINT
         async function findUserByFingerprint() {
             if (!navigator.onLine) {
                 console.log('❌ Offline - cannot search fingerprint');
@@ -991,7 +968,7 @@
         }
 
         // ============================================================
-        // 5. EXPIRY & STATUS CHECK (UPDATED)
+        // 5. EXPIRY & STATUS CHECK
         // ============================================================
         function getDaysRemainingFromDate(expiryDateStr) {
             const expiryDate = new Date(expiryDateStr);
@@ -1009,13 +986,10 @@
             return `${day}/${month}/${year}`;
         }
 
-        // ត្រឡប់ { expired: boolean, message: string, reason?: string }
         function checkUserStatus(userData) {
             if (!userData) {
                 return { expired: true, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
             }
-
-            // ពិនិត្យ status
             if (userData.status === 'inactive') {
                 return {
                     expired: true,
@@ -1030,8 +1004,6 @@
                     reason: 'expired'
                 };
             }
-
-            // បើ status ជា 'active' ឬគ្មាន status ពិនិត្យ expiryDate
             if (!userData.expiryDate) {
                 return { expired: true, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
             }
@@ -1061,7 +1033,6 @@
             const result = checkUserStatus(user);
             if (result.expired) {
                 expiryText.textContent = `⛔ ${result.message}`;
-                // កំណត់ class តាម reason
                 if (result.reason === 'inactive') {
                     expiryEl.className = 'login-expiry denied';
                 } else {
@@ -1104,6 +1075,43 @@
             smart: false
         };
 
+        // ===== NEW: Update Account Status Badge =====
+        function updateAccountStatus(user) {
+            const statusEl = document.getElementById('accountStatusValue');
+            if (!statusEl) return;
+
+            if (!user) {
+                statusEl.textContent = '👤 សូមចូលប្រើ';
+                return;
+            }
+
+            const result = checkUserStatus(user);
+            if (result.expired) {
+                statusEl.innerHTML = `⛔ <span class="status-inactive">${result.message}</span>`;
+                return;
+            }
+
+            const days = result.daysRemaining;
+            const expiryFormatted = formatDate(result.expiryDate);
+            let daysText = '';
+            let daysClass = 'status-days';
+            if (days <= 3) {
+                daysClass = 'status-expired';
+                daysText = `⚠️ ${days} ថ្ងៃ`;
+            } else if (days <= 7) {
+                daysClass = 'status-expired';
+                daysText = `⚠️ ${days} ថ្ងៃ`;
+            } else {
+                daysText = `${days} ថ្ងៃ`;
+            }
+
+            statusEl.innerHTML = `
+                👤 <span class="status-user">${user.uid}</span>
+                &nbsp;|&nbsp; 📅 ${expiryFormatted}
+                &nbsp;|&nbsp; <span class="${daysClass}">${daysText}</span>
+            `;
+        }
+
         function setUserSession(user) {
             currentUser = user;
             userCodes = { metfone: '', cellcard: '', smart: '' };
@@ -1130,6 +1138,9 @@
             document.getElementById('loginOverlay').classList.remove('active');
             showUpdateNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
             console.log('✅ Login successful! User:', user.uid);
+
+            // Update account status badge
+            updateAccountStatus(user);
         }
 
         // ============================================================
@@ -1388,7 +1399,7 @@
         }
 
         // ============================================================
-        // 14. INITIALIZE LOGIN SYSTEM (STRICT - FP + Password, with status handling)
+        // 14. INITIALIZE LOGIN SYSTEM
         // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
@@ -1440,10 +1451,10 @@
                 btn.disabled = true;
 
                 try {
-                    // 1. ស្វែងរកអ្នកប្រើតាម Fingerprint
+                    // 1. Find user by fingerprint
                     const userByFP = await findUserByFingerprint();
 
-                    // 2. បើគ្មាន FP → បដិសេធ
+                    // 2. If no FP → reject
                     if (!userByFP) {
                         error.textContent = 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!';
                         error.classList.add('show');
@@ -1453,7 +1464,7 @@
                         return;
                     }
 
-                    // 3. ពិនិត្យ status និង expiry
+                    // 3. Check status & expiry
                     const statusCheck = checkUserStatus(userByFP);
                     if (statusCheck.expired) {
                         error.textContent = statusCheck.message;
@@ -1464,7 +1475,7 @@
                         return;
                     }
 
-                    // 4. ផ្ទៀងផ្ទាត់ password
+                    // 4. Verify password
                     if (userByFP.password !== password) {
                         error.textContent = 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ';
                         error.classList.add('show');
@@ -1474,7 +1485,7 @@
                         return;
                     }
 
-                    // 5. ជោគជ័យ
+                    // 5. Success
                     setUserSession(userByFP);
                     loading.classList.remove('active');
                     btn.disabled = false;
@@ -1557,19 +1568,14 @@
         // ============================================================
         setTimeout(initLogin, 100);
 
-        loadSavedVersionDate();
+        // Update account status initially (shows "សូមចូលប្រើ")
+        updateAccountStatus(null);
         updateStatusBadge();
 
         console.log('🔐 ID Device:', deviceFingerprint);
-        console.log('📱 TEVA App Loaded Successfully (Strict Mode + Status-aware)');
+        console.log('📱 TEVA App Loaded Successfully (Account Status Badge)');
         console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
-        console.log('📌 Login rules:');
-        console.log('  1. Must have BOTH fingerprint AND password in Firebase');
-        console.log('  2. status = "inactive" → "អ្នកត្រូវបានហាមឃាត់..."');
-        console.log('  3. status = "expired" or expiryDate passed → "គណនីរបស់អ្នកបានផុតកំណត់!"');
-        console.log('  4. Wrong password → "ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ"');
-        console.log('  5. No fingerprint → "អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!"');
     </script>
 </body>
 </html>
