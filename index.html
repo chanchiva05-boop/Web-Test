@@ -17,10 +17,12 @@
     <meta name="application-name" content="TEVA">
     <meta name="msapplication-TileColor" content="#0a0a2a">
 
-    <!-- Firebase SDKs -->
+    <!-- ===== Firebase SDKs (បន្ថែម Auth SDK) ===== -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
     </script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js">
     </script>
 
     <style>
@@ -871,9 +873,27 @@
         const db = firebase.database();
 
         // ============================================================
-        // 1. VERSION DATE MANAGEMENT (REMOVED - replaced with account status)
+        // 1. ANONYMOUS AUTHENTICATION (បន្ថែមថ្មី)
         // ============================================================
-        // We no longer need version date functions
+        firebase.auth().signInAnonymously()
+            .then(() => {
+                console.log('✅ Anonymous Authentication successful');
+            })
+            .catch((error) => {
+                console.error('❌ Anonymous Auth failed:', error);
+                showUpdateNotification('កំហុស', 'មិនអាចផ្ទៀងផ្ទាត់ឧបករណ៍បាន');
+            });
+
+        // តាមដានស្ថានភាព Auth
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                console.log('✅ User is signed in (anonymous)');
+            } else {
+                console.log('❌ No user signed in');
+                // ព្យាយាម Login ឡើងវិញ បើមិនទាន់មាន
+                firebase.auth().signInAnonymously().catch(err => console.error('Retry auth failed:', err));
+            }
+        });
 
         // ============================================================
         // 2. PARTICLES BACKGROUND
@@ -1573,7 +1593,7 @@
         updateStatusBadge();
 
         console.log('🔐 ID Device:', deviceFingerprint);
-        console.log('📱 TEVA App Loaded Successfully (Account Status Badge)');
+        console.log('📱 TEVA App Loaded Successfully (Account Status Badge + Anonymous Auth)');
         console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
     </script>
