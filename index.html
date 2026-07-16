@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>| 𝕊𝕂𝕐ℕ𝔼𝕋 |</title>
-    
+
     <link rel="apple-touch-icon" href="teva.png">
     <link rel="icon" type="image/png" sizes="32x32" href="teva.png">
     <link rel="icon" type="image/png" sizes="192x192" href="teva.png">
-    
+
     <meta name="theme-color" content="#0a0a2a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -16,11 +16,13 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="TEVA">
     <meta name="msapplication-TileColor" content="#0a0a2a">
-    
+
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js">
+    </script>
+
     <style>
         @font-face {
             font-family: 'Khmer OS Battambang';
@@ -28,27 +30,27 @@
             font-weight: normal;
             font-style: normal;
         }
-        
+
         @font-face {
             font-family: 'Khmer OS Battambang';
             src: local('Khmer OS Battambang Bold'), local('KhmerOSBattambang-Bold');
             font-weight: bold;
             font-style: normal;
         }
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             height: 100vh;
             overflow: hidden;
             background: #0a0a2a;
             font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
         }
-        
+
         .gradient-bg {
             position: fixed;
             top: 0;
@@ -58,20 +60,20 @@
             background: radial-gradient(circle at 20% 50%, rgba(25, 35, 70, 0.8), rgba(10, 10, 42, 0.95));
             z-index: 0;
         }
-        
+
         .animated-bg {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: 
-                repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 8px),
-                repeating-linear-gradient(135deg, rgba(212,175,55,0.03) 0px, rgba(212,175,55,0.03) 1px, transparent 1px, transparent 12px);
+            background:
+                repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0px, rgba(255, 255, 255, 0.02) 2px, transparent 2px, transparent 8px),
+                repeating-linear-gradient(135deg, rgba(212, 175, 55, 0.03) 0px, rgba(212, 175, 55, 0.03) 1px, transparent 1px, transparent 12px);
             z-index: 1;
             pointer-events: none;
         }
-        
+
         .orb {
             position: fixed;
             border-radius: 50%;
@@ -80,40 +82,47 @@
             z-index: 0;
             animation: floatOrb 20s ease-in-out infinite;
         }
-        
+
         .orb-1 {
             width: 400px;
             height: 400px;
-            background: radial-gradient(circle, rgba(212,175,55,0.4), rgba(100,80,20,0.1));
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.4), rgba(100, 80, 20, 0.1));
             top: -150px;
             right: -100px;
             animation-delay: 0s;
         }
-        
+
         .orb-2 {
             width: 500px;
             height: 500px;
-            background: radial-gradient(circle, rgba(80,120,200,0.3), rgba(30,50,100,0.1));
+            background: radial-gradient(circle, rgba(80, 120, 200, 0.3), rgba(30, 50, 100, 0.1));
             bottom: -200px;
             left: -150px;
             animation-delay: -5s;
         }
-        
+
         .orb-3 {
             width: 300px;
             height: 300px;
-            background: radial-gradient(circle, rgba(245,226,140,0.3), rgba(150,120,50,0.1));
+            background: radial-gradient(circle, rgba(245, 226, 140, 0.3), rgba(150, 120, 50, 0.1));
             top: 40%;
             left: 20%;
             animation-delay: -10s;
         }
-        
+
         @keyframes floatOrb {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(30px, -40px) scale(1.05); }
-            66% { transform: translate(-20px, 30px) scale(0.95); }
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+            33% {
+                transform: translate(30px, -40px) scale(1.05);
+            }
+            66% {
+                transform: translate(-20px, 30px) scale(0.95);
+            }
         }
-        
+
         .glass-panel {
             position: absolute;
             left: 50%;
@@ -125,14 +134,14 @@
             max-width: 480px;
             padding: 0 20px;
         }
-        
+
         .header-badge {
             margin-bottom: 40px;
             opacity: 0;
             animation: fadeSlideUp 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
             animation-delay: 0.3s;
         }
-        
+
         .badge {
             display: inline-flex;
             align-items: center;
@@ -145,13 +154,13 @@
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
             transition: all 0.3s ease;
         }
-        
+
         .badge:hover {
             border-color: rgba(212, 175, 55, 0.7);
             box-shadow: 0 16px 32px rgba(212, 175, 55, 0.15);
             transform: scale(1.02);
         }
-        
+
         .badge-icon {
             width: 10px;
             height: 10px;
@@ -160,12 +169,19 @@
             box-shadow: 0 0 12px #d4af37;
             animation: pulse 1.5s ease-in-out infinite;
         }
-        
+
         @keyframes pulse {
-            0%, 100% { opacity: 0.6; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.4); }
+            0%,
+            100% {
+                opacity: 0.6;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.4);
+            }
         }
-        
+
         .badge-text {
             font-size: 18px;
             font-weight: 600;
@@ -174,32 +190,32 @@
             text-transform: uppercase;
             font-family: 'Times New Roman', Times, serif;
         }
-        
+
         .badge-text span {
             color: #d4af37;
             font-weight: 700;
             font-size: 19px;
         }
-        
+
         .card {
             background: rgba(12, 18, 28, 0.55);
             backdrop-filter: blur(24px);
             border-radius: 48px;
             padding: 48px 32px;
             border: 1px solid rgba(212, 175, 55, 0.2);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
             opacity: 0;
             animation: fadeSlideUp 0.8s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
             animation-delay: 0.5s;
             transition: transform 0.4s ease, box-shadow 0.4s ease;
         }
-        
+
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 40px 70px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+            box-shadow: 0 40px 70px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
             border-color: rgba(212, 175, 55, 0.35);
         }
-        
+
         @keyframes fadeSlideUp {
             from {
                 opacity: 0;
@@ -210,13 +226,13 @@
                 transform: translateY(0);
             }
         }
-        
+
         .button-group {
             display: flex;
             flex-direction: column;
             gap: 18px;
         }
-        
+
         .btn {
             position: relative;
             width: 100%;
@@ -235,7 +251,7 @@
             border: 1px solid rgba(212, 175, 55, 0.3);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
-        
+
         .btn::before {
             content: '';
             position: absolute;
@@ -246,36 +262,36 @@
             background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
             transition: left 0.5s ease;
         }
-        
+
         .btn:hover::before {
             left: 100%;
         }
-        
+
         .btn:hover {
             transform: translateY(-2px);
             border-color: rgba(212, 175, 55, 0.6);
             box-shadow: 0 8px 25px rgba(212, 175, 55, 0.2);
             background: linear-gradient(105deg, #253544, #121a28);
         }
-        
+
         .btn:active {
             transform: translateY(1px);
         }
-        
+
         .btn-glow {
             position: absolute;
             inset: 0;
             border-radius: 40px;
-            background: radial-gradient(circle at 30% 50%, rgba(212,175,55,0.15), transparent 70%);
+            background: radial-gradient(circle at 30% 50%, rgba(212, 175, 55, 0.15), transparent 70%);
             opacity: 0;
             transition: opacity 0.3s;
             pointer-events: none;
         }
-        
+
         .btn:hover .btn-glow {
             opacity: 1;
         }
-        
+
         .line-decoration {
             position: absolute;
             left: 50%;
@@ -286,14 +302,14 @@
             bottom: -25px;
             border-radius: 2px;
         }
-        
+
         .card-footer {
             margin-top: 28px;
             display: flex;
             justify-content: center;
             gap: 12px;
         }
-        
+
         .dot {
             width: 6px;
             height: 6px;
@@ -301,12 +317,12 @@
             border-radius: 50%;
             transition: all 0.3s;
         }
-        
+
         .card:hover .dot {
             background: rgba(212, 175, 55, 0.9);
             box-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
         }
-        
+
         .birds-container {
             position: absolute;
             top: 0;
@@ -316,7 +332,7 @@
             z-index: 15;
             pointer-events: none;
         }
-        
+
         .bird {
             position: absolute;
             width: 40px;
@@ -325,7 +341,7 @@
             opacity: 0.6;
             filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.2));
         }
-        
+
         .bird-body {
             position: absolute;
             width: 30px;
@@ -335,7 +351,7 @@
             top: 5px;
             left: 5px;
         }
-        
+
         .bird-wing {
             position: absolute;
             width: 20px;
@@ -343,21 +359,21 @@
             background: rgba(255, 240, 180, 0.8);
             border-radius: 50%;
         }
-        
+
         .bird-wing.left {
             top: 8px;
             left: 0;
             transform: rotate(-20deg);
             animation: wingFlapLeft 0.8s infinite alternate ease-in-out;
         }
-        
+
         .bird-wing.right {
             top: 8px;
             right: 0;
             transform: rotate(20deg);
             animation: wingFlapRight 0.8s infinite alternate ease-in-out;
         }
-        
+
         .bird-tail {
             position: absolute;
             width: 15px;
@@ -368,7 +384,7 @@
             left: 25px;
             transform: rotate(30deg);
         }
-        
+
         .bird-eye {
             position: absolute;
             width: 3px;
@@ -378,29 +394,96 @@
             top: 8px;
             left: 25px;
         }
-        
+
         @keyframes wingFlapLeft {
-            0% { transform: rotate(-20deg) translateY(0); }
-            100% { transform: rotate(-40deg) translateY(2px); }
+            0% {
+                transform: rotate(-20deg) translateY(0);
+            }
+            100% {
+                transform: rotate(-40deg) translateY(2px);
+            }
         }
-        
+
         @keyframes wingFlapRight {
-            0% { transform: rotate(20deg) translateY(0); }
-            100% { transform: rotate(40deg) translateY(2px); }
+            0% {
+                transform: rotate(20deg) translateY(0);
+            }
+            100% {
+                transform: rotate(40deg) translateY(2px);
+            }
         }
-        
-        .bird1 { top: 12%; left: -10%; animation: flyPath1 28s linear infinite; }
-        .bird2 { top: 18%; left: -20%; animation: flyPath2 32s linear infinite; animation-delay: 2s; }
-        .bird3 { top: 8%; left: -40%; animation: flyPath3 30s linear infinite; animation-delay: 5s; }
-        .bird4 { top: 22%; left: -60%; animation: flyPath4 35s linear infinite; animation-delay: 7s; }
-        .bird5 { top: 15%; left: -80%; animation: flyPath5 26s linear infinite; animation-delay: 3s; }
-        
-        @keyframes flyPath1 { 0% { transform: translateX(0) translateY(0); } 100% { transform: translateX(130vw) translateY(20px); } }
-        @keyframes flyPath2 { 0% { transform: translateX(0) translateY(0); } 100% { transform: translateX(140vw) translateY(-15px); } }
-        @keyframes flyPath3 { 0% { transform: translateX(0) translateY(0); } 100% { transform: translateX(125vw) translateY(10px); } }
-        @keyframes flyPath4 { 0% { transform: translateX(0) translateY(0); } 100% { transform: translateX(150vw) translateY(-8px); } }
-        @keyframes flyPath5 { 0% { transform: translateX(0) translateY(0); } 100% { transform: translateX(120vw) translateY(15px); } }
-        
+
+        .bird1 {
+            top: 12%;
+            left: -10%;
+            animation: flyPath1 28s linear infinite;
+        }
+        .bird2 {
+            top: 18%;
+            left: -20%;
+            animation: flyPath2 32s linear infinite;
+            animation-delay: 2s;
+        }
+        .bird3 {
+            top: 8%;
+            left: -40%;
+            animation: flyPath3 30s linear infinite;
+            animation-delay: 5s;
+        }
+        .bird4 {
+            top: 22%;
+            left: -60%;
+            animation: flyPath4 35s linear infinite;
+            animation-delay: 7s;
+        }
+        .bird5 {
+            top: 15%;
+            left: -80%;
+            animation: flyPath5 26s linear infinite;
+            animation-delay: 3s;
+        }
+
+        @keyframes flyPath1 {
+            0% {
+                transform: translateX(0) translateY(0);
+            }
+            100% {
+                transform: translateX(130vw) translateY(20px);
+            }
+        }
+        @keyframes flyPath2 {
+            0% {
+                transform: translateX(0) translateY(0);
+            }
+            100% {
+                transform: translateX(140vw) translateY(-15px);
+            }
+        }
+        @keyframes flyPath3 {
+            0% {
+                transform: translateX(0) translateY(0);
+            }
+            100% {
+                transform: translateX(125vw) translateY(10px);
+            }
+        }
+        @keyframes flyPath4 {
+            0% {
+                transform: translateX(0) translateY(0);
+            }
+            100% {
+                transform: translateX(150vw) translateY(-8px);
+            }
+        }
+        @keyframes flyPath5 {
+            0% {
+                transform: translateX(0) translateY(0);
+            }
+            100% {
+                transform: translateX(120vw) translateY(15px);
+            }
+        }
+
         .mountain-scene {
             position: absolute;
             bottom: 0;
@@ -409,36 +492,62 @@
             z-index: 5;
             pointer-events: none;
         }
-        
+
         .peak {
             position: absolute;
             bottom: 0;
             background: linear-gradient(180deg, rgba(8, 12, 22, 0.9), rgba(0, 0, 0, 0.7));
             clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
         }
-        
-        .peak-1 { left: 5%; width: 28%; height: 70%; opacity: 0.5; }
-        .peak-2 { left: 25%; width: 32%; height: 85%; opacity: 0.6; }
-        .peak-3 { left: 55%; width: 25%; height: 60%; opacity: 0.45; }
-        .peak-4 { left: 75%; width: 22%; height: 75%; opacity: 0.55; }
-        
+
+        .peak-1 {
+            left: 5%;
+            width: 28%;
+            height: 70%;
+            opacity: 0.5;
+        }
+        .peak-2 {
+            left: 25%;
+            width: 32%;
+            height: 85%;
+            opacity: 0.6;
+        }
+        .peak-3 {
+            left: 55%;
+            width: 25%;
+            height: 60%;
+            opacity: 0.45;
+        }
+        .peak-4 {
+            left: 75%;
+            width: 22%;
+            height: 75%;
+            opacity: 0.55;
+        }
+
         .mist {
             position: absolute;
             bottom: 0;
             width: 100%;
             height: 35%;
-            background: linear-gradient(to top, rgba(255,255,245,0.08), transparent);
+            background: linear-gradient(to top, rgba(255, 255, 245, 0.08), transparent);
             filter: blur(40px);
             z-index: 6;
             pointer-events: none;
             animation: mistMove 22s ease-in-out infinite alternate;
         }
-        
+
         @keyframes mistMove {
-            0% { opacity: 0.4; transform: translateX(-5%); }
-            100% { opacity: 0.8; transform: translateX(5%); }
+            0% {
+                opacity: 0.4;
+                transform: translateX(-5%);
+            }
+            100% {
+                opacity: 0.8;
+                transform: translateX(5%);
+            }
         }
-        
+
         .particles {
             position: fixed;
             top: 0;
@@ -448,21 +557,31 @@
             z-index: 2;
             pointer-events: none;
         }
-        
+
         .particle {
             position: absolute;
             background: rgba(212, 175, 55, 0.3);
             border-radius: 50%;
             animation: floatParticle 12s infinite linear;
         }
-        
+
         @keyframes floatParticle {
-            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.5; }
-            90% { opacity: 0.5; }
-            100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.5;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(-20vh) rotate(360deg);
+                opacity: 0;
+            }
         }
-        
+
         .install-prompt {
             position: fixed;
             bottom: 24px;
@@ -485,18 +604,18 @@
             letter-spacing: 0.5px;
             white-space: nowrap;
         }
-        
+
         .install-prompt:hover {
             transform: translateX(-50%) translateY(-3px);
             background: linear-gradient(135deg, #e5c458, #d4af37);
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 28px rgba(212, 175, 55, 0.5);
             border-color: rgba(255, 250, 200, 0.8);
         }
-        
+
         .install-prompt:active {
             transform: translateX(-50%) translateY(2px);
         }
-        
+
         .install-prompt::before {
             content: '📥';
             margin-right: 10px;
@@ -504,12 +623,17 @@
             display: inline-block;
             animation: bounce 1s ease-in-out infinite;
         }
-        
+
         @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-3px); }
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-3px);
+            }
         }
-        
+
         .status-badge {
             position: fixed;
             top: 12px;
@@ -528,17 +652,17 @@
             letter-spacing: 0.3px;
             transition: all 0.3s ease;
         }
-        
+
         .status-badge.online {
             color: #4ade80;
             border-color: rgba(74, 222, 128, 0.4);
         }
-        
+
         .status-badge.offline {
             color: #fbbf24;
             border-color: rgba(251, 191, 36, 0.4);
         }
-        
+
         .update-notification {
             position: fixed;
             bottom: 100px;
@@ -552,18 +676,30 @@
             font-weight: bold;
             z-index: 1000;
             font-family: 'Khmer OS Battambang', 'Times New Roman', Times, serif;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             animation: fadeInOut 3s ease forwards;
             white-space: nowrap;
         }
-        
+
         @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
-            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(10px);
+            }
+            15% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            85% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-10px);
+            }
         }
-        
+
         /* ===== LOGIN SCREEN STYLES ===== */
         .login-overlay {
             position: fixed;
@@ -580,11 +716,11 @@
             flex-direction: column;
             padding: 20px;
         }
-        
+
         .login-overlay.active {
             display: flex;
         }
-        
+
         .login-box {
             background: rgba(12, 18, 28, 0.85);
             backdrop-filter: blur(24px);
@@ -597,7 +733,7 @@
             text-align: center;
             animation: fadeSlideUp 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
         }
-        
+
         .login-title {
             color: #f0e9cf;
             font-size: 32px;
@@ -609,11 +745,11 @@
             user-select: none;
             transition: all 0.3s ease;
         }
-        
+
         .login-title:active {
             transform: scale(0.95);
         }
-        
+
         .login-subtitle {
             color: rgba(212, 175, 55, 0.6);
             font-size: 13px;
@@ -621,7 +757,7 @@
             letter-spacing: 3px;
             text-transform: uppercase;
         }
-        
+
         .login-expiry {
             font-size: 14px;
             color: rgba(212, 175, 55, 0.7);
@@ -631,7 +767,7 @@
             transition: all 0.3s ease;
             padding: 10px 12px;
             border-radius: 12px;
-            background: rgba(255,255,255,0.03);
+            background: rgba(255, 255, 255, 0.03);
             font-weight: 500;
             display: flex;
             align-items: center;
@@ -667,21 +803,26 @@
         }
         .login-expiry.loading {
             color: rgba(212, 175, 55, 0.6);
-            background: rgba(255,255,255,0.02);
+            background: rgba(255, 255, 255, 0.02);
             border: 1px solid rgba(212, 175, 55, 0.1);
             animation: pulseLoading 1s ease-in-out infinite;
         }
-        
+
         @keyframes pulseLoading {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
+            0%,
+            100% {
+                opacity: 0.6;
+            }
+            50% {
+                opacity: 1;
+            }
         }
-        
+
         .login-input-group {
             position: relative;
             margin-bottom: 20px;
         }
-        
+
         .login-input {
             width: 100%;
             padding: 16px 22px;
@@ -696,17 +837,17 @@
             outline: none;
             letter-spacing: 1px;
         }
-        
+
         .login-input:focus {
             border-color: #d4af37;
             box-shadow: 0 0 25px rgba(212, 175, 55, 0.15);
             background: rgba(255, 255, 255, 0.08);
         }
-        
+
         .login-input::placeholder {
             color: rgba(255, 255, 255, 0.25);
         }
-        
+
         .toggle-password {
             position: absolute;
             right: 16px;
@@ -721,15 +862,15 @@
             transition: color 0.3s ease;
             z-index: 10;
         }
-        
+
         .toggle-password:hover {
             color: #d4af37;
         }
-        
+
         .toggle-password:active {
             transform: translateY(-50%) scale(0.9);
         }
-        
+
         .login-btn {
             width: 100%;
             padding: 16px;
@@ -745,21 +886,21 @@
             box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
             letter-spacing: 1px;
         }
-        
+
         .login-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5);
         }
-        
+
         .login-btn:active {
             transform: translateY(1px);
         }
-        
+
         .login-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
-        
+
         .login-error {
             color: #ff6b6b;
             font-size: 16px;
@@ -773,14 +914,14 @@
             border: 2px solid rgba(255, 0, 0, 0.2);
             font-weight: 700;
             transform: translateY(-5px);
-            text-shadow: 0 0 10px rgba(255,0,0,0.3);
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
         }
-        
+
         .login-error.show {
             opacity: 1;
             transform: translateY(0);
         }
-        
+
         .login-device-info {
             color: rgba(255, 255, 255, 0.25);
             font-size: 11px;
@@ -789,7 +930,7 @@
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             padding-top: 20px;
         }
-        
+
         .login-logo {
             width: 80px;
             height: 80px;
@@ -806,18 +947,18 @@
             user-select: none;
             transition: all 0.3s ease;
         }
-        
+
         .login-logo:active {
             transform: scale(0.9);
         }
-        
+
         .login-shield {
             font-size: 14px;
             color: rgba(212, 175, 55, 0.4);
             margin-top: 10px;
             letter-spacing: 1px;
         }
-        
+
         .login-loading {
             margin-top: 15px;
             display: none;
@@ -827,11 +968,11 @@
             color: rgba(255, 255, 255, 0.6);
             font-size: 14px;
         }
-        
+
         .login-loading.active {
             display: flex;
         }
-        
+
         .spinner {
             width: 20px;
             height: 20px;
@@ -840,33 +981,37 @@
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
-        
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
         }
-        
+
         /* ===== FINGERPRINT DISPLAY ===== */
         #fpDisplay {
             position: fixed;
             bottom: 120px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.95);
+            background: rgba(0, 0, 0, 0.95);
             color: #d4af37;
             padding: 20px 25px;
             border-radius: 20px;
             font-family: monospace;
             z-index: 99999;
             border: 2px solid #d4af37;
-            box-shadow: 0 0 50px rgba(212,175,55,0.2);
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.2);
             text-align: center;
             max-width: 90%;
             width: 350px;
             backdrop-filter: blur(10px);
             animation: slideUp 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1) forwards;
         }
-        
+
         @keyframes slideUp {
             from {
                 opacity: 0;
@@ -877,33 +1022,33 @@
                 transform: translateX(-50%) translateY(0);
             }
         }
-        
+
         .fp-title {
             font-size: 12px;
             color: #888;
             margin-bottom: 8px;
             letter-spacing: 2px;
         }
-        
+
         .fp-code {
             font-weight: bold;
             font-size: 22px;
             color: #d4af37;
             word-break: break-all;
             margin: 10px 0;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
             padding: 10px;
             border-radius: 10px;
             letter-spacing: 1px;
         }
-        
+
         .fp-actions {
             display: flex;
             gap: 10px;
             justify-content: center;
             margin-top: 15px;
         }
-        
+
         .fp-btn {
             padding: 10px 20px;
             border: none;
@@ -913,32 +1058,32 @@
             font-size: 14px;
             transition: all 0.3s ease;
         }
-        
+
         .fp-btn-copy {
             background: #d4af37;
             color: #000;
         }
-        
+
         .fp-btn-copy:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(212,175,55,0.3);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
         }
-        
+
         .fp-btn-close {
             background: #ff4444;
             color: #fff;
         }
-        
+
         .fp-btn-close:hover {
             transform: scale(1.05);
         }
-        
+
         .fp-hint {
             font-size: 10px;
             color: #666;
             margin-top: 10px;
         }
-        
+
         @media (max-width: 500px) {
             .glass-panel {
                 max-width: 380px;
@@ -1025,7 +1170,7 @@
                 padding: 8px 12px;
             }
         }
-        
+
         @supports (display: standalone) {
             body {
                 background: #0a0a2a;
@@ -1063,15 +1208,15 @@
 
     <div class="gradient-bg"></div>
     <div class="animated-bg"></div>
-    
+
     <div class="status-badge online" id="statusBadge">● Online</div>
-    
+
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
     <div class="orb orb-3"></div>
-    
+
     <div class="particles" id="particles"></div>
-    
+
     <div class="glass-panel">
         <div class="header-badge">
             <div class="badge">
@@ -1079,7 +1224,7 @@
                 <div class="badge-text" id="versionDate">កាលបរិច្ឆេទកំណែ : <span id="versionDateValue">កំពុងផ្ទុក...</span></div>
             </div>
         </div>
-        
+
         <div class="card">
             <div class="button-group">
                 <button class="btn" onclick="openV2Box('metfone')">
@@ -1095,7 +1240,7 @@
                     <div class="btn-glow"></div>
                 </button>
             </div>
-            
+
             <div class="card-footer">
                 <div class="dot"></div>
                 <div class="dot"></div>
@@ -1104,7 +1249,7 @@
             <div class="line-decoration"></div>
         </div>
     </div>
-    
+
     <div class="birds-container">
         <div class="bird bird1"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
         <div class="bird bird2"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
@@ -1112,21 +1257,21 @@
         <div class="bird bird4"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
         <div class="bird bird5"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
     </div>
-    
+
     <div class="mountain-scene">
         <div class="peak peak-1"></div>
         <div class="peak peak-2"></div>
         <div class="peak peak-3"></div>
         <div class="peak peak-4"></div>
     </div>
-    
+
     <div class="mist"></div>
-    
+
     <button id="installBtn" class="install-prompt">ដំឡើងកម្មវិធី</button>
-    
+
     <script>
         // ============================================================
-        // FIREBASE CONFIG
+        // 0. FIREBASE INIT
         // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyA-RvOzR03Ic4HefKdBycXYIK7AZyjcVn4",
@@ -1135,29 +1280,29 @@
             projectId: "skynet-dec0e",
             storageBucket: "skynet-dec0e.firebasestorage.app",
             messagingSenderId: "771361401451",
-            appId: "1:771361401451:web:ad0389550229089003df2e"
+            appId: "1:771361401451:web:ad0389550229089003df2e",
+            measurementId: "G-QRQ8QB3ME0"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        console.log('✅ Firebase connected!');
+        const db = firebase.database();
 
         // ============================================================
         // 1. VERSION DATE MANAGEMENT
         // ============================================================
         let lastUpdateTime = null;
-        
+
         function updateVersionDate() {
             const versionSpan = document.getElementById('versionDateValue');
             const now = new Date();
-            const formattedDate = `${now.getDate().toString().padStart(2, '0')} ${getKhmerMonth(now.getMonth())} ${now.getFullYear()}`;
+            const formattedDate =
+                `${now.getDate().toString().padStart(2, '0')} ${getKhmerMonth(now.getMonth())} ${now.getFullYear()}`;
             versionSpan.textContent = formattedDate;
             lastUpdateTime = now;
             localStorage.setItem('last_version_update', now.toISOString());
             console.log('📅 Version date updated to:', formattedDate);
         }
-        
+
         function getKhmerMonth(month) {
             const khmerMonths = [
                 'មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា',
@@ -1165,23 +1310,24 @@
             ];
             return khmerMonths[month];
         }
-        
+
         function loadSavedVersionDate() {
             const savedDate = localStorage.getItem('last_version_update');
             if (savedDate) {
                 try {
                     const date = new Date(savedDate);
-                    const formattedDate = `${date.getDate().toString().padStart(2, '0')} ${getKhmerMonth(date.getMonth())} ${date.getFullYear()}`;
+                    const formattedDate =
+                        `${date.getDate().toString().padStart(2, '0')} ${getKhmerMonth(date.getMonth())} ${date.getFullYear()}`;
                     document.getElementById('versionDateValue').textContent = formattedDate;
                     lastUpdateTime = date;
-                } catch(e) {
+                } catch (e) {
                     updateVersionDate();
                 }
             } else {
                 updateVersionDate();
             }
         }
-        
+
         // ============================================================
         // 2. PARTICLES BACKGROUND
         // ============================================================
@@ -1201,7 +1347,7 @@
             }
         }
         createParticles();
-        
+
         // ============================================================
         // 3. STATUS BADGE
         // ============================================================
@@ -1215,7 +1361,7 @@
                 badge.className = 'status-badge offline';
             }
         }
-        
+
         function showUpdateNotification(title, message) {
             const existingNotifications = document.querySelectorAll('.update-notification');
             existingNotifications.forEach(notif => notif.remove());
@@ -1225,108 +1371,145 @@
             document.body.appendChild(notification);
             setTimeout(() => notification.remove(), 3000);
         }
-        
+
         // ============================================================
-        // 4. STABLE DEVICE FINGERPRINT
+        // 4. CLEAR LOCAL STORAGE (old keys)
         // ============================================================
-        function getDeviceFingerprint() {
-            let fp = localStorage.getItem('device_fingerprint');
-            if (fp && fp.startsWith('FP_')) {
-                console.log('✅ Using saved fingerprint:', fp);
-                return fp;
-            }
-            
-            console.log('🔐 Generating new stable fingerprint...');
-            
-            const components = [
-                navigator.userAgent,
-                screen.width + 'x' + screen.height,
-                screen.colorDepth,
-                navigator.hardwareConcurrency || 0,
-                navigator.platform,
-                navigator.language,
-                new Date().getTimezoneOffset()
-            ];
-            
+        function clearLocalStorage() {
             try {
-                const canvas = document.createElement('canvas');
-                canvas.width = 200;
-                canvas.height = 50;
-                const ctx = canvas.getContext('2d');
-                ctx.textBaseline = 'top';
-                ctx.font = '14px Arial';
-                ctx.fillStyle = '#f60';
-                ctx.fillRect(125, 1, 62, 20);
-                ctx.fillStyle = '#069';
-                ctx.fillText('TEVA', 2, 15);
-                ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
-                ctx.fillText('SECURE', 4, 17);
-                components.push(canvas.toDataURL());
-            } catch(e) {}
-            
-            const str = components.join('|||');
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                const char = str.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash = hash & hash;
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && (key.includes('user_codes_') ||
+                            key.includes('_exists_') ||
+                            key.includes('METFONE') ||
+                            key.includes('CELLCARD') ||
+                            key.includes('METFONE1') ||
+                            key.includes('metfone') ||
+                            key.includes('cellcard') ||
+                            key.includes('toor_') ||
+                            key.includes('smart'))) {
+                        keysToRemove.push(key);
+                    }
+                }
+                keysToRemove.forEach(key => {
+                    localStorage.removeItem(key);
+                    console.log('🗑️ Removed localStorage:', key);
+                });
+                return true;
+            } catch (e) {
+                console.error('❌ Error clearing localStorage:', e);
+                return false;
             }
-            fp = 'FP_' + Math.abs(hash).toString(16).padStart(8, '0');
-            
-            localStorage.setItem('device_fingerprint', fp);
-            console.log('✅ New stable fingerprint saved:', fp);
-            
-            return fp;
         }
 
-        let deviceFingerprint = getDeviceFingerprint();
-        let isLoggedIn = false;
-        let currentUser = '';
+        // ============================================================
+        // 5. FIREBASE HELPERS
+        // ============================================================
+        async function getAllUsers() {
+            if (!navigator.onLine) {
+                console.log('❌ Offline - cannot read from Firebase');
+                return null;
+            }
+            try {
+                const snapshot = await db.ref('users').once('value');
+                return snapshot.val();
+            } catch (e) {
+                console.error('❌ Firebase read error:', e);
+                return null;
+            }
+        }
+
+        async function getUserByPassword(password) {
+            if (!navigator.onLine || !password) return null;
+            try {
+                const snapshot = await db.ref(`users/${password}`).once('value');
+                const val = snapshot.val();
+                if (val) {
+                    return { ...val, password: password };
+                }
+                return null;
+            } catch (e) {
+                console.error('❌ Firebase read error:', e);
+                return null;
+            }
+        }
+
+        // ============================================================
+        // 6. LOAD USER CODES FROM FIREBASE
+        // ============================================================
         let userCodes = {
             metfone: '',
             cellcard: '',
             smart: ''
         };
+        let currentUser = '';
         let userExists = {
             metfone: false,
             cellcard: false,
             smart: false
         };
-        let skyNetData = null;
-        let expiryConfig = null;
 
-        // ============================================================
-        // 5. LOAD DATA FROM FIREBASE
-        // ============================================================
-        async function loadSkyNetData() {
+        async function loadUserCodes(password) {
+            currentUser = password;
+            userCodes = { metfone: '', cellcard: '', smart: '' };
+            userExists = { metfone: false, cellcard: false, smart: false };
+
+            console.log('🔄 Loading user codes from Firebase for:', password);
+
             if (!navigator.onLine) {
-                console.log('❌ Offline - cannot load from Firebase');
+                console.log('❌ Offline - cannot authenticate');
+                showUpdateNotification('កំហុស', 'ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់');
                 return null;
             }
-            
-            try {
-                const snapshot = await database.ref('/').once('value');
-                const data = snapshot.val();
-                
-                if (data) {
-                    skyNetData = data;
-                    expiryConfig = data;
-                    console.log('✅ Loaded data from Firebase successfully');
-                    console.log('📋 Users found:', Object.keys(data.users || {}).length);
-                    return data;
-                } else {
-                    console.log('❌ No data found in Firebase');
-                    return null;
+
+            const userData = await getUserByPassword(password);
+            if (!userData) {
+                console.log('❌ User not found in Firebase');
+                return null;
+            }
+
+            console.log('✅ Found user in Firebase');
+
+            if (userData.links) {
+                if (userData.links.metfone) {
+                    userCodes.metfone = userData.links.metfone;
+                    userExists.metfone = true;
                 }
-            } catch (error) {
-                console.error('❌ Firebase load error:', error);
-                return null;
+                if (userData.links.cellcard) {
+                    userCodes.cellcard = userData.links.cellcard;
+                    userExists.cellcard = true;
+                }
+                if (userData.links.smart) {
+                    userCodes.smart = userData.links.smart;
+                    userExists.smart = true;
+                }
             }
+
+            console.log('✅ Loaded user codes for', password, ':', userCodes);
+            console.log('✅ User exists status:', userExists);
+            return userCodes;
         }
 
         // ============================================================
-        // 6. USER EXPIRY FUNCTIONS
+        // 7. EXPIRY DATE MANAGEMENT
         // ============================================================
+        let expiryConfig = null;
+        let currentDeviceUser = null;
+
+        async function loadExpiryConfig() {
+            if (!navigator.onLine) {
+                console.log('❌ Offline - cannot load expiry data');
+                return null;
+            }
+            const data = await getAllUsers();
+            if (data) {
+                expiryConfig = { users: data };
+                return expiryConfig;
+            }
+            return null;
+        }
+
         function getDaysRemainingFromDate(expiryDateStr) {
             const expiryDate = new Date(expiryDateStr);
             const now = new Date();
@@ -1337,14 +1520,34 @@
 
         function getUserExpiry(password) {
             if (!expiryConfig || !expiryConfig.users) return null;
-            
             const userData = expiryConfig.users[password];
             if (!userData) return null;
-            
             if (userData.status === 'inactive' || userData.status === 'expired') {
                 return { ...userData, expired: true };
             }
             return { ...userData, expired: false };
+        }
+
+        async function findUserByFingerprint() {
+            if (!navigator.onLine) {
+                console.log('❌ Offline - cannot search fingerprint');
+                return null;
+            }
+            const data = await getAllUsers();
+            if (!data) {
+                console.log('❌ Failed to load users from Firebase');
+                return null;
+            }
+            const currentFP = getDeviceFingerprint();
+            console.log('🔍 Searching for user with FP:', currentFP);
+            for (const [key, value] of Object.entries(data)) {
+                if (value.fingerprint && value.fingerprint === currentFP) {
+                    console.log('✅ Found user by fingerprint:', key);
+                    return key;
+                }
+            }
+            console.log('❌ No user found with this fingerprint');
+            return null;
         }
 
         function formatDate(dateStr) {
@@ -1355,185 +1558,79 @@
             return `${day}/${month}/${year}`;
         }
 
-        // ============================================================
-        // 7. CHECK LOGIN - FIXED VERSION
-        // ============================================================
-        async function checkLogin(password) {
-            if (!navigator.onLine) {
-                return { success: false, message: '❌ ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់' };
+        async function isUserExpired(password) {
+            await loadExpiryConfig();
+            if (!expiryConfig || !expiryConfig.users) {
+                console.log('❌ No user data found');
+                return { expired: true, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
             }
-            
-            const data = await loadSkyNetData();
-            if (!data || !data.users) {
-                return { success: false, message: '❌ មិនអាចផ្ទុកទិន្នន័យបាន' };
+            const userExpiry = getUserExpiry(password);
+            if (!userExpiry) {
+                console.log(`❌ User ${password} NOT FOUND`);
+                return { expired: true, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
             }
-            
-            const currentFP = deviceFingerprint;
-            
-            console.log('🔍 Checking login...');
-            console.log('📋 Password entered:', password);
-            console.log('📋 Current FP:', currentFP);
-            
-            // ====== METHOD 1: Check if password exists in database ======
-            if (data.users[password]) {
-                const userData = data.users[password];
-                console.log('✅ User found by password:', password);
-                
-                // Check if user is active
-                if (userData.status === 'inactive' || userData.status === 'expired') {
-                    return { success: false, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
-                }
-                
-                // Check expiry date
-                if (userData.expiryDate) {
-                    const expiryDate = new Date(userData.expiryDate);
-                    const now = new Date();
-                    if (expiryDate < now) {
-                        return { success: false, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
-                    }
-                }
-                
-                // ====== Load user codes ======
-                currentUser = password;
-                if (userData.links) {
-                    if (userData.links.metfone) {
-                        userCodes.metfone = userData.links.metfone;
-                        userExists.metfone = true;
-                    }
-                    if (userData.links.cellcard) {
-                        userCodes.cellcard = userData.links.cellcard;
-                        userExists.cellcard = true;
-                    }
-                    if (userData.links.smart) {
-                        userCodes.smart = userData.links.smart;
-                        userExists.smart = true;
-                    }
-                }
-                console.log('✅ Loaded user codes:', userCodes);
-                console.log('✅ User exists status:', userExists);
-                
-                // ====== Also save fingerprint if not set ======
-                if (!userData.fingerprint || userData.fingerprint === '') {
-                    await database.ref('users/' + password + '/fingerprint').set(currentFP);
-                    console.log('✅ Saved fingerprint for user:', password);
-                }
-                
-                return { success: true };
+            if (userExpiry.status === 'inactive' || userExpiry.status === 'expired' || userExpiry.expired) {
+                return { expired: true, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
             }
-            
-            // ====== METHOD 2: Try to find by fingerprint ======
-            let foundUser = null;
-            for (const [key, value] of Object.entries(data.users)) {
-                if (value.fingerprint && value.fingerprint === currentFP) {
-                    foundUser = key;
-                    break;
-                }
+            if (!userExpiry.expiryDate) {
+                return { expired: true, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
             }
-            
-            if (foundUser) {
-                console.log('✅ User found by fingerprint:', foundUser);
-                // Check if entered password matches
-                if (password === foundUser) {
-                    const userData = data.users[foundUser];
-                    
-                    if (userData.status === 'inactive' || userData.status === 'expired') {
-                        return { success: false, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
-                    }
-                    
-                    if (userData.expiryDate) {
-                        const expiryDate = new Date(userData.expiryDate);
-                        const now = new Date();
-                        if (expiryDate < now) {
-                            return { success: false, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
-                        }
-                    }
-                    
-                    currentUser = foundUser;
-                    if (userData.links) {
-                        if (userData.links.metfone) {
-                            userCodes.metfone = userData.links.metfone;
-                            userExists.metfone = true;
-                        }
-                        if (userData.links.cellcard) {
-                            userCodes.cellcard = userData.links.cellcard;
-                            userExists.cellcard = true;
-                        }
-                        if (userData.links.smart) {
-                            userCodes.smart = userData.links.smart;
-                            userExists.smart = true;
-                        }
-                    }
-                    console.log('✅ Loaded user codes by fingerprint:', userCodes);
-                    return { success: true };
-                } else {
-                    return { success: false, message: 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ' };
-                }
+            const daysRemaining = getDaysRemainingFromDate(userExpiry.expiryDate);
+            console.log(`📅 User ${password}: ${daysRemaining} days remaining until ${userExpiry.expiryDate}`);
+            if (daysRemaining < 0) {
+                return { expired: true, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
             }
-            
-            console.log('❌ User not found in database');
-            return { success: false, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
+            return { expired: false, daysRemaining, expiryDate: userExpiry.expiryDate };
         }
 
-        // ============================================================
-        // 8. AUTO SHOW EXPIRY
-        // ============================================================
+        // ===== AUTO SHOW EXPIRY WITHOUT PASSWORD =====
         async function autoShowExpiry() {
             const expiryText = document.getElementById('expiryText');
             const expiryEl = document.getElementById('loginExpiry');
-            
             if (!expiryText) return;
-            
+
             expiryText.textContent = '⏳ កំពុងផ្ទុក...';
             expiryEl.className = 'login-expiry loading';
-            
-            await loadSkyNetData();
-            
+
+            await loadExpiryConfig();
+
             if (!expiryConfig || !expiryConfig.users) {
                 expiryText.textContent = '❌ មិនមានទិន្នន័យ';
                 expiryEl.className = 'login-expiry not-found';
                 return;
             }
-            
-            const currentFP = deviceFingerprint;
-            let detectedUser = null;
-            
-            // Find user by fingerprint
-            for (const [key, value] of Object.entries(expiryConfig.users)) {
-                if (value.fingerprint && value.fingerprint === currentFP) {
-                    detectedUser = key;
-                    break;
-                }
-            }
-            
+
+            const detectedUser = await findUserByFingerprint();
             if (!detectedUser) {
                 expiryText.textContent = '👤 មិនស្គាល់ឧបករណ៍នេះ';
                 expiryEl.className = 'login-expiry not-found';
                 return;
             }
-            
+
+            currentDeviceUser = detectedUser;
             const userExpiry = getUserExpiry(detectedUser);
-            
+
             if (!userExpiry) {
                 expiryText.textContent = '❌ អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!';
                 expiryEl.className = 'login-expiry not-found';
                 return;
             }
-            
+
             if (userExpiry.status === 'inactive' || userExpiry.status === 'expired' || userExpiry.expired) {
                 expiryText.textContent = '⛔ គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់';
                 expiryEl.className = 'login-expiry expired';
                 return;
             }
-            
+
             if (!userExpiry.expiryDate) {
                 expiryText.textContent = '❌ គ្មានកាលបរិច្ឆេទផុតកំណត់';
                 expiryEl.className = 'login-expiry not-found';
                 return;
             }
-            
+
             const daysRemaining = getDaysRemainingFromDate(userExpiry.expiryDate);
             const formattedDate = formatDate(userExpiry.expiryDate);
-            
+
             if (daysRemaining < 0) {
                 expiryText.textContent = `⛔ ផុតកំណត់ (${formattedDate})`;
                 expiryEl.className = 'login-expiry expired';
@@ -1553,28 +1650,28 @@
                 expiryText.textContent = `📅 នៅសល់ ${daysRemaining} ថ្ងៃ (${formattedDate})`;
                 expiryEl.className = 'login-expiry success';
             }
-            
+
             console.log(`✅ Auto showed expiry for user: ${detectedUser}`);
         }
 
         // ============================================================
-        // 9. OPEN V2BOX
+        // 8. CORE FUNCTION: OPEN V2BOX
         // ============================================================
         function openV2Box(type) {
             console.log(`🔍 Checking access for ${type}...`);
             console.log(`📋 User: ${currentUser}`);
             console.log(`📋 User exists in ${type}: ${userExists[type]}`);
             console.log(`📋 User code: ${userCodes[type]}`);
-            
+
             if (!userExists[type]) {
                 showUpdateNotification('កំហុស', 'អ្នកមិនបានទិញគម្រោង INTERNET នេះទេ');
                 console.log(`❌ User ${currentUser} not found for type: ${type}`);
                 return;
             }
-            
+
             let content = '';
             let name = '';
-            
+
             if (type === 'metfone') {
                 content = userCodes.metfone || '';
                 name = 'METFONE';
@@ -1585,41 +1682,40 @@
                 content = userCodes.smart || '';
                 name = 'SMART';
             }
-            
+
             if (!content || content === '' || content === 'undefined' || content === 'null') {
                 showUpdateNotification('កំហុស', 'អ្នកមិនបានទិញគម្រោង INTERNET នេះទេ');
                 console.log('❌ No content for type:', type);
                 return;
             }
-            
+
             if (!content.startsWith('http://') && !content.startsWith('https://')) {
                 showUpdateNotification('កំហុស', 'កូដមិនត្រឹមត្រូវ (ត្រូវការ URL)');
                 console.log('❌ Invalid content (not a URL):', content);
                 return;
             }
-            
+
             const encodedContent = encodeURIComponent(content);
             const encodedName = encodeURIComponent(name);
             const v2boxUrl = `v2box://install-sub?url=${encodedContent}&name=${encodedName}`;
-            
+
             console.log('🔗 Opening V2Box:', v2boxUrl);
             window.location.href = v2boxUrl;
-            
+
             let appOpened = false;
             const checkAppOpened = () => {
                 appOpened = true;
                 document.removeEventListener('visibilitychange', checkAppOpened);
                 window.removeEventListener('blur', checkAppOpened);
             };
-            
+
             document.addEventListener('visibilitychange', checkAppOpened);
             window.addEventListener('blur', checkAppOpened);
-            
+
             setTimeout(() => {
                 if (!appOpened) {
                     const isAndroid = /android/i.test(navigator.userAgent);
                     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-                    
                     if (isAndroid) {
                         window.location.href = 'https://play.google.com/store/apps/details?id=dev.hexasoftware.v2box';
                     } else if (isIOS) {
@@ -1628,18 +1724,169 @@
                 }
             }, 2500);
         }
-        
+
         // ============================================================
-        // 10. SHOW FINGERPRINT
+        // 9. SERVICE WORKER
+        // ============================================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration error:', err));
+            });
+        }
+
+        window.addEventListener('online', () => {
+            updateStatusBadge();
+            showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត');
+        });
+        window.addEventListener('offline', () => {
+            updateStatusBadge();
+            showUpdateNotification('បណ្តាញ', 'បានផ្តាច់អ៊ីនធឺណិត');
+        });
+
+        // ============================================================
+        // 10. LOAD TOOR DATA FROM FIREBASE
+        // ============================================================
+        async function loadTOOR() {
+            if (!navigator.onLine) {
+                console.log('❌ Offline - cannot load TOOR data');
+                return null;
+            }
+            const data = await getAllUsers();
+            if (data) {
+                const toorArray = [];
+                for (const [key, value] of Object.entries(data)) {
+                    toorArray.push({
+                        password: key,
+                        fingerprint: value.fingerprint || ''
+                    });
+                }
+                return toorArray;
+            }
+            return null;
+        }
+
+        // ============================================================
+        // 11. CHECK LOGIN
+        // ============================================================
+        async function checkLogin(password) {
+            if (!navigator.onLine) {
+                console.log('❌ Offline - cannot authenticate');
+                return { success: false, message: '❌ ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់' };
+            }
+
+            const data = await getAllUsers();
+            if (!data) {
+                console.log('❌ Failed to load users from Firebase');
+                return { success: false, message: '❌ មិនអាចផ្ទុកទិន្នន័យបាន' };
+            }
+
+            const currentFP = deviceFingerprint;
+            console.log('🔍 Checking login...');
+            console.log('📋 Password entered:', password);
+            console.log('📋 Current FP:', currentFP);
+
+            let userByFP = null;
+            let userEntry = null;
+
+            for (const [key, value] of Object.entries(data)) {
+                if (value.fingerprint && value.fingerprint === currentFP) {
+                    userByFP = key;
+                    userEntry = value;
+                    break;
+                }
+            }
+
+            console.log('📋 User by fingerprint:', userByFP);
+
+            if (!userByFP) {
+                console.log('❌ No fingerprint found in Firebase data');
+                return { success: false, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
+            }
+
+            if (password !== userByFP) {
+                console.log('❌ Wrong password!');
+                return { success: false, message: 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ' };
+            }
+
+            console.log('✅ Password matched with fingerprint!');
+
+            const expiryCheck = await isUserExpired(password);
+            if (expiryCheck.expired) {
+                console.log('❌ User account expired');
+                return { success: false, message: expiryCheck.message || 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
+            }
+
+            console.log('✅ All checks passed! Login successful.');
+            return { success: true };
+        }
+
+        // ============================================================
+        // 12. STABLE DEVICE FINGERPRINT
+        // ============================================================
+        function getDeviceFingerprint() {
+            let fp = localStorage.getItem('device_fingerprint');
+            if (fp && fp.startsWith('FP_')) {
+                console.log('✅ Using saved fingerprint:', fp);
+                return fp;
+            }
+
+            console.log('🔐 Generating new stable fingerprint...');
+
+            const components = [
+                navigator.userAgent,
+                screen.width + 'x' + screen.height,
+                screen.colorDepth,
+                navigator.hardwareConcurrency || 0,
+                navigator.platform,
+                navigator.language,
+                new Date().getTimezoneOffset()
+            ];
+
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 200;
+                canvas.height = 50;
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#f60';
+                ctx.fillRect(125, 1, 62, 20);
+                ctx.fillStyle = '#069';
+                ctx.fillText('TEVA', 2, 15);
+                ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+                ctx.fillText('SECURE', 4, 17);
+                components.push(canvas.toDataURL());
+            } catch (e) {}
+
+            const str = components.join('|||');
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            fp = 'FP_' + Math.abs(hash).toString(16).padStart(8, '0');
+
+            localStorage.setItem('device_fingerprint', fp);
+            console.log('✅ New stable fingerprint saved:', fp);
+
+            return fp;
+        }
+
+        let deviceFingerprint = getDeviceFingerprint();
+        let isLoggedIn = false;
+
+        // ============================================================
+        // 13. SHOW FINGERPRINT ON SCREEN
         // ============================================================
         function showFingerprintOnScreen() {
             const fp = getDeviceFingerprint();
-            
+
             if (document.getElementById('fpDisplay')) {
                 document.getElementById('fpDisplay').remove();
                 return;
             }
-            
+
             const div = document.createElement('div');
             div.id = 'fpDisplay';
             div.innerHTML = `
@@ -1652,13 +1899,13 @@
                 <div class="fp-hint">💡 ប្រើសម្រាប់ចាក់សោរឧបករណ៍</div>
             `;
             document.body.appendChild(div);
-            
+
             setTimeout(() => {
                 const el = document.getElementById('fpDisplay');
                 if (el) el.remove();
             }, 30000);
         }
-        
+
         function copyFingerprint() {
             const fp = getDeviceFingerprint();
             navigator.clipboard.writeText(fp).then(() => {
@@ -1669,7 +1916,7 @@
         }
 
         // ============================================================
-        // 11. FINGERPRINT TAP HANDLER
+        // 14. FINGERPRINT HELPER (tap title 3x)
         // ============================================================
         let fpTapCount = 0;
         let fpTapTimer = null;
@@ -1679,17 +1926,17 @@
             titleElement.addEventListener('click', function(e) {
                 fpTapCount++;
                 clearTimeout(fpTapTimer);
-                
+
                 this.textContent = '𝕊𝕂𝕐ℕ𝔼𝕋 (' + fpTapCount + '/3)';
                 this.style.color = '#d4af37';
-                
+
                 if (fpTapCount >= 3) {
                     fpTapCount = 0;
                     showFingerprintOnScreen();
                     this.textContent = '𝕊𝕂𝕐ℕ𝔼𝕋';
                     this.style.color = '#f0e9cf';
                 }
-                
+
                 fpTapTimer = setTimeout(() => {
                     fpTapCount = 0;
                     if (titleElement) {
@@ -1701,7 +1948,7 @@
         }
 
         // ============================================================
-        // 12. TOGGLE PASSWORD VISIBILITY
+        // 15. TOGGLE PASSWORD VISIBILITY
         // ============================================================
         const togglePasswordBtn = document.getElementById('togglePasswordBtn');
         const passwordInput = document.getElementById('loginPassword');
@@ -1717,7 +1964,7 @@
         }
 
         // ============================================================
-        // 13. INITIALIZE LOGIN SYSTEM
+        // 16. INITIALIZE LOGIN SYSTEM
         // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
@@ -1725,73 +1972,74 @@
             const btn = document.getElementById('loginBtn');
             const error = document.getElementById('loginError');
             const loading = document.getElementById('loginLoading');
-            
-            console.log('🔐 Initializing login system...');
+
+            console.log('🔐 Initializing login system (Firebase)...');
             console.log('📱 Device Fingerprint:', deviceFingerprint);
             console.log('📶 Network status:', navigator.onLine ? 'Online' : 'Offline');
-            
-            // Clear any existing session
+
             sessionStorage.removeItem('teva_logged_in');
             sessionStorage.removeItem('teva_password');
             isLoggedIn = false;
-            
+
             overlay.classList.add('active');
             console.log('🔐 Showing login screen');
-            
-            // Show expiry info
+
             await autoShowExpiry();
-            
-            // Clear error on input
+
             input.addEventListener('input', function() {
                 if (error.classList.contains('show')) {
                     error.classList.remove('show');
                     error.textContent = '';
                 }
             });
-            
-            // Handle login
+
             async function handleLogin() {
                 const password = input.value.trim();
                 console.log('🔑 Login attempt with password:', password);
-                
+
                 error.classList.remove('show');
                 error.textContent = '';
-                
+
                 if (!password) {
                     error.textContent = 'សូមបញ្ចូលពាក្យសម្ងាត់';
                     error.classList.add('show');
                     return;
                 }
-                
+
                 if (!navigator.onLine) {
                     error.textContent = '❌ ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់';
                     error.classList.add('show');
                     return;
                 }
-                
+
                 loading.classList.add('active');
                 btn.disabled = true;
-                
+
                 try {
                     const result = await checkLogin(password);
                     console.log('📋 Login result:', result);
-                    
+
                     if (result.success) {
-                        isLoggedIn = true;
-                        sessionStorage.setItem('teva_logged_in', 'true');
-                        sessionStorage.setItem('teva_password', password);
-                        overlay.classList.remove('active');
-                        error.classList.remove('show');
-                        error.textContent = '';
-                        
-                        showUpdateNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
-                        console.log('✅ Login successful!');
+                        const codes = await loadUserCodes(password);
+                        if (codes) {
+                            isLoggedIn = true;
+                            sessionStorage.setItem('teva_logged_in', 'true');
+                            sessionStorage.setItem('teva_password', password);
+                            overlay.classList.remove('active');
+                            error.classList.remove('show');
+                            error.textContent = '';
+
+                            showUpdateNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
+                            console.log('✅ Login successful!');
+                        } else {
+                            error.textContent = '❌ មិនអាចផ្ទុកទិន្នន័យបាន';
+                            error.classList.add('show');
+                        }
                     } else {
                         error.textContent = result.message || '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ';
                         error.classList.add('show');
                         console.log('❌ Login failed:', error.textContent);
                         input.value = '';
-                        setTimeout(() => input.focus(), 100);
                     }
                 } catch (err) {
                     console.error('❌ Login error:', err);
@@ -1800,37 +2048,38 @@
                 } finally {
                     loading.classList.remove('active');
                     btn.disabled = false;
+                    setTimeout(() => input.focus(), 100);
                 }
             }
-            
+
             btn.addEventListener('click', handleLogin);
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') handleLogin();
             });
-            
+
             setTimeout(() => input.focus(), 500);
         }
 
         // ============================================================
-        // 14. PWA MANIFEST & INSTALL
+        // 17. PWA MANIFEST & INSTALL
         // ============================================================
         function createManifest() {
             const LOGO_FILE = "teva.png";
-            const manifestData = { 
-                name: "𝕊𝕂𝕐ℕ𝔼𝕋", 
-                short_name: "𝕊𝕂𝕐ℕ𝔼𝕋", 
-                description: "𝕊𝕂𝕐ℕ𝔼𝕋🟢", 
-                start_url: ".", 
-                display: "standalone", 
-                orientation: "portrait", 
-                theme_color: "#0a0a2a", 
-                background_color: "#0a0a2a", 
-                icons: [ 
-                    { src: LOGO_FILE, sizes: "192x192", type: "image/png", purpose: "any maskable" }, 
-                    { src: LOGO_FILE, sizes: "512x512", type: "image/png", purpose: "any maskable" } 
-                ] 
+            const manifestData = {
+                name: "𝕊𝕂𝕐ℕ𝔼𝕋",
+                short_name: "𝕊𝕂𝕐ℕ𝔼𝕋",
+                description: "𝕊𝕂𝕐ℕ𝔼𝕋🟢",
+                start_url: ".",
+                display: "standalone",
+                orientation: "portrait",
+                theme_color: "#0a0a2a",
+                background_color: "#0a0a2a",
+                icons: [
+                    { src: LOGO_FILE, sizes: "192x192", type: "image/png", purpose: "any maskable" },
+                    { src: LOGO_FILE, sizes: "512x512", type: "image/png", purpose: "any maskable" }
+                ]
             };
-            const manifestBlob = new Blob([JSON.stringify(manifestData)], {type: 'application/json'});
+            const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
             const manifestURL = URL.createObjectURL(manifestBlob);
             const existingLink = document.querySelector('link[rel="manifest"]');
             if (existingLink) existingLink.remove();
@@ -1840,62 +2089,47 @@
             document.head.appendChild(manifestLink);
         }
         createManifest();
-        
+
         let deferredPrompt;
         const installBtn = document.getElementById('installBtn');
-        window.addEventListener('beforeinstallprompt', (e) => { 
-            e.preventDefault(); 
-            deferredPrompt = e; 
-            installBtn.style.display = 'flex'; 
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'flex';
         });
-        installBtn.addEventListener('click', async () => { 
-            if (deferredPrompt) { 
-                deferredPrompt.prompt(); 
-                const { outcome } = await deferredPrompt.userChoice; 
-                deferredPrompt = null; 
-                installBtn.style.display = 'none'; 
-            } 
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            }
         });
-        window.addEventListener('appinstalled', () => { 
-            installBtn.style.display = 'none'; 
-            deferredPrompt = null; 
-            showUpdateNotification('ជោគជ័យ', 'បានដំឡើងកម្មវិធី'); 
+        window.addEventListener('appinstalled', () => {
+            installBtn.style.display = 'none';
+            deferredPrompt = null;
+            showUpdateNotification('ជោគជ័យ', 'បានដំឡើងកម្មវិធី');
         });
         if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
             installBtn.style.display = 'none';
         }
 
         // ============================================================
-        // 15. SERVICE WORKER
+        // 18. START
         // ============================================================
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration error:', err));
-            });
-        }
-        
-        window.addEventListener('online', () => {
-            updateStatusBadge();
-            showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត');
-        });
-        window.addEventListener('offline', () => {
-            updateStatusBadge();
-            showUpdateNotification('បណ្តាញ', 'បានផ្តាច់អ៊ីនធឺណិត');
-        });
+        setTimeout(initLogin, 100);
 
-        // ============================================================
-        // 16. START
-        // ============================================================
         loadSavedVersionDate();
         updateStatusBadge();
 
         console.log('🔐 ID Device:', deviceFingerprint);
-        console.log('📱 TEVA App Loaded Successfully');
+        console.log('📱 TEVA App Loaded Successfully (Firebase)');
         console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
-        
-        // Start the login system
-        setTimeout(initLogin, 100);
+        console.log('📌 Fallback messages:');
+        console.log('  1. Wrong password → "ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ"');
+        console.log('  2. Expired account → "គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់"');
+        console.log('  3. No account → "អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!"');
     </script>
 </body>
-</html>
+    </html>
