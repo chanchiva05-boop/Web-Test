@@ -991,7 +991,7 @@
         }
 
         // ============================================================
-        // 5. EXPIRY DATE MANAGEMENT
+        // 5. EXPIRY & STATUS CHECK (UPDATED)
         // ============================================================
         function getDaysRemainingFromDate(expiryDateStr) {
             const expiryDate = new Date(expiryDateStr);
@@ -1009,11 +1009,29 @@
             return `${day}/${month}/${year}`;
         }
 
-        function checkUserExpiry(userData) {
-            if (!userData) return { expired: true, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
-            if (userData.status === 'inactive' || userData.status === 'expired') {
-                return { expired: true, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
+        // ត្រឡប់ { expired: boolean, message: string, reason?: string }
+        function checkUserStatus(userData) {
+            if (!userData) {
+                return { expired: true, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
             }
+
+            // ពិនិត្យ status
+            if (userData.status === 'inactive') {
+                return {
+                    expired: true,
+                    message: 'អ្នកត្រូវបានហាមឃាត់ក្នុងការប្រើប្រាស់បន្តទៀត ដោយសារអ្នកបានបំពានលក្ខខណ្ឌនៃការប្រើប្រាស់',
+                    reason: 'inactive'
+                };
+            }
+            if (userData.status === 'expired') {
+                return {
+                    expired: true,
+                    message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់',
+                    reason: 'expired'
+                };
+            }
+
+            // បើ status ជា 'active' ឬគ្មាន status ពិនិត្យ expiryDate
             if (!userData.expiryDate) {
                 return { expired: true, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
             }
@@ -1040,10 +1058,15 @@
                 return;
             }
 
-            const result = checkUserExpiry(user);
+            const result = checkUserStatus(user);
             if (result.expired) {
                 expiryText.textContent = `⛔ ${result.message}`;
-                expiryEl.className = 'login-expiry expired';
+                // កំណត់ class តាម reason
+                if (result.reason === 'inactive') {
+                    expiryEl.className = 'login-expiry denied';
+                } else {
+                    expiryEl.className = 'login-expiry expired';
+                }
                 return;
             }
 
@@ -1365,7 +1388,7 @@
         }
 
         // ============================================================
-        // 14. INITIALIZE LOGIN SYSTEM (STRICT - REQUIRES BOTH FP AND PASSWORD)
+        // 14. INITIALIZE LOGIN SYSTEM (STRICT - FP + Password, with status handling)
         // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
@@ -1374,7 +1397,7 @@
             const error = document.getElementById('loginError');
             const loading = document.getElementById('loginLoading');
 
-            console.log('🔐 Initializing login system (Strict: FP + Password required)');
+            console.log('🔐 Initializing login system (Strict: FP + Password required, status-aware)');
             console.log('📱 Device Fingerprint:', deviceFingerprint);
             console.log('📶 Network status:', navigator.onLine ? 'Online' : 'Offline');
 
@@ -1430,9 +1453,10 @@
                         return;
                     }
 
-                    // 3. បើមាន FP ប៉ុន្តែ password មិនត្រូវគ្នា
-                    if (userByFP.password !== password) {
-                        error.textContent = 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ';
+                    // 3. ពិនិត្យ status និង expiry
+                    const statusCheck = checkUserStatus(userByFP);
+                    if (statusCheck.expired) {
+                        error.textContent = statusCheck.message;
                         error.classList.add('show');
                         input.value = '';
                         loading.classList.remove('active');
@@ -1440,10 +1464,9 @@
                         return;
                     }
 
-                    // 4. ពិនិត្យផុតកំណត់
-                    const expiryCheck = checkUserExpiry(userByFP);
-                    if (expiryCheck.expired) {
-                        error.textContent = expiryCheck.message;
+                    // 4. ផ្ទៀងផ្ទាត់ password
+                    if (userByFP.password !== password) {
+                        error.textContent = 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ';
                         error.classList.add('show');
                         input.value = '';
                         loading.classList.remove('active');
@@ -1538,14 +1561,15 @@
         updateStatusBadge();
 
         console.log('🔐 ID Device:', deviceFingerprint);
-        console.log('📱 TEVA App Loaded Successfully (Strict Mode: FP + Password required)');
+        console.log('📱 TEVA App Loaded Successfully (Strict Mode + Status-aware)');
         console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
         console.log('📌 Login rules:');
         console.log('  1. Must have BOTH fingerprint AND password in Firebase');
-        console.log('  2. Wrong password → "ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ"');
-        console.log('  3. Expired account → "គណនីរបស់អ្នកបានផុតកំណត់!..."');
-        console.log('  4. No fingerprint → "អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!"');
+        console.log('  2. status = "inactive" → "អ្នកត្រូវបានហាមឃាត់..."');
+        console.log('  3. status = "expired" or expiryDate passed → "គណនីរបស់អ្នកបានផុតកំណត់!"');
+        console.log('  4. Wrong password → "ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ"');
+        console.log('  5. No fingerprint → "អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!"');
     </script>
 </body>
 </html>
