@@ -17,7 +17,7 @@
     <meta name="application-name" content="TEVA">
     <meta name="msapplication-TileColor" content="#0a0a2a">
 
-    <!-- ===== Firebase SDKs (បន្ថែម Auth SDK) ===== -->
+    <!-- ===== Firebase SDKs ===== -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
     </script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js">
@@ -26,7 +26,7 @@
     </script>
 
     <style>
-        /* ===== CSS (ដូចដើម មិនផ្លាស់ប្តូរ) ===== */
+        /* ===== CSS (ដូចដើម) ===== */
         @font-face {
             font-family: 'Khmer OS Battambang';
             src: local('Khmer OS Battambang'), local('KhmerOSBattambang');
@@ -873,24 +873,19 @@
         const db = firebase.database();
 
         // ============================================================
-        // 1. ANONYMOUS AUTHENTICATION (បន្ថែមថ្មី)
+        // 1. ANONYMOUS AUTHENTICATION (សម្រាប់ចូលប្រើ Firebase)
         // ============================================================
         firebase.auth().signInAnonymously()
-            .then(() => {
-                console.log('✅ Anonymous Authentication successful');
-            })
+            .then(() => console.log('✅ Anonymous Authentication successful'))
             .catch((error) => {
                 console.error('❌ Anonymous Auth failed:', error);
                 showUpdateNotification('កំហុស', 'មិនអាចផ្ទៀងផ្ទាត់ឧបករណ៍បាន');
             });
 
-        // តាមដានស្ថានភាព Auth
         firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                console.log('✅ User is signed in (anonymous)');
-            } else {
+            if (user) console.log('✅ User is signed in (anonymous)');
+            else {
                 console.log('❌ No user signed in');
-                // ព្យាយាម Login ឡើងវិញ បើមិនទាន់មាន
                 firebase.auth().signInAnonymously().catch(err => console.error('Retry auth failed:', err));
             }
         });
@@ -916,7 +911,7 @@
         createParticles();
 
         // ============================================================
-        // 3. STATUS BADGE
+        // 3. STATUS BADGE & NOTIFICATIONS
         // ============================================================
         function updateStatusBadge() {
             const badge = document.getElementById('statusBadge');
@@ -940,51 +935,51 @@
         }
 
         // ============================================================
-        // 4. FIREBASE HELPERS
+        // 4. FIREBASE HELPERS (SECURE: use orderByChild + equalTo)
         // ============================================================
-        async function getAllUsers() {
-            if (!navigator.onLine) {
-                console.log('❌ Offline - cannot read from Firebase');
-                return null;
-            }
-            try {
-                const snapshot = await db.ref('users').once('value');
-                return snapshot.val();
-            } catch (e) {
-                console.error('❌ Firebase read error:', e);
-                return null;
-            }
-        }
-
-        async function findUserByPassword(password) {
-            if (!navigator.onLine || !password) return null;
-            const users = await getAllUsers();
-            if (!users) return null;
-            for (const [key, value] of Object.entries(users)) {
-                if (value.password && value.password === password) {
-                    return { ...value, uid: key };
-                }
-            }
-            return null;
-        }
+        // លុប getAllUsers() ចេញ ដើម្បីកុំឲ្យទាញយកទិន្នន័យទាំងអស់
 
         async function findUserByFingerprint() {
             if (!navigator.onLine) {
                 console.log('❌ Offline - cannot search fingerprint');
                 return null;
             }
-            const users = await getAllUsers();
-            if (!users) return null;
-            const currentFP = getDeviceFingerprint();
-            console.log('🔍 Searching for user with FP:', currentFP);
-            for (const [key, value] of Object.entries(users)) {
-                if (value.fingerprint && value.fingerprint === currentFP) {
-                    console.log('✅ Found user by fingerprint:', key);
-                    return { ...value, uid: key };
+            const fp = getDeviceFingerprint();
+            console.log('🔍 Searching for user with FP:', fp);
+            try {
+                const snapshot = await db.ref('users')
+                    .orderByChild('fingerprint')
+                    .equalTo(fp)
+                    .once('value');
+                const data = snapshot.val();
+                if (!data) {
+                    console.log('❌ No user found with this fingerprint');
+                    return null;
                 }
+                const uid = Object.keys(data)[0];
+                console.log('✅ Found user by fingerprint:', uid);
+                return { ...data[uid], uid };
+            } catch (e) {
+                console.error('❌ Search by fingerprint error:', e);
+                return null;
             }
-            console.log('❌ No user found with this fingerprint');
-            return null;
+        }
+
+        async function findUserByPassword(password) {
+            if (!navigator.onLine || !password) return null;
+            try {
+                const snapshot = await db.ref('users')
+                    .orderByChild('password')
+                    .equalTo(password)
+                    .once('value');
+                const data = snapshot.val();
+                if (!data) return null;
+                const uid = Object.keys(data)[0];
+                return { ...data[uid], uid };
+            } catch (e) {
+                console.error('❌ Search by password error:', e);
+                return null;
+            }
         }
 
         // ============================================================
@@ -1095,7 +1090,6 @@
             smart: false
         };
 
-        // ===== NEW: Update Account Status Badge =====
         function updateAccountStatus(user) {
             const statusEl = document.getElementById('accountStatusValue');
             if (!statusEl) return;
@@ -1159,7 +1153,6 @@
             showUpdateNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
             console.log('✅ Login successful! User:', user.uid);
 
-            // Update account status badge
             updateAccountStatus(user);
         }
 
@@ -1235,7 +1228,7 @@
         }
 
         // ============================================================
-        // 8. SERVICE WORKER
+        // 8. SERVICE WORKER & NETWORK EVENTS
         // ============================================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -1253,26 +1246,29 @@
         });
 
         // ============================================================
-        // 9. LOAD TOOR DATA (optional)
+        // 9. LOAD TOOR DATA (SECURE VERSION)
         // ============================================================
         async function loadTOOR() {
-            if (!navigator.onLine) {
-                console.log('❌ Offline - cannot load TOOR data');
+            // លែងប្រើ getAllUsers() ហើយ ប្រើ query ដើម្បីទាញយកតែអ្នកប្រើដែលត្រូវនឹង fingerprint
+            if (!navigator.onLine) return null;
+            const fp = getDeviceFingerprint();
+            try {
+                const snapshot = await db.ref('users')
+                    .orderByChild('fingerprint')
+                    .equalTo(fp)
+                    .once('value');
+                const data = snapshot.val();
+                if (!data) return null;
+                const uid = Object.keys(data)[0];
+                return [{
+                    uid: uid,
+                    password: data[uid].password || '',
+                    fingerprint: data[uid].fingerprint || ''
+                }];
+            } catch (e) {
+                console.error('❌ loadTOOR error:', e);
                 return null;
             }
-            const users = await getAllUsers();
-            if (users) {
-                const toorArray = [];
-                for (const [key, value] of Object.entries(users)) {
-                    toorArray.push({
-                        uid: key,
-                        password: value.password || '',
-                        fingerprint: value.fingerprint || ''
-                    });
-                }
-                return toorArray;
-            }
-            return null;
         }
 
         // ============================================================
@@ -1428,7 +1424,7 @@
             const error = document.getElementById('loginError');
             const loading = document.getElementById('loginLoading');
 
-            console.log('🔐 Initializing login system (Strict: FP + Password required, status-aware)');
+            console.log('🔐 Initializing login system (SECURE: no getAllUsers)');
             console.log('📱 Device Fingerprint:', deviceFingerprint);
             console.log('📶 Network status:', navigator.onLine ? 'Online' : 'Offline');
 
@@ -1471,10 +1467,9 @@
                 btn.disabled = true;
 
                 try {
-                    // 1. Find user by fingerprint
+                    // 1. Find user by fingerprint (តែមួយដង)
                     const userByFP = await findUserByFingerprint();
 
-                    // 2. If no FP → reject
                     if (!userByFP) {
                         error.textContent = 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!';
                         error.classList.add('show');
@@ -1484,7 +1479,7 @@
                         return;
                     }
 
-                    // 3. Check status & expiry
+                    // 2. Check status & expiry
                     const statusCheck = checkUserStatus(userByFP);
                     if (statusCheck.expired) {
                         error.textContent = statusCheck.message;
@@ -1495,7 +1490,7 @@
                         return;
                     }
 
-                    // 4. Verify password
+                    // 3. Verify password (compare)
                     if (userByFP.password !== password) {
                         error.textContent = 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ';
                         error.classList.add('show');
@@ -1505,7 +1500,7 @@
                         return;
                     }
 
-                    // 5. Success
+                    // 4. Success
                     setUserSession(userByFP);
                     loading.classList.remove('active');
                     btn.disabled = false;
@@ -1588,12 +1583,11 @@
         // ============================================================
         setTimeout(initLogin, 100);
 
-        // Update account status initially (shows "សូមចូលប្រើ")
         updateAccountStatus(null);
         updateStatusBadge();
 
         console.log('🔐 ID Device:', deviceFingerprint);
-        console.log('📱 TEVA App Loaded Successfully (Account Status Badge + Anonymous Auth)');
+        console.log('📱 TEVA App Loaded Successfully (SECURE VERSION)');
         console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
     </script>
