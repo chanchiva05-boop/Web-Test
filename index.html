@@ -1365,7 +1365,7 @@
         }
 
         // ============================================================
-        // 14. INITIALIZE LOGIN SYSTEM (UPDATED FALLBACK LOGIC)
+        // 14. INITIALIZE LOGIN SYSTEM (STRICT - REQUIRES BOTH FP AND PASSWORD)
         // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
@@ -1374,7 +1374,7 @@
             const error = document.getElementById('loginError');
             const loading = document.getElementById('loginLoading');
 
-            console.log('🔐 Initializing login system (Firebase - Password only)');
+            console.log('🔐 Initializing login system (Strict: FP + Password required)');
             console.log('📱 Device Fingerprint:', deviceFingerprint);
             console.log('📶 Network status:', navigator.onLine ? 'Online' : 'Offline');
 
@@ -1417,15 +1417,11 @@
                 btn.disabled = true;
 
                 try {
-                    // 1. ស្វែងរកអ្នកប្រើតាម Fingerprint និង Password
+                    // 1. ស្វែងរកអ្នកប្រើតាម Fingerprint
                     const userByFP = await findUserByFingerprint();
-                    const userByPass = await findUserByPassword(password);
 
-                    console.log('👤 User by FP:', userByFP ? userByFP.uid : 'none');
-                    console.log('👤 User by Pass:', userByPass ? userByPass.uid : 'none');
-
-                    // ===== CONDITION 3: គ្មាន Fingerprint និងគ្មាន Password =====
-                    if (!userByFP && !userByPass) {
+                    // 2. បើគ្មាន FP → បដិសេធ
+                    if (!userByFP) {
                         error.textContent = 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!';
                         error.classList.add('show');
                         input.value = '';
@@ -1434,70 +1430,31 @@
                         return;
                     }
 
-                    // ===== បើមាន Fingerprint (ឧបករណ៍នេះត្រូវបានចុះឈ្មោះ) =====
-                    if (userByFP) {
-                        // CONDITION 1: វាយ Password ខុស
-                        if (userByFP.password !== password) {
-                            error.textContent = 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ';
-                            error.classList.add('show');
-                            input.value = '';
-                            loading.classList.remove('active');
-                            btn.disabled = false;
-                            return;
-                        }
-
-                        // CONDITION 2: ផុតកំណត់
-                        const expiryCheck = checkUserExpiry(userByFP);
-                        if (expiryCheck.expired) {
-                            error.textContent = expiryCheck.message; // "គណនីរបស់អ្នកបានផុតកំណត់!..."
-                            error.classList.add('show');
-                            input.value = '';
-                            loading.classList.remove('active');
-                            btn.disabled = false;
-                            return;
-                        }
-
-                        // ជោគជ័យ
-                        setUserSession(userByFP);
+                    // 3. បើមាន FP ប៉ុន្តែ password មិនត្រូវគ្នា
+                    if (userByFP.password !== password) {
+                        error.textContent = 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ';
+                        error.classList.add('show');
+                        input.value = '';
                         loading.classList.remove('active');
                         btn.disabled = false;
                         return;
                     }
 
-                    // ===== បើគ្មាន Fingerprint ប៉ុន្តែមាន Password =====
-                    if (userByPass) {
-                        // ប្រសិនបើ User នេះមាន Fingerprint (ប៉ុន្តែមិនត្រូវនឹងឧបករណ៍បច្ចុប្បន្ន)
-                        if (userByPass.fingerprint) {
-                            error.textContent = 'ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត';
-                            error.classList.add('show');
-                            input.value = '';
-                            loading.classList.remove('active');
-                            btn.disabled = false;
-                            return;
-                        }
-
-                        // ពិនិត្យផុតកំណត់
-                        const expiryCheck = checkUserExpiry(userByPass);
-                        if (expiryCheck.expired) {
-                            error.textContent = expiryCheck.message;
-                            error.classList.add('show');
-                            input.value = '';
-                            loading.classList.remove('active');
-                            btn.disabled = false;
-                            return;
-                        }
-
-                        // ជោគជ័យ (ប្រើតែ Password)
-                        setUserSession(userByPass);
+                    // 4. ពិនិត្យផុតកំណត់
+                    const expiryCheck = checkUserExpiry(userByFP);
+                    if (expiryCheck.expired) {
+                        error.textContent = expiryCheck.message;
+                        error.classList.add('show');
+                        input.value = '';
                         loading.classList.remove('active');
                         btn.disabled = false;
                         return;
                     }
 
-                    // Fallback បើសិនជាគ្មានលក្ខខណ្ឌណាមួយត្រូវ
-                    error.textContent = '❌ មានបញ្ហាក្នុងការផ្ទៀងផ្ទាត់';
-                    error.classList.add('show');
-                    input.value = '';
+                    // 5. ជោគជ័យ
+                    setUserSession(userByFP);
+                    loading.classList.remove('active');
+                    btn.disabled = false;
 
                 } catch (err) {
                     console.error('❌ Login error:', err);
@@ -1581,14 +1538,14 @@
         updateStatusBadge();
 
         console.log('🔐 ID Device:', deviceFingerprint);
-        console.log('📱 TEVA App Loaded Successfully (Firebase - Fallback Updated)');
+        console.log('📱 TEVA App Loaded Successfully (Strict Mode: FP + Password required)');
         console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
-        console.log('📌 Fallback messages:');
-        console.log('  1. Wrong password → "ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ"');
-        console.log('  2. Expired account → "គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់"');
-        console.log('  3. No account → "អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!"');
-        console.log('  4. Wrong device (FP mismatch) → "ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត"');
+        console.log('📌 Login rules:');
+        console.log('  1. Must have BOTH fingerprint AND password in Firebase');
+        console.log('  2. Wrong password → "ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ"');
+        console.log('  3. Expired account → "គណនីរបស់អ្នកបានផុតកំណត់!..."');
+        console.log('  4. No fingerprint → "អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!"');
     </script>
 </body>
 </html>
