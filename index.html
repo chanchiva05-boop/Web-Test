@@ -957,12 +957,11 @@
             }
         }
 
-        // ===== ស្វែងរកអ្នកប្រើតាម PASSWORD =====
+        // ស្វែងរកអ្នកប្រើតាម PASSWORD
         async function findUserByPassword(password) {
             if (!navigator.onLine || !password) return null;
             const users = await getAllUsers();
             if (!users) return null;
-            // រកមើល user ដែលមាន password ត្រូវគ្នា
             for (const [key, value] of Object.entries(users)) {
                 if (value.password && value.password === password) {
                     return { ...value, uid: key };
@@ -971,7 +970,7 @@
             return null;
         }
 
-        // ===== ស្វែងរកអ្នកប្រើតាម FINGERPRINT =====
+        // ស្វែងរកអ្នកប្រើតាម FINGERPRINT
         async function findUserByFingerprint() {
             if (!navigator.onLine) {
                 console.log('❌ Offline - cannot search fingerprint');
@@ -1068,42 +1067,21 @@
         }
 
         // ============================================================
-        // 6. LOAD USER CODES FROM FIREBASE (by password)
+        // 6. USER SESSION MANAGER
         // ============================================================
         let userCodes = {
             metfone: '',
             cellcard: '',
             smart: ''
         };
-        let currentUser = null; // store user object { uid, ... }
+        let currentUser = null;
         let userExists = {
             metfone: false,
             cellcard: false,
             smart: false
         };
 
-        async function loadUserCodesByPassword(password) {
-            console.log('🔄 Loading user codes from Firebase for password:', password);
-
-            if (!navigator.onLine) {
-                console.log('❌ Offline - cannot authenticate');
-                showUpdateNotification('កំហុស', 'ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់');
-                return null;
-            }
-
-            const user = await findUserByPassword(password);
-            if (!user) {
-                console.log('❌ No user found with that password');
-                return null;
-            }
-
-            // ពិនិត្យ expiry
-            const expiryCheck = checkUserExpiry(user);
-            if (expiryCheck.expired) {
-                showUpdateNotification('កំហុស', expiryCheck.message);
-                return null;
-            }
-
+        function setUserSession(user) {
             currentUser = user;
             userCodes = { metfone: '', cellcard: '', smart: '' };
             userExists = { metfone: false, cellcard: false, smart: false };
@@ -1123,8 +1101,12 @@
                 }
             }
 
-            console.log('✅ Loaded user codes for user:', user.uid, userCodes);
-            return userCodes;
+            isLoggedIn = true;
+            sessionStorage.setItem('teva_logged_in', 'true');
+            sessionStorage.setItem('teva_password', user.password || '');
+            document.getElementById('loginOverlay').classList.remove('active');
+            showUpdateNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
+            console.log('✅ Login successful! User:', user.uid);
         }
 
         // ============================================================
@@ -1383,7 +1365,7 @@
         }
 
         // ============================================================
-        // 14. INITIALIZE LOGIN SYSTEM
+        // 14. INITIALIZE LOGIN SYSTEM (UPDATED FALLBACK LOGIC)
         // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
@@ -1435,10 +1417,16 @@
                 btn.disabled = true;
 
                 try {
-                    // 1. ស្វែងរកអ្នកប្រើតាម password
-                    const user = await findUserByPassword(password);
-                    if (!user) {
-                        error.textContent = '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ';
+                    // 1. ស្វែងរកអ្នកប្រើតាម Fingerprint និង Password
+                    const userByFP = await findUserByFingerprint();
+                    const userByPass = await findUserByPassword(password);
+
+                    console.log('👤 User by FP:', userByFP ? userByFP.uid : 'none');
+                    console.log('👤 User by Pass:', userByPass ? userByPass.uid : 'none');
+
+                    // ===== CONDITION 3: គ្មាន Fingerprint និងគ្មាន Password =====
+                    if (!userByFP && !userByPass) {
+                        error.textContent = 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!';
                         error.classList.add('show');
                         input.value = '';
                         loading.classList.remove('active');
@@ -1446,48 +1434,70 @@
                         return;
                     }
 
-                    // 2. ពិនិត្យ expiry
-                    const expiryCheck = checkUserExpiry(user);
-                    if (expiryCheck.expired) {
-                        error.textContent = expiryCheck.message;
-                        error.classList.add('show');
-                        input.value = '';
+                    // ===== បើមាន Fingerprint (ឧបករណ៍នេះត្រូវបានចុះឈ្មោះ) =====
+                    if (userByFP) {
+                        // CONDITION 1: វាយ Password ខុស
+                        if (userByFP.password !== password) {
+                            error.textContent = 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ';
+                            error.classList.add('show');
+                            input.value = '';
+                            loading.classList.remove('active');
+                            btn.disabled = false;
+                            return;
+                        }
+
+                        // CONDITION 2: ផុតកំណត់
+                        const expiryCheck = checkUserExpiry(userByFP);
+                        if (expiryCheck.expired) {
+                            error.textContent = expiryCheck.message; // "គណនីរបស់អ្នកបានផុតកំណត់!..."
+                            error.classList.add('show');
+                            input.value = '';
+                            loading.classList.remove('active');
+                            btn.disabled = false;
+                            return;
+                        }
+
+                        // ជោគជ័យ
+                        setUserSession(userByFP);
                         loading.classList.remove('active');
                         btn.disabled = false;
                         return;
                     }
 
-                    // 3. ផ្ទៀងផ្ទាត់ fingerprint (ប្រសិនបើមាន)
-                    const currentFP = getDeviceFingerprint();
-                    if (user.fingerprint && user.fingerprint !== currentFP) {
-                        error.textContent = '❌ ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត';
-                        error.classList.add('show');
-                        input.value = '';
+                    // ===== បើគ្មាន Fingerprint ប៉ុន្តែមាន Password =====
+                    if (userByPass) {
+                        // ប្រសិនបើ User នេះមាន Fingerprint (ប៉ុន្តែមិនត្រូវនឹងឧបករណ៍បច្ចុប្បន្ន)
+                        if (userByPass.fingerprint) {
+                            error.textContent = 'ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត';
+                            error.classList.add('show');
+                            input.value = '';
+                            loading.classList.remove('active');
+                            btn.disabled = false;
+                            return;
+                        }
+
+                        // ពិនិត្យផុតកំណត់
+                        const expiryCheck = checkUserExpiry(userByPass);
+                        if (expiryCheck.expired) {
+                            error.textContent = expiryCheck.message;
+                            error.classList.add('show');
+                            input.value = '';
+                            loading.classList.remove('active');
+                            btn.disabled = false;
+                            return;
+                        }
+
+                        // ជោគជ័យ (ប្រើតែ Password)
+                        setUserSession(userByPass);
                         loading.classList.remove('active');
                         btn.disabled = false;
                         return;
                     }
 
-                    // 4. ផ្ទុកកូដរបស់អ្នកប្រើ
-                    const codes = await loadUserCodesByPassword(password);
-                    if (!codes) {
-                        error.textContent = '❌ មិនអាចផ្ទុកទិន្នន័យបាន';
-                        error.classList.add('show');
-                        loading.classList.remove('active');
-                        btn.disabled = false;
-                        return;
-                    }
-
-                    // 5. ចូលប្រើជោគជ័យ
-                    isLoggedIn = true;
-                    sessionStorage.setItem('teva_logged_in', 'true');
-                    sessionStorage.setItem('teva_password', password);
-                    overlay.classList.remove('active');
-                    error.classList.remove('show');
-                    error.textContent = '';
-
-                    showUpdateNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
-                    console.log('✅ Login successful! User:', user.uid);
+                    // Fallback បើសិនជាគ្មានលក្ខខណ្ឌណាមួយត្រូវ
+                    error.textContent = '❌ មានបញ្ហាក្នុងការផ្ទៀងផ្ទាត់';
+                    error.classList.add('show');
+                    input.value = '';
 
                 } catch (err) {
                     console.error('❌ Login error:', err);
@@ -1571,14 +1581,14 @@
         updateStatusBadge();
 
         console.log('🔐 ID Device:', deviceFingerprint);
-        console.log('📱 TEVA App Loaded Successfully (Firebase - Password only)');
+        console.log('📱 TEVA App Loaded Successfully (Firebase - Fallback Updated)');
         console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
         console.log('📌 Fallback messages:');
-        console.log('  1. Wrong password → "ពាក្យសម្ងាត់មិនត្រឹមត្រូវ"');
+        console.log('  1. Wrong password → "ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ"');
         console.log('  2. Expired account → "គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់"');
         console.log('  3. No account → "អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!"');
-        console.log('  4. Wrong device → "ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត"');
+        console.log('  4. Wrong device (FP mismatch) → "ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត"');
     </script>
 </body>
 </html>
