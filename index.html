@@ -26,7 +26,7 @@
     </script>
 
     <style>
-        /* ===== CSS (ដូចដើម) ===== */
+        /* ===== CSS ===== */
         @font-face {
             font-family: 'Khmer OS Battambang';
             src: local('Khmer OS Battambang'), local('KhmerOSBattambang');
@@ -1100,10 +1100,14 @@
             <div class="login-title" id="loginTitle">𝕊𝕂𝕐ℕ𝔼𝕋</div>
             <div class="login-subtitle">• Secure Access •</div>
             <div class="login-expiry" id="loginExpiry">
-                <span id="expiryText">⏳ កំពុងផ្ទុក...</span>
+                <span id="expiryText">👤 បញ្ចូល Username និង Password</span>
+            </div>
+            <!-- ===== NEW USERNAME FIELD ===== -->
+            <div class="login-input-group">
+                <input type="text" class="login-input" id="loginUsername" placeholder="បញ្ចូល Username (ឧ. TEVA)" autocomplete="username">
             </div>
             <div class="login-input-group">
-                <input type="password" class="login-input" id="loginPassword" placeholder="បញ្ចូលពាក្យសម្ងាត់..." autocomplete="off">
+                <input type="password" class="login-input" id="loginPassword" placeholder="បញ្ចូលពាក្យសម្ងាត់..." autocomplete="current-password">
                 <button class="toggle-password" id="togglePasswordBtn" type="button" aria-label="Toggle password visibility">👁️</button>
             </div>
             <button class="login-btn" id="loginBtn">ចូលប្រើប្រាស់</button>
@@ -1263,54 +1267,7 @@
         }
 
         // ============================================================
-        // 4. FIREBASE HELPERS
-        // ============================================================
-
-        async function findUserByFingerprint() {
-            if (!navigator.onLine) {
-                console.log('❌ Offline - cannot search fingerprint');
-                return null;
-            }
-            const fp = getDeviceFingerprint();
-            console.log('🔍 Searching for user with FP:', fp);
-            try {
-                const snapshot = await db.ref('users')
-                    .orderByChild('fingerprint')
-                    .equalTo(fp)
-                    .once('value');
-                const data = snapshot.val();
-                if (!data) {
-                    console.log('❌ No user found with this fingerprint');
-                    return null;
-                }
-                const uid = Object.keys(data)[0];
-                console.log('✅ Found user by fingerprint:', uid);
-                return { ...data[uid], uid };
-            } catch (e) {
-                console.error('❌ Search by fingerprint error:', e);
-                return null;
-            }
-        }
-
-        async function findUserByPassword(password) {
-            if (!navigator.onLine || !password) return null;
-            try {
-                const snapshot = await db.ref('users')
-                    .orderByChild('password')
-                    .equalTo(password)
-                    .once('value');
-                const data = snapshot.val();
-                if (!data) return null;
-                const uid = Object.keys(data)[0];
-                return { ...data[uid], uid };
-            } catch (e) {
-                console.error('❌ Search by password error:', e);
-                return null;
-            }
-        }
-
-        // ============================================================
-        // 5. EXPIRY & STATUS CHECK
+        // 4. EXPIRY & STATUS CHECK
         // ============================================================
         function getDaysRemainingFromDate(expiryDateStr) {
             const expiryDate = new Date(expiryDateStr);
@@ -1356,54 +1313,8 @@
             return { expired: false, daysRemaining, expiryDate: userData.expiryDate };
         }
 
-        // ===== AUTO SHOW EXPIRY WITHOUT PASSWORD =====
-        async function autoShowExpiry() {
-            const expiryText = document.getElementById('expiryText');
-            const expiryEl = document.getElementById('loginExpiry');
-            if (!expiryText) return;
-
-            expiryText.textContent = '⏳ កំពុងផ្ទុក...';
-            expiryEl.className = 'login-expiry loading';
-
-            const user = await findUserByFingerprint();
-            if (!user) {
-                expiryText.textContent = '👤 មិនស្គាល់ឧបករណ៍នេះ';
-                expiryEl.className = 'login-expiry not-found';
-                return;
-            }
-
-            const result = checkUserStatus(user);
-            if (result.expired) {
-                expiryText.textContent = `⛔ ${result.message}`;
-                if (result.reason === 'inactive') {
-                    expiryEl.className = 'login-expiry denied';
-                } else {
-                    expiryEl.className = 'login-expiry expired';
-                }
-                return;
-            }
-
-            const formattedDate = formatDate(result.expiryDate);
-            const days = result.daysRemaining;
-            let statusClass = 'success';
-            let msg = `📅 នៅសល់ ${days} ថ្ងៃ (${formattedDate})`;
-            if (days <= 0) {
-                statusClass = 'expired';
-                msg = `⛔ ផុតកំណត់ (${formattedDate})`;
-            } else if (days <= 3) {
-                statusClass = 'warning';
-                msg = `⚠️ នៅសល់ ${days} ថ្ងៃ (${formattedDate})`;
-            } else if (days <= 7) {
-                statusClass = 'warning';
-                msg = `📅 នៅសល់ ${days} ថ្ងៃ (${formattedDate})`;
-            }
-            expiryText.textContent = msg;
-            expiryEl.className = `login-expiry ${statusClass}`;
-            console.log(`✅ Auto showed expiry for user: ${user.uid}`);
-        }
-
         // ============================================================
-        // 6. USER SESSION MANAGER
+        // 5. USER SESSION MANAGER
         // ============================================================
         let userCodes = {
             metfone: '',
@@ -1484,7 +1395,7 @@
         }
 
         // ============================================================
-        // 7. CORE FUNCTION: OPEN V2BOX
+        // 6. CORE FUNCTION: OPEN V2BOX
         // ============================================================
         function openV2Box(type) {
             console.log(`🔍 Checking access for ${type}...`);
@@ -1555,7 +1466,7 @@
         }
 
         // ============================================================
-        // 8. SERVICE WORKER & NETWORK EVENTS
+        // 7. SERVICE WORKER & NETWORK EVENTS
         // ============================================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -1573,32 +1484,7 @@
         });
 
         // ============================================================
-        // 9. LOAD TOOR DATA (SECURE VERSION)
-        // ============================================================
-        async function loadTOOR() {
-            if (!navigator.onLine) return null;
-            const fp = getDeviceFingerprint();
-            try {
-                const snapshot = await db.ref('users')
-                    .orderByChild('fingerprint')
-                    .equalTo(fp)
-                    .once('value');
-                const data = snapshot.val();
-                if (!data) return null;
-                const uid = Object.keys(data)[0];
-                return [{
-                    uid: uid,
-                    password: data[uid].password || '',
-                    fingerprint: data[uid].fingerprint || ''
-                }];
-            } catch (e) {
-                console.error('❌ loadTOOR error:', e);
-                return null;
-            }
-        }
-
-        // ============================================================
-        // 10. STABLE DEVICE FINGERPRINT
+        // 8. STABLE DEVICE FINGERPRINT
         // ============================================================
         function getDeviceFingerprint() {
             let fp = localStorage.getItem('device_fingerprint');
@@ -1654,7 +1540,7 @@
         let isLoggedIn = false;
 
         // ============================================================
-        // 11. SHOW FINGERPRINT ON SCREEN
+        // 9. SHOW FINGERPRINT ON SCREEN
         // ============================================================
         function showFingerprintOnScreen() {
             const fp = getDeviceFingerprint();
@@ -1693,7 +1579,7 @@
         }
 
         // ============================================================
-        // 12. FINGERPRINT HELPER (tap title 3x)
+        // 10. FINGERPRINT HELPER (tap title 3x)
         // ============================================================
         let fpTapCount = 0;
         let fpTapTimer = null;
@@ -1725,7 +1611,7 @@
         }
 
         // ============================================================
-        // 13. TOGGLE PASSWORD VISIBILITY
+        // 11. TOGGLE PASSWORD VISIBILITY
         // ============================================================
         const togglePasswordBtn = document.getElementById('togglePasswordBtn');
         const passwordInput = document.getElementById('loginPassword');
@@ -1741,16 +1627,19 @@
         }
 
         // ============================================================
-        // 14. INITIALIZE LOGIN SYSTEM (with 1s loading delay)
+        // 12. LOGIN SYSTEM (WITH USERNAME + PASSWORD)
         // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
-            const input = document.getElementById('loginPassword');
+            const usernameInput = document.getElementById('loginUsername');
+            const passwordInput = document.getElementById('loginPassword');
             const btn = document.getElementById('loginBtn');
             const error = document.getElementById('loginError');
             const loading = document.getElementById('loginLoading');
+            const expiryText = document.getElementById('expiryText');
+            const expiryEl = document.getElementById('loginExpiry');
 
-            console.log('🔐 Initializing login system (SECURE: no getAllUsers)');
+            console.log('🔐 Initializing login system (Username + Password)');
             console.log('📱 Device Fingerprint:', deviceFingerprint);
             console.log('📶 Network status:', navigator.onLine ? 'Online' : 'Offline');
 
@@ -1761,105 +1650,152 @@
             overlay.classList.add('active');
             console.log('🔐 Showing login screen');
 
-            await autoShowExpiry();
+            // Remove autoShowExpiry
+            expiryText.textContent = '👤 បញ្ចូល Username និង Password';
+            expiryEl.className = 'login-expiry';
 
-            input.addEventListener('input', function() {
+            // Clear errors on input
+            usernameInput.addEventListener('input', () => {
+                if (error.classList.contains('show')) {
+                    error.classList.remove('show');
+                    error.textContent = '';
+                }
+            });
+            passwordInput.addEventListener('input', () => {
                 if (error.classList.contains('show')) {
                     error.classList.remove('show');
                     error.textContent = '';
                 }
             });
 
-            // ============================================================
-            // មុខងារ handleLogin ដែលបានកែសម្រួល - បង្ហាញ loading 1 វិនាទីជានិច្ច
-            // ============================================================
             async function handleLogin() {
-                const password = input.value.trim();
+                const username = usernameInput.value.trim();
+                const password = passwordInput.value.trim();
 
-                // លុប error ចាស់
                 error.classList.remove('show');
                 error.textContent = '';
 
-                // ពិនិត្យពាក្យសម្ងាត់ទទេ
+                if (!username) {
+                    error.textContent = 'សូមបញ្ចូល Username (ឧ. TEVA, USER002)';
+                    error.classList.add('show');
+                    usernameInput.focus();
+                    return;
+                }
                 if (!password) {
                     error.textContent = 'សូមបញ្ចូលពាក្យសម្ងាត់';
                     error.classList.add('show');
+                    passwordInput.focus();
                     return;
                 }
 
-                // ពិនិត្យបណ្តាញ
                 if (!navigator.onLine) {
                     error.textContent = '❌ ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់';
                     error.classList.add('show');
                     return;
                 }
 
-                // ===== បង្ហាញ Loading =====
                 loading.classList.add('active');
                 btn.disabled = true;
 
-                // ===== បង្កើត Promise សម្រាប់ការផ្ទៀងផ្ទាត់ =====
-                const validationPromise = (async () => {
-                    try {
-                        // 1. ស្វែងរកអ្នកប្រើតាម fingerprint
-                        const userByFP = await findUserByFingerprint();
-                        if (!userByFP) {
-                            return { success: false, error: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
-                        }
+                try {
+                    // 1. Read user data by UID (Username)
+                    const snapshot = await db.ref('users/' + username).once('value');
+                    const userData = snapshot.val();
 
-                        // 2. ពិនិត្យស្ថានភាព និង ថ្ងៃផុតកំណត់
-                        const statusCheck = checkUserStatus(userByFP);
-                        if (statusCheck.expired) {
-                            return { success: false, error: statusCheck.message };
-                        }
-
-                        // 3. ផ្ទៀងផ្ទាត់ពាក្យសម្ងាត់
-                        if (userByFP.password !== password) {
-                            return { success: false, error: 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ' };
-                        }
-
-                        // 4. ជោគជ័យ
-                        return { success: true, user: userByFP };
-
-                    } catch (err) {
-                        console.error('❌ Validation error:', err);
-                        return { success: false, error: '❌ មានបញ្ហាក្នុងការផ្ទៀងផ្ទាត់' };
+                    if (!userData) {
+                        error.textContent = '❌ Username មិនត្រឹមត្រូវ';
+                        error.classList.add('show');
+                        usernameInput.value = '';
+                        usernameInput.focus();
+                        loading.classList.remove('active');
+                        btn.disabled = false;
+                        return;
                     }
-                })();
 
-                // ===== រង់ចាំទាំងការផ្ទៀងផ្ទាត់ និងពេលវេលា 1 វិនាទី =====
-                const [result] = await Promise.all([
-                    validationPromise,
-                    new Promise(resolve => setTimeout(resolve, 1000))
-                ]);
+                    // 2. Verify password
+                    if (userData.password !== password) {
+                        error.textContent = '❌ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ';
+                        error.classList.add('show');
+                        passwordInput.value = '';
+                        passwordInput.focus();
+                        loading.classList.remove('active');
+                        btn.disabled = false;
+                        return;
+                    }
 
-                // ===== បង្ហាញលទ្ធផល =====
-                if (result.success) {
-                    // ចូលប្រើជោគជ័យ
-                    setUserSession(result.user);
-                } else {
-                    // Fallback: បង្ហាញកំហុស
-                    error.textContent = result.error;
+                    // 3. Verify fingerprint (extra security)
+                    const currentFp = getDeviceFingerprint();
+                    if (userData.fingerprint && userData.fingerprint !== currentFp) {
+                        error.textContent = '⚠️ ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត (Fingerprint mismatch)';
+                        error.classList.add('show');
+                        loading.classList.remove('active');
+                        btn.disabled = false;
+                        return;
+                    }
+
+                    // 4. Check account status
+                    if (userData.status === 'inactive' || userData.status === 'expired') {
+                        const msg = userData.status === 'inactive' ? 'ហាមឃាត់' : 'ផុតកំណត់';
+                        error.textContent = `⛔ គណនីរបស់អ្នកត្រូវបាន ${msg}`;
+                        error.classList.add('show');
+                        loading.classList.remove('active');
+                        btn.disabled = false;
+                        return;
+                    }
+
+                    // 5. Check expiry date
+                    if (userData.expiryDate) {
+                        const expiryDate = new Date(userData.expiryDate);
+                        const now = new Date();
+                        if (expiryDate < now) {
+                            error.textContent = '⛔ គណនីរបស់អ្នកបានផុតកំណត់ហើយ';
+                            error.classList.add('show');
+                            loading.classList.remove('active');
+                            btn.disabled = false;
+                            return;
+                        }
+                    }
+
+                    // 6. Login success
+                    localStorage.setItem('teva_user_uid', username);
+                    localStorage.setItem('teva_logged_in', 'true');
+
+                    const user = {
+                        uid: username,
+                        links: userData.links || { metfone: '', cellcard: '', smart: '' },
+                        expiryDate: userData.expiryDate,
+                        status: userData.status,
+                        password: password
+                    };
+
+                    setUserSession(user);
+
+                } catch (err) {
+                    console.error('❌ Login error:', err);
+                    error.textContent = '❌ មានបញ្ហាក្នុងការផ្ទៀងផ្ទាត់';
                     error.classList.add('show');
-                    input.value = '';
-                    setTimeout(() => input.focus(), 100);
                 }
 
-                // ===== បិទ Loading =====
                 loading.classList.remove('active');
                 btn.disabled = false;
             }
 
             btn.addEventListener('click', handleLogin);
-            input.addEventListener('keydown', (e) => {
+            passwordInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') handleLogin();
             });
+            usernameInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    passwordInput.focus();
+                }
+            });
 
-            setTimeout(() => input.focus(), 500);
+            setTimeout(() => usernameInput.focus(), 500);
         }
 
         // ============================================================
-        // 15. PWA MANIFEST & INSTALL
+        // 13. PWA MANIFEST & INSTALL
         // ============================================================
         function createManifest() {
             const LOGO_FILE = "teva.png";
@@ -1913,7 +1849,7 @@
         }
 
         // ============================================================
-        // 16. START
+        // 14. START
         // ============================================================
         setTimeout(initLogin, 100);
 
@@ -1921,7 +1857,7 @@
         updateStatusBadge();
 
         console.log('🔐 ID Device:', deviceFingerprint);
-        console.log('📱 TEVA App Loaded Successfully (SECURE VERSION + 1s Loading)');
+        console.log('📱 TEVA App Loaded Successfully (SECURE VERSION + Username Login)');
         console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
     </script>
