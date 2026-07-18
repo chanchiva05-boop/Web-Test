@@ -1,11 +1,10 @@
-const CACHE_NAME = 'teva-v18'; // ប្ដូរ version ដើម្បីបង្ខំឲ្យ Update Cache
+const CACHE_NAME = 'teva-v18';
 const urlsToCache = [
   './',
   './index.html',
   './teva.png'
 ];
 
-// ===== INSTALL =====
 self.addEventListener('install', event => {
   console.log('Service Worker installing...', CACHE_NAME);
   event.waitUntil(
@@ -20,7 +19,6 @@ self.addEventListener('install', event => {
   );
 });
 
-// ===== ACTIVATE =====
 self.addEventListener('activate', event => {
   console.log('Service Worker activating...', CACHE_NAME);
   event.waitUntil(
@@ -40,8 +38,6 @@ self.addEventListener('activate', event => {
   );
 });
 
-// ===== STRATEGIES =====
-// Network First - សម្រាប់ HTML និង Navigation
 async function networkFirst(request) {
   try {
     console.log('🌐 Fetching from network:', request.url);
@@ -72,7 +68,6 @@ async function networkFirst(request) {
   }
 }
 
-// Cache First - សម្រាប់ Static Assets (CSS, JS, Images)
 function cacheFirst(request) {
   return caches.match(request)
     .then(response => {
@@ -84,19 +79,12 @@ function cacheFirst(request) {
     });
 }
 
-// ===== FETCH =====
 self.addEventListener('fetch', event => {
   const url = event.request.url;
 
-  // **លែងប្រើ SKYNET.txt និងឯកសារ txt ផ្សេងៗ** – អនុញ្ញាតឲ្យ fetch ធម្មតា
-  // ប៉ុន្តែបើចង់ទប់ស្កាត់ការចាប់យកឯកសារ txt ទាំងនោះ យើងអាចទុកចោល ឬបញ្ជូនទៅ network ធម្មតា
-  // ឥឡូវយើងឲ្យវាឆ្លងកាត់ដូចឯកសារដទៃ
-
-  // បើជា index.html ឬ Navigation Request → ប្រើ Network First
   if (url.includes('index.html') || url === './' || event.request.mode === 'navigate') {
     event.respondWith(networkFirst(event.request));
   }
-  // បើជា sw.js ខ្លួនឯង → ប្រើ Network First (មិន Cache)
   else if (url.includes('sw.js')) {
     event.respondWith(
       fetch(event.request, {
@@ -105,13 +93,11 @@ self.addEventListener('fetch', event => {
       })
     );
   }
-  // ឯកសារផ្សេងទៀត → Cache First
   else {
     event.respondWith(cacheFirst(event.request));
   }
 });
 
-// ===== MESSAGE HANDLER (សម្រាប់ Clear Cache) =====
 self.addEventListener('message', async (event) => {
   console.log('📨 Received message:', event.data);
 
@@ -132,7 +118,6 @@ self.addEventListener('message', async (event) => {
   }
 });
 
-// ===== CONTROLLER CHANGE =====
 self.addEventListener('controllerchange', () => {
   console.log('🔄 Service Worker controller changed');
 });
