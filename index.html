@@ -1281,6 +1281,7 @@
             const expiryFormatted = formatDate(result.expiryDate);
             let daysText = '';
             let daysClass = 'status-days';
+            // 🔥 FIXED: handle days === 0 as "ផុតកំណត់ថ្ងៃនេះ"
             if (days === 0) {
                 daysClass = 'status-expired';
                 daysText = '⚠️ ផុតកំណត់ថ្ងៃនេះ';
@@ -1539,20 +1540,13 @@
                     if (userData.password !== password) {
                         throw new Error('ពាក្យសម្ងាត់មិនត្រឹមត្រូវ');
                     }
+                    const currentFp = getDeviceFingerprint();
+                    if (userData.fingerprint !== currentFp) {
+                        throw new Error('ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត');
+                    }
                     const statusCheck = checkUserStatus(userData);
                     if (statusCheck.expired) {
                         throw new Error(statusCheck.message);
-                    }
-                    const currentUser = firebase.auth().currentUser;
-                    if (!currentUser) {
-                        throw new Error('មិនអាចផ្ទៀងផ្ទាត់ឧបករណ៍បាន');
-                    }
-                    const currentUid = currentUser.uid;
-                    if (!userData.firebaseUid) {
-                        await db.ref('users/' + username + '/firebaseUid').set(currentUid);
-                        userData.firebaseUid = currentUid;
-                    } else if (userData.firebaseUid !== currentUid) {
-                        throw new Error('ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត (UID Mismatch)');
                     }
                     localStorage.setItem('teva_user_uid', username);
                     localStorage.setItem('teva_logged_in', 'true');
