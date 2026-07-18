@@ -24,11 +24,9 @@
     </script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js">
     </script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js">
-    </script>
 
     <style>
-        /* ===== CSS ===== */
+        /* ===== CSS (ដូចដើម) ===== */
         @font-face {
             font-family: 'Khmer OS Battambang';
             src: local('Khmer OS Battambang'), local('KhmerOSBattambang');
@@ -1102,16 +1100,10 @@
             <div class="login-title" id="loginTitle">𝕊𝕂𝕐ℕ𝔼𝕋</div>
             <div class="login-subtitle">• Secure Access •</div>
             <div class="login-expiry" id="loginExpiry">
-                <span id="expiryText">👤 បញ្ចូល Username និង Password</span>
+                <span id="expiryText">⏳ កំពុងផ្ទុក...</span>
             </div>
-            
-            <!-- ===== NEW USERNAME FIELD ===== -->
             <div class="login-input-group">
-                <input type="text" class="login-input" id="loginUsername" placeholder="បញ្ចូល Username (ឧ. TEVA)" autocomplete="username">
-            </div>
-            
-            <div class="login-input-group">
-                <input type="password" class="login-input" id="loginPassword" placeholder="បញ្ចូលពាក្យសម្ងាត់..." autocomplete="current-password">
+                <input type="password" class="login-input" id="loginPassword" placeholder="បញ្ចូលពាក្យសម្ងាត់..." autocomplete="off">
                 <button class="toggle-password" id="togglePasswordBtn" type="button" aria-label="Toggle password visibility">👁️</button>
             </div>
             <button class="login-btn" id="loginBtn">ចូលប្រើប្រាស់</button>
@@ -1271,7 +1263,37 @@
         }
 
         // ============================================================
-        // 4. EXPIRY & STATUS CHECK (HELPER FUNCTIONS)
+        // 4. FIREBASE HELPERS (SECURE - Only Fingerprint)
+        // ============================================================
+
+        async function findUserByFingerprint() {
+            if (!navigator.onLine) {
+                console.log('❌ Offline - cannot search fingerprint');
+                return null;
+            }
+            const fp = getDeviceFingerprint();
+            console.log('🔍 Searching for user with FP:', fp);
+            try {
+                const snapshot = await db.ref('users')
+                    .orderByChild('fingerprint')
+                    .equalTo(fp)
+                    .once('value');
+                const data = snapshot.val();
+                if (!data) {
+                    console.log('❌ No user found with this fingerprint');
+                    return null;
+                }
+                const uid = Object.keys(data)[0];
+                console.log('✅ Found user by fingerprint:', uid);
+                return { ...data[uid], uid };
+            } catch (e) {
+                console.error('❌ Search by fingerprint error:', e);
+                return null;
+            }
+        }
+
+        // ============================================================
+        // 5. EXPIRY & STATUS CHECK
         // ============================================================
         function getDaysRemainingFromDate(expiryDateStr) {
             const expiryDate = new Date(expiryDateStr);
@@ -1294,28 +1316,89 @@
                 return { expired: true, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
             }
             if (userData.status === 'inactive') {
-                return { expired: true, message: 'អ្នកត្រូវបានហាមឃាត់ក្នុងការប្រើប្រាស់បន្តទៀត', reason: 'inactive' };
+                return {
+                    expired: true,
+                    message: 'អ្នកត្រូវបានហាមឃាត់ក្នុងការប្រើប្រាស់បន្តទៀត ដោយសារអ្នកបានបំពានលក្ខខណ្ឌនៃការប្រើប្រាស់',
+                    reason: 'inactive'
+                };
             }
             if (userData.status === 'expired') {
-                return { expired: true, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់', reason: 'expired' };
+                return {
+                    expired: true,
+                    message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់',
+                    reason: 'expired'
+                };
             }
             if (!userData.expiryDate) {
-                return { expired: true, message: 'គណនីរបស់អ្នកបានផុតកំណត់!' };
+                return { expired: true, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
             }
             const daysRemaining = getDaysRemainingFromDate(userData.expiryDate);
             if (daysRemaining < 0) {
-                return { expired: true, message: 'គណនីរបស់អ្នកបានផុតកំណត់!' };
+                return { expired: true, message: 'គណនីរបស់អ្នកបានផុតកំណត់! សូមទូទាត់ប្រាក់' };
             }
             return { expired: false, daysRemaining, expiryDate: userData.expiryDate };
         }
 
+        // ===== AUTO SHOW EXPIRY WITHOUT PASSWORD =====
+        async function autoShowExpiry() {
+            const expiryText = document.getElementById('expiryText');
+            const expiryEl = document.getElementById('loginExpiry');
+            if (!expiryText) return;
+
+            expiryText.textContent = '⏳ កំពុងផ្ទុក...';
+            expiryEl.className = 'login-expiry loading';
+
+            const user = await findUserByFingerprint();
+            if (!user) {
+                expiryText.textContent = '👤 មិនស្គាល់ឧបករណ៍នេះ';
+                expiryEl.className = 'login-expiry not-found';
+                return;
+            }
+
+            const result = checkUserStatus(user);
+            if (result.expired) {
+                expiryText.textContent = `⛔ ${result.message}`;
+                if (result.reason === 'inactive') {
+                    expiryEl.className = 'login-expiry denied';
+                } else {
+                    expiryEl.className = 'login-expiry expired';
+                }
+                return;
+            }
+
+            const formattedDate = formatDate(result.expiryDate);
+            const days = result.daysRemaining;
+            let statusClass = 'success';
+            let msg = `📅 នៅសល់ ${days} ថ្ងៃ (${formattedDate})`;
+            if (days <= 0) {
+                statusClass = 'expired';
+                msg = `⛔ ផុតកំណត់ (${formattedDate})`;
+            } else if (days <= 3) {
+                statusClass = 'warning';
+                msg = `⚠️ នៅសល់ ${days} ថ្ងៃ (${formattedDate})`;
+            } else if (days <= 7) {
+                statusClass = 'warning';
+                msg = `📅 នៅសល់ ${days} ថ្ងៃ (${formattedDate})`;
+            }
+            expiryText.textContent = msg;
+            expiryEl.className = `login-expiry ${statusClass}`;
+            console.log(`✅ Auto showed expiry for user: ${user.uid}`);
+        }
+
         // ============================================================
-        // 5. USER SESSION MANAGER
+        // 6. USER SESSION MANAGER
         // ============================================================
-        let userCodes = { metfone: '', cellcard: '', smart: '' };
+        let userCodes = {
+            metfone: '',
+            cellcard: '',
+            smart: ''
+        };
         let currentUser = null;
-        let userExists = { metfone: false, cellcard: false, smart: false };
-        let isLoggedIn = false;
+        let userExists = {
+            metfone: false,
+            cellcard: false,
+            smart: false
+        };
 
         function updateAccountStatus(user) {
             const statusEl = document.getElementById('accountStatusValue');
@@ -1379,38 +1462,55 @@
             document.getElementById('loginOverlay').classList.remove('active');
             showUpdateNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
             console.log('✅ Login successful! User:', user.uid);
+
             updateAccountStatus(user);
         }
 
         // ============================================================
-        // 6. CORE FUNCTION: OPEN V2BOX
+        // 7. CORE FUNCTION: OPEN V2BOX
         // ============================================================
         function openV2Box(type) {
             console.log(`🔍 Checking access for ${type}...`);
+            console.log(`📋 User: ${currentUser ? currentUser.uid : 'none'}`);
+            console.log(`📋 User exists in ${type}: ${userExists[type]}`);
+            console.log(`📋 User code: ${userCodes[type]}`);
+
             if (!userExists[type]) {
                 showUpdateNotification('កំហុស', 'អ្នកមិនបានទិញគម្រោង INTERNET នេះទេ');
+                console.log(`❌ User ${currentUser ? currentUser.uid : 'unknown'} not found for type: ${type}`);
                 return;
             }
 
             let content = '';
             let name = '';
-            if (type === 'metfone') { content = userCodes.metfone || '';
-                name = 'METFONE'; } else if (type === 'cellcard') { content = userCodes.cellcard || '';
-                name = 'CELLCARD'; } else if (type === 'smart') { content = userCodes.smart || '';
-                name = 'SMART'; }
+
+            if (type === 'metfone') {
+                content = userCodes.metfone || '';
+                name = 'METFONE';
+            } else if (type === 'cellcard') {
+                content = userCodes.cellcard || '';
+                name = 'CELLCARD';
+            } else if (type === 'smart') {
+                content = userCodes.smart || '';
+                name = 'SMART';
+            }
 
             if (!content || content === '' || content === 'undefined' || content === 'null') {
                 showUpdateNotification('កំហុស', 'អ្នកមិនបានទិញគម្រោង INTERNET នេះទេ');
+                console.log('❌ No content for type:', type);
                 return;
             }
+
             if (!content.startsWith('http://') && !content.startsWith('https://')) {
                 showUpdateNotification('កំហុស', 'កូដមិនត្រឹមត្រូវ (ត្រូវការ URL)');
+                console.log('❌ Invalid content (not a URL):', content);
                 return;
             }
 
             const encodedContent = encodeURIComponent(content);
             const encodedName = encodeURIComponent(name);
             const v2boxUrl = `v2box://install-sub?url=${encodedContent}&name=${encodedName}`;
+
             console.log('🔗 Opening V2Box:', v2boxUrl);
             window.location.href = v2boxUrl;
 
@@ -1420,6 +1520,7 @@
                 document.removeEventListener('visibilitychange', checkAppOpened);
                 window.removeEventListener('blur', checkAppOpened);
             };
+
             document.addEventListener('visibilitychange', checkAppOpened);
             window.addEventListener('blur', checkAppOpened);
 
@@ -1427,27 +1528,35 @@
                 if (!appOpened) {
                     const isAndroid = /android/i.test(navigator.userAgent);
                     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-                    if (isAndroid) window.location.href = 'https://play.google.com/store/apps/details?id=dev.hexasoftware.v2box';
-                    else if (isIOS) window.location.href = 'https://apps.apple.com/app/v2box/id6446814670';
+                    if (isAndroid) {
+                        window.location.href = 'https://play.google.com/store/apps/details?id=dev.hexasoftware.v2box';
+                    } else if (isIOS) {
+                        window.location.href = 'https://apps.apple.com/app/v2box/id6446814670';
+                    }
                 }
             }, 2500);
         }
 
         // ============================================================
-        // 7. SERVICE WORKER & NETWORK EVENTS
+        // 8. SERVICE WORKER & NETWORK EVENTS
         // ============================================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration error:', err));
             });
         }
-        window.addEventListener('online', () => { updateStatusBadge();
-            showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត'); });
-        window.addEventListener('offline', () => { updateStatusBadge();
-            showUpdateNotification('បណ្តាញ', 'បានផ្តាច់អ៊ីនធឺណិត'); });
+
+        window.addEventListener('online', () => {
+            updateStatusBadge();
+            showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត');
+        });
+        window.addEventListener('offline', () => {
+            updateStatusBadge();
+            showUpdateNotification('បណ្តាញ', 'បានផ្តាច់អ៊ីនធឺណិត');
+        });
 
         // ============================================================
-        // 8. STABLE DEVICE FINGERPRINT
+        // 9. STABLE DEVICE FINGERPRINT
         // ============================================================
         function getDeviceFingerprint() {
             let fp = localStorage.getItem('device_fingerprint');
@@ -1455,7 +1564,9 @@
                 console.log('✅ Using saved fingerprint:', fp);
                 return fp;
             }
+
             console.log('🔐 Generating new stable fingerprint...');
+
             const components = [
                 navigator.userAgent,
                 screen.width + 'x' + screen.height,
@@ -1465,6 +1576,7 @@
                 navigator.language,
                 new Date().getTimezoneOffset()
             ];
+
             try {
                 const canvas = document.createElement('canvas');
                 canvas.width = 200;
@@ -1480,6 +1592,7 @@
                 ctx.fillText('SECURE', 4, 17);
                 components.push(canvas.toDataURL());
             } catch (e) {}
+
             const str = components.join('|||');
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
@@ -1488,18 +1601,27 @@
                 hash = hash & hash;
             }
             fp = 'FP_' + Math.abs(hash).toString(16).padStart(8, '0');
+
             localStorage.setItem('device_fingerprint', fp);
             console.log('✅ New stable fingerprint saved:', fp);
+
             return fp;
         }
+
         let deviceFingerprint = getDeviceFingerprint();
+        let isLoggedIn = false;
 
         // ============================================================
-        // 9. SHOW FINGERPRINT ON SCREEN (tap title 3x)
+        // 10. SHOW FINGERPRINT ON SCREEN
         // ============================================================
         function showFingerprintOnScreen() {
             const fp = getDeviceFingerprint();
-            if (document.getElementById('fpDisplay')) { document.getElementById('fpDisplay').remove(); return; }
+
+            if (document.getElementById('fpDisplay')) {
+                document.getElementById('fpDisplay').remove();
+                return;
+            }
+
             const div = document.createElement('div');
             div.id = 'fpDisplay';
             div.innerHTML = `
@@ -1512,108 +1634,117 @@
                 <div class="fp-hint">💡 ប្រើសម្រាប់ចាក់សោរឧបករណ៍</div>
             `;
             document.body.appendChild(div);
-            setTimeout(() => { const el = document.getElementById('fpDisplay'); if (el) el.remove(); }, 30000);
+
+            setTimeout(() => {
+                const el = document.getElementById('fpDisplay');
+                if (el) el.remove();
+            }, 30000);
         }
 
         function copyFingerprint() {
             const fp = getDeviceFingerprint();
-            navigator.clipboard.writeText(fp).then(() => { showUpdateNotification('✅', 'ចម្លងដោយជោគជ័យ!'); }).catch(() => { alert(
-                    '⚠️ សូមចម្លងដោយដៃ: ' + fp); });
+            navigator.clipboard.writeText(fp).then(() => {
+                showUpdateNotification('✅', 'ចម្លងដោយជោគជ័យ!');
+            }).catch(() => {
+                alert('⚠️ សូមចម្លងដោយដៃ: ' + fp);
+            });
         }
 
+        // ============================================================
+        // 11. FINGERPRINT HELPER (tap title 3x)
+        // ============================================================
         let fpTapCount = 0;
         let fpTapTimer = null;
+
         const titleElement = document.getElementById('loginTitle');
         if (titleElement) {
             titleElement.addEventListener('click', function(e) {
                 fpTapCount++;
                 clearTimeout(fpTapTimer);
+
                 this.textContent = '𝕊𝕂𝕐ℕ𝔼𝕋 (' + fpTapCount + '/3)';
                 this.style.color = '#d4af37';
+
                 if (fpTapCount >= 3) {
                     fpTapCount = 0;
                     showFingerprintOnScreen();
                     this.textContent = '𝕊𝕂𝕐ℕ𝔼𝕋';
                     this.style.color = '#f0e9cf';
                 }
+
                 fpTapTimer = setTimeout(() => {
                     fpTapCount = 0;
-                    if (titleElement) { titleElement.textContent = '𝕊𝕂𝕐ℕ𝔼𝕋';
-                        titleElement.style.color = '#f0e9cf'; }
+                    if (titleElement) {
+                        titleElement.textContent = '𝕊𝕂𝕐ℕ𝔼𝕋';
+                        titleElement.style.color = '#f0e9cf';
+                    }
                 }, 3000);
             });
         }
 
         // ============================================================
-        // 10. TOGGLE PASSWORD VISIBILITY
+        // 12. TOGGLE PASSWORD VISIBILITY
         // ============================================================
         const togglePasswordBtn = document.getElementById('togglePasswordBtn');
         const passwordInput = document.getElementById('loginPassword');
         let passwordVisible = false;
+
         if (togglePasswordBtn && passwordInput) {
             togglePasswordBtn.addEventListener('click', function() {
                 passwordVisible = !passwordVisible;
                 passwordInput.type = passwordVisible ? 'text' : 'password';
                 this.textContent = passwordVisible ? '🙈' : '👁️';
+                this.setAttribute('aria-label', passwordVisible ? 'Hide password' : 'Show password');
             });
         }
 
         // ============================================================
-        // 11. INITIALIZE LOGIN SYSTEM (SECURE VERSION)
+        // 13. INITIALIZE LOGIN SYSTEM (SECURE VERSION)
         // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
-            const usernameInput = document.getElementById('loginUsername');
-            const passwordInput = document.getElementById('loginPassword');
+            const input = document.getElementById('loginPassword');
             const btn = document.getElementById('loginBtn');
             const error = document.getElementById('loginError');
             const loading = document.getElementById('loginLoading');
-            const expiryText = document.getElementById('expiryText');
 
-            console.log('🔐 Initializing secure login system (Username + Password)');
+            console.log('🔐 Initializing login system (SECURE - FINGERPRINT ONLY)');
             console.log('📱 Device Fingerprint:', deviceFingerprint);
             console.log('📶 Network status:', navigator.onLine ? 'Online' : 'Offline');
 
             sessionStorage.removeItem('teva_logged_in');
             sessionStorage.removeItem('teva_password');
             isLoggedIn = false;
-            overlay.classList.add('active');
-            expiryText.textContent = '👤 បញ្ចូល Username និង Password';
 
-            // Clear errors on input
-            usernameInput.addEventListener('input', () => {
-                if (error.classList.contains('show')) { error.classList.remove('show');
-                    error.textContent = ''; }
-            });
-            passwordInput.addEventListener('input', () => {
-                if (error.classList.contains('show')) { error.classList.remove('show');
-                    error.textContent = ''; }
+            overlay.classList.add('active');
+            console.log('🔐 Showing login screen');
+
+            await autoShowExpiry();
+
+            input.addEventListener('input', function() {
+                if (error.classList.contains('show')) {
+                    error.classList.remove('show');
+                    error.textContent = '';
+                }
             });
 
             // ============================================================
-            // MAIN LOGIN HANDLER
+            // SECURE handleLogin - Uses ONLY Fingerprint
             // ============================================================
             async function handleLogin() {
-                const username = usernameInput.value.trim();
-                const password = passwordInput.value.trim();
+                const password = input.value.trim();
 
                 error.classList.remove('show');
                 error.textContent = '';
 
-                if (!username) {
-                    error.textContent = 'សូមបញ្ចូល Username (ឧ. TEVA)';
-                    error.classList.add('show');
-                    usernameInput.focus();
-                    return;
-                }
                 if (!password) {
                     error.textContent = 'សូមបញ្ចូលពាក្យសម្ងាត់';
                     error.classList.add('show');
-                    passwordInput.focus();
                     return;
                 }
+
                 if (!navigator.onLine) {
-                    error.textContent = '❌ ត្រូវការអ៊ីនធឺណិត';
+                    error.textContent = '❌ ត្រូវការអ៊ីនធឺណិតសម្រាប់ផ្ទៀងផ្ទាត់';
                     error.classList.add('show');
                     return;
                 }
@@ -1621,69 +1752,64 @@
                 loading.classList.add('active');
                 btn.disabled = true;
 
-                try {
-                    // 1. Read user data directly from /users/username
-                    const snapshot = await db.ref('users/' + username).once('value');
-                    const userData = snapshot.val();
+                // ===== SECURE VALIDATION: ONLY FINGERPRINT =====
+                const validationPromise = (async () => {
+                    try {
+                        // 1. Find user by fingerprint ONLY
+                        const userByFP = await findUserByFingerprint();
+                        if (!userByFP) {
+                            throw new Error('អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!');
+                        }
 
-                    if (!userData) {
-                        throw new Error('Username មិនត្រឹមត្រូវ');
+                        // 2. Check status & expiry
+                        const statusCheck = checkUserStatus(userByFP);
+                        if (statusCheck.expired) {
+                            throw new Error(statusCheck.message);
+                        }
+
+                        // 3. Verify password
+                        if (userByFP.password !== password) {
+                            throw new Error('ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ');
+                        }
+
+                        // 4. Success
+                        return { success: true, user: userByFP };
+
+                    } catch (err) {
+                        console.error('❌ Validation error:', err);
+                        return { success: false, error: err.message };
                     }
+                })();
 
-                    // 2. Verify password
-                    if (userData.password !== password) {
-                        throw new Error('ពាក្យសម្ងាត់មិនត្រឹមត្រូវ');
-                    }
+                // ===== Wait for validation + 1 second loading =====
+                const [result] = await Promise.all([
+                    validationPromise,
+                    new Promise(resolve => setTimeout(resolve, 1000))
+                ]);
 
-                    // 3. Verify fingerprint (extra security)
-                    const currentFp = getDeviceFingerprint();
-                    if (userData.fingerprint && userData.fingerprint !== currentFp) {
-                        throw new Error('ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត (Fingerprint mismatch)');
-                    }
-
-                    // 4. Check status & expiry
-                    const statusCheck = checkUserStatus(userData);
-                    if (statusCheck.expired) {
-                        throw new Error(statusCheck.message);
-                    }
-
-                    // 5. Login success
-                    localStorage.setItem('teva_user_uid', username);
-                    localStorage.setItem('teva_logged_in', 'true');
-
-                    const user = {
-                        uid: username,
-                        links: userData.links || { metfone: '', cellcard: '', smart: '' },
-                        expiryDate: userData.expiryDate,
-                        status: userData.status,
-                        password: password
-                    };
-
-                    setUserSession(user);
-
-                } catch (err) {
-                    console.error('❌ Login error:', err);
-                    error.textContent = '❌ ' + err.message;
+                if (result.success) {
+                    setUserSession(result.user);
+                } else {
+                    error.textContent = result.error;
                     error.classList.add('show');
-                    passwordInput.value = '';
-                    setTimeout(() => passwordInput.focus(), 100);
+                    input.value = '';
+                    setTimeout(() => input.focus(), 100);
                 }
 
                 loading.classList.remove('active');
                 btn.disabled = false;
             }
 
-            // Event listeners
             btn.addEventListener('click', handleLogin);
-            passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(); });
-            usernameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault();
-                    passwordInput.focus(); } });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
 
-            setTimeout(() => usernameInput.focus(), 500);
+            setTimeout(() => input.focus(), 500);
         }
 
         // ============================================================
-        // 12. PWA MANIFEST & INSTALL
+        // 14. PWA MANIFEST & INSTALL
         // ============================================================
         function createManifest() {
             const LOGO_FILE = "teva.png";
@@ -1696,7 +1822,8 @@
                 orientation: "portrait",
                 theme_color: "#0a0a2a",
                 background_color: "#0a0a2a",
-                icons: [{ src: LOGO_FILE, sizes: "192x192", type: "image/png", purpose: "any maskable" },
+                icons: [
+                    { src: LOGO_FILE, sizes: "192x192", type: "image/png", purpose: "any maskable" },
                     { src: LOGO_FILE, sizes: "512x512", type: "image/png", purpose: "any maskable" }
                 ]
             };
@@ -1736,16 +1863,18 @@
         }
 
         // ============================================================
-        // 13. START
+        // 15. START
         // ============================================================
         setTimeout(initLogin, 100);
+
         updateAccountStatus(null);
         updateStatusBadge();
 
         console.log('🔐 ID Device:', deviceFingerprint);
-        console.log('📱 TEVA App Loaded Successfully (SECURE + Username Login)');
+        console.log('📱 TEVA App Loaded Successfully (SECURE VERSION - FINGERPRINT ONLY)');
         console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
         console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
+        console.log('🔒 SECURE: No password query in Firebase');
     </script>
 </body>
 </html>
