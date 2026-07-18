@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>| 𝕊𝕂𝕐ℕ𝔼𝕋 |</title>
-
     <link rel="apple-touch-icon" href="teva.png">
     <link rel="icon" type="image/png" sizes="32x32" href="teva.png">
     <link rel="icon" type="image/png" sizes="192x192" href="teva.png">
-
     <meta name="theme-color" content="#0a0a2a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -16,17 +14,13 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="TEVA">
     <meta name="msapplication-TileColor" content="#0a0a2a">
-
-    <!-- ===== Firebase SDKs ===== -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
     </script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js">
     </script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js">
     </script>
-
     <style>
-        /* ===== CSS ===== */
         @font-face {
             font-family: 'Khmer OS Battambang';
             src: local('Khmer OS Battambang'), local('KhmerOSBattambang');
@@ -653,8 +647,6 @@
                 transform: translateX(-50%) translateY(-10px);
             }
         }
-
-        /* ===== LOGIN SCREEN STYLES ===== */
         .login-overlay {
             position: fixed;
             top: 0;
@@ -764,7 +756,6 @@
                 opacity: 1;
             }
         }
-
         .login-input-group {
             position: relative;
             margin-bottom: 20px;
@@ -917,8 +908,6 @@
                 transform: rotate(360deg);
             }
         }
-
-        /* ===== FINGERPRINT DISPLAY ===== */
         #fpDisplay {
             position: fixed;
             bottom: 120px;
@@ -1000,7 +989,6 @@
             color: #666;
             margin-top: 10px;
         }
-
         @media (max-width: 500px) {
             .glass-panel {
                 max-width: 380px;
@@ -1091,9 +1079,7 @@
         }
     </style>
 </head>
-
 <body>
-    <!-- ===== LOGIN OVERLAY ===== -->
     <div class="login-overlay active" id="loginOverlay">
         <div class="login-box">
             <div class="login-logo" id="loginLogo">🔐</div>
@@ -1102,12 +1088,9 @@
             <div class="login-expiry" id="loginExpiry">
                 <span id="expiryText">👤 បញ្ចូល Username និង Password</span>
             </div>
-
-            <!-- ===== USERNAME FIELD ===== -->
             <div class="login-input-group">
                 <input type="text" class="login-input" id="loginUsername" placeholder="បញ្ចូល Username" autocomplete="username">
             </div>
-
             <div class="login-input-group">
                 <input type="password" class="login-input" id="loginPassword" placeholder="បញ្ចូលពាក្យសម្ងាត់..." autocomplete="current-password">
                 <button class="toggle-password" id="togglePasswordBtn" type="button" aria-label="Toggle password visibility">👁️</button>
@@ -1122,18 +1105,13 @@
             <div class="login-shield">🛡️ SECURE DEVICE LOCK</div>
         </div>
     </div>
-
     <div class="gradient-bg"></div>
     <div class="animated-bg"></div>
-
     <div class="status-badge online" id="statusBadge">● Online</div>
-
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
     <div class="orb orb-3"></div>
-
     <div class="particles" id="particles"></div>
-
     <div class="glass-panel">
         <div class="header-badge">
             <div class="badge">
@@ -1143,7 +1121,6 @@
                 </div>
             </div>
         </div>
-
         <div class="card">
             <div class="button-group">
                 <button class="btn" onclick="openV2Box('metfone')">
@@ -1159,7 +1136,6 @@
                     <div class="btn-glow"></div>
                 </button>
             </div>
-
             <div class="card-footer">
                 <div class="dot"></div>
                 <div class="dot"></div>
@@ -1168,7 +1144,6 @@
             <div class="line-decoration"></div>
         </div>
     </div>
-
     <div class="birds-container">
         <div class="bird bird1"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
         <div class="bird bird2"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
@@ -1176,22 +1151,15 @@
         <div class="bird bird4"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
         <div class="bird bird5"><div class="bird-body"></div><div class="bird-wing left"></div><div class="bird-wing right"></div><div class="bird-tail"></div><div class="bird-eye"></div></div>
     </div>
-
     <div class="mountain-scene">
         <div class="peak peak-1"></div>
         <div class="peak peak-2"></div>
         <div class="peak peak-3"></div>
         <div class="peak peak-4"></div>
     </div>
-
     <div class="mist"></div>
-
     <button id="installBtn" class="install-prompt">ដំឡើងកម្មវិធី</button>
-
     <script>
-        // ============================================================
-        // 0. FIREBASE INIT
-        // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyA-RvOzR03Ic4HefKdBycXYIK7AZyjcVn4",
             authDomain: "skynet-dec0e.firebaseapp.com",
@@ -1202,20 +1170,14 @@
             appId: "1:771361401451:web:ad0389550229089003df2e",
             measurementId: "G-QRQ8QB3ME0"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
-        // ============================================================
-        // 1. ANONYMOUS AUTHENTICATION
-        // ============================================================
         firebase.auth().signInAnonymously()
             .then(() => console.log('✅ Anonymous Authentication successful'))
             .catch((error) => {
                 console.error('❌ Anonymous Auth failed:', error);
                 showUpdateNotification('កំហុស', 'មិនអាចផ្ទៀងផ្ទាត់ឧបករណ៍បាន');
             });
-
         firebase.auth().onAuthStateChanged((user) => {
             if (user) console.log('✅ User is signed in (anonymous)');
             else {
@@ -1223,10 +1185,6 @@
                 firebase.auth().signInAnonymously().catch(err => console.error('Retry auth failed:', err));
             }
         });
-
-        // ============================================================
-        // 2. PARTICLES BACKGROUND
-        // ============================================================
         function createParticles() {
             const container = document.getElementById('particles');
             for (let i = 0; i < 45; i++) {
@@ -1243,10 +1201,6 @@
             }
         }
         createParticles();
-
-        // ============================================================
-        // 3. STATUS BADGE & NOTIFICATIONS
-        // ============================================================
         function updateStatusBadge() {
             const badge = document.getElementById('statusBadge');
             if (navigator.onLine) {
@@ -1257,7 +1211,6 @@
                 badge.className = 'status-badge offline';
             }
         }
-
         function showUpdateNotification(title, message) {
             const existingNotifications = document.querySelectorAll('.update-notification');
             existingNotifications.forEach(notif => notif.remove());
@@ -1267,10 +1220,6 @@
             document.body.appendChild(notification);
             setTimeout(() => notification.remove(), 3000);
         }
-
-        // ============================================================
-        // 4. EXPIRY & STATUS CHECK
-        // ============================================================
         function getDaysRemainingFromDate(expiryDateStr) {
             const expiryDate = new Date(expiryDateStr);
             const now = new Date();
@@ -1278,7 +1227,6 @@
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             return diffDays;
         }
-
         function formatDate(dateStr) {
             const date = new Date(dateStr);
             const day = date.getDate().toString().padStart(2, '0');
@@ -1286,7 +1234,6 @@
             const year = date.getFullYear();
             return `${day}/${month}/${year}`;
         }
-
         function checkUserStatus(userData) {
             if (!userData) {
                 return { expired: true, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
@@ -1314,30 +1261,22 @@
             }
             return { expired: false, daysRemaining, expiryDate: userData.expiryDate };
         }
-
-        // ============================================================
-        // 5. USER SESSION MANAGER
-        // ============================================================
         let userCodes = { metfone: '', cellcard: '', smart: '' };
         let currentUser = null;
         let userExists = { metfone: false, cellcard: false, smart: false };
         let isLoggedIn = false;
-
         function updateAccountStatus(user) {
             const statusEl = document.getElementById('accountStatusValue');
             if (!statusEl) return;
-
             if (!user) {
                 statusEl.textContent = '👤 សូមចូលប្រើ';
                 return;
             }
-
             const result = checkUserStatus(user);
             if (result.expired) {
                 statusEl.innerHTML = `⛔ <span class="status-inactive">${result.message}</span>`;
                 return;
             }
-
             const days = result.daysRemaining;
             const expiryFormatted = formatDate(result.expiryDate);
             let daysText = '';
@@ -1351,19 +1290,16 @@
             } else {
                 daysText = `${days} ថ្ងៃ`;
             }
-
             statusEl.innerHTML = `
                 👤 <span class="status-user">${user.uid}</span>
                 &nbsp;|&nbsp; 📅 ${expiryFormatted}
                 &nbsp;|&nbsp; <span class="${daysClass}">${daysText}</span>
             `;
         }
-
         function setUserSession(user) {
             currentUser = user;
             userCodes = { metfone: '', cellcard: '', smart: '' };
             userExists = { metfone: false, cellcard: false, smart: false };
-
             if (user.links) {
                 if (user.links.metfone) {
                     userCodes.metfone = user.links.metfone;
@@ -1378,7 +1314,6 @@
                     userExists.smart = true;
                 }
             }
-
             isLoggedIn = true;
             sessionStorage.setItem('teva_logged_in', 'true');
             sessionStorage.setItem('teva_password', user.password || '');
@@ -1387,17 +1322,12 @@
             console.log('✅ Login successful! User:', user.uid);
             updateAccountStatus(user);
         }
-
-        // ============================================================
-        // 6. CORE FUNCTION: OPEN V2BOX
-        // ============================================================
         function openV2Box(type) {
             console.log(`🔍 Checking access for ${type}...`);
             if (!userExists[type]) {
                 showUpdateNotification('កំហុស', 'អ្នកមិនបានទិញគម្រោង INTERNET នេះទេ');
                 return;
             }
-
             let content = '';
             let name = '';
             if (type === 'metfone') {
@@ -1410,7 +1340,6 @@
                 content = userCodes.smart || '';
                 name = 'SMART';
             }
-
             if (!content || content === '' || content === 'undefined' || content === 'null') {
                 showUpdateNotification('កំហុស', 'អ្នកមិនបានទិញគម្រោង INTERNET នេះទេ');
                 return;
@@ -1419,13 +1348,11 @@
                 showUpdateNotification('កំហុស', 'កូដមិនត្រឹមត្រូវ (ត្រូវការ URL)');
                 return;
             }
-
             const encodedContent = encodeURIComponent(content);
             const encodedName = encodeURIComponent(name);
             const v2boxUrl = `v2box://install-sub?url=${encodedContent}&name=${encodedName}`;
             console.log('🔗 Opening V2Box:', v2boxUrl);
             window.location.href = v2boxUrl;
-
             let appOpened = false;
             const checkAppOpened = () => {
                 appOpened = true;
@@ -1434,7 +1361,6 @@
             };
             document.addEventListener('visibilitychange', checkAppOpened);
             window.addEventListener('blur', checkAppOpened);
-
             setTimeout(() => {
                 if (!appOpened) {
                     const isAndroid = /android/i.test(navigator.userAgent);
@@ -1444,10 +1370,6 @@
                 }
             }, 2500);
         }
-
-        // ============================================================
-        // 7. SERVICE WORKER & NETWORK EVENTS
-        // ============================================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration error:', err));
@@ -1457,10 +1379,6 @@
             showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត'); });
         window.addEventListener('offline', () => { updateStatusBadge();
             showUpdateNotification('បណ្តាញ', 'បានផ្តាច់អ៊ីនធឺណិត'); });
-
-        // ============================================================
-        // 8. STABLE DEVICE FINGERPRINT
-        // ============================================================
         function getDeviceFingerprint() {
             let fp = localStorage.getItem('device_fingerprint');
             if (fp && fp.startsWith('FP_')) {
@@ -1504,12 +1422,7 @@
             console.log('✅ New stable fingerprint saved:', fp);
             return fp;
         }
-
         let deviceFingerprint = getDeviceFingerprint();
-
-        // ============================================================
-        // 9. SHOW FINGERPRINT ON SCREEN (tap title 3x)
-        // ============================================================
         function showFingerprintOnScreen() {
             const fp = getDeviceFingerprint();
             if (document.getElementById('fpDisplay')) { document.getElementById('fpDisplay').remove(); return; }
@@ -1527,13 +1440,11 @@
             document.body.appendChild(div);
             setTimeout(() => { const el = document.getElementById('fpDisplay'); if (el) el.remove(); }, 30000);
         }
-
         function copyFingerprint() {
             const fp = getDeviceFingerprint();
             navigator.clipboard.writeText(fp).then(() => { showUpdateNotification('✅', 'ចម្លងដោយជោគជ័យ!'); }).catch(() => { alert(
                     '⚠️ សូមចម្លងដោយដៃ: ' + fp); });
         }
-
         let fpTapCount = 0;
         let fpTapTimer = null;
         const titleElement = document.getElementById('loginTitle');
@@ -1556,10 +1467,6 @@
                 }, 3000);
             });
         }
-
-        // ============================================================
-        // 10. TOGGLE PASSWORD VISIBILITY
-        // ============================================================
         const togglePasswordBtn = document.getElementById('togglePasswordBtn');
         const passwordInput = document.getElementById('loginPassword');
         let passwordVisible = false;
@@ -1570,10 +1477,6 @@
                 this.textContent = passwordVisible ? '🙈' : '👁️';
             });
         }
-
-        // ============================================================
-        // 11. INITIALIZE LOGIN SYSTEM (USERNAME + PASSWORD)
-        // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
             const usernameInput = document.getElementById('loginUsername');
@@ -1583,21 +1486,15 @@
             const loading = document.getElementById('loginLoading');
             const expiryText = document.getElementById('expiryText');
             const expiryEl = document.getElementById('loginExpiry');
-
             console.log('🔐 Initializing secure login system (Username + Password)');
             console.log('📱 Device Fingerprint:', deviceFingerprint);
             console.log('📶 Network status:', navigator.onLine ? 'Online' : 'Offline');
-
             sessionStorage.removeItem('teva_logged_in');
             sessionStorage.removeItem('teva_password');
             isLoggedIn = false;
             overlay.classList.add('active');
-
-            // Set expiry text (no auto lookup)
             expiryText.textContent = '👤 បញ្ចូល Username និង Password';
             expiryEl.className = 'login-expiry';
-
-            // Clear errors on input
             usernameInput.addEventListener('input', () => {
                 if (error.classList.contains('show')) { error.classList.remove('show');
                     error.textContent = ''; }
@@ -1606,17 +1503,11 @@
                 if (error.classList.contains('show')) { error.classList.remove('show');
                     error.textContent = ''; }
             });
-
-            // ============================================================
-            // MAIN LOGIN HANDLER - Reads /users/username directly
-            // ============================================================
             async function handleLogin() {
                 const username = usernameInput.value.trim();
                 const password = passwordInput.value.trim();
-
                 error.classList.remove('show');
                 error.textContent = '';
-
                 if (!username) {
                     error.textContent = 'សូមបញ្ចូល Username (ឧ. TEVA)';
                     error.classList.add('show');
@@ -1634,40 +1525,27 @@
                     error.classList.add('show');
                     return;
                 }
-
                 loading.classList.add('active');
                 btn.disabled = true;
-
                 try {
-                    // ===== 1. Read user data DIRECTLY from /users/username =====
                     const snapshot = await db.ref('users/' + username).once('value');
                     const userData = snapshot.val();
-
                     if (!userData) {
                         throw new Error('Username មិនត្រឹមត្រូវ');
                     }
-
-                    // ===== 2. Verify password =====
                     if (userData.password !== password) {
                         throw new Error('ពាក្យសម្ងាត់មិនត្រឹមត្រូវ');
                     }
-
-                    // ===== 3. Verify fingerprint (extra security) =====
                     const currentFp = getDeviceFingerprint();
                     if (userData.fingerprint && userData.fingerprint !== currentFp) {
                         throw new Error('ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត (Fingerprint mismatch)');
                     }
-
-                    // ===== 4. Check status & expiry =====
                     const statusCheck = checkUserStatus(userData);
                     if (statusCheck.expired) {
                         throw new Error(statusCheck.message);
                     }
-
-                    // ===== 5. Login success =====
                     localStorage.setItem('teva_user_uid', username);
                     localStorage.setItem('teva_logged_in', 'true');
-
                     const user = {
                         uid: username,
                         links: userData.links || { metfone: '', cellcard: '', smart: '' },
@@ -1675,9 +1553,7 @@
                         status: userData.status,
                         password: password
                     };
-
                     setUserSession(user);
-
                 } catch (err) {
                     console.error('❌ Login error:', err);
                     error.textContent = '❌ ' + err.message;
@@ -1685,11 +1561,9 @@
                     passwordInput.value = '';
                     setTimeout(() => passwordInput.focus(), 100);
                 }
-
                 loading.classList.remove('active');
                 btn.disabled = false;
             }
-
             btn.addEventListener('click', handleLogin);
             passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(); });
             usernameInput.addEventListener('keydown', (e) => {
@@ -1698,13 +1572,8 @@
                     passwordInput.focus();
                 }
             });
-
             setTimeout(() => usernameInput.focus(), 500);
         }
-
-        // ============================================================
-        // 12. PWA MANIFEST & INSTALL
-        // ============================================================
         function createManifest() {
             const LOGO_FILE = "teva.png";
             const manifestData = {
@@ -1730,7 +1599,6 @@
             document.head.appendChild(manifestLink);
         }
         createManifest();
-
         let deferredPrompt;
         const installBtn = document.getElementById('installBtn');
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -1754,19 +1622,9 @@
         if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
             installBtn.style.display = 'none';
         }
-
-        // ============================================================
-        // 13. START
-        // ============================================================
         setTimeout(initLogin, 100);
         updateAccountStatus(null);
         updateStatusBadge();
-
-        console.log('🔐 ID Device:', deviceFingerprint);
-        console.log('📱 TEVA App Loaded Successfully (SECURE - Username + Password)');
-        console.log('💡 ចុចលើ "TEVA" 3 ដង ដើម្បីមើល ID DEVICE');
-        console.log('💡 បើចង់ឃើញ Log បើក Console (F12)');
-        console.log('🔒 SECURE: Direct read from /users/username - No search queries');
     </script>
 </body>
 </html>
