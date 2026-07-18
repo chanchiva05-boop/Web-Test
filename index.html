@@ -1509,7 +1509,7 @@
                 error.classList.remove('show');
                 error.textContent = '';
                 if (!username) {
-                    error.textContent = 'សូមបញ្ចូល Username (ឧ. TEVA)';
+                    error.textContent = 'សូមបញ្ចូល Username';
                     error.classList.add('show');
                     usernameInput.focus();
                     return;
@@ -1538,7 +1538,7 @@
                     }
                     const currentFp = getDeviceFingerprint();
                     if (userData.fingerprint && userData.fingerprint !== currentFp) {
-                        throw new Error('ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត (Fingerprint mismatch)');
+                        throw new Error('ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត');
                     }
                     const statusCheck = checkUserStatus(userData);
                     if (statusCheck.expired) {
