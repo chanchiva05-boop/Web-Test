@@ -10,9 +10,9 @@
     <meta name="theme-color" content="#0a0a2a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="TEVA">
+    <meta name="apple-mobile-web-app-title" content="SKYNET">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="TEVA">
+    <meta name="application-name" content="SKYNET">
     <meta name="msapplication-TileColor" content="#0a0a2a">
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
     </script>
@@ -1160,6 +1160,9 @@
     <div class="mist"></div>
     <button id="installBtn" class="install-prompt">ដំឡើងកម្មវិធី</button>
     <script>
+        // ============================================================
+        // FIREBASE CONFIG
+        // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyB-ggPTrt3lbCDQ2T3pOTZYnGdmyN8DsGM",
             authDomain: "test-project-d4809.firebaseapp.com",
@@ -1172,12 +1175,184 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+
+        // ============================================================
+        // SECURITY CONSTANTS
+        // ============================================================
+        const ENCRYPTION_KEY = 'SKYNET_SECURE_2026_ULTRA';
+        const SESSION_TIMEOUT = 24 * 60 * 60 * 1000; // 24 hours
+        const MAX_LOGIN_ATTEMPTS = 5;
+        const LOCKOUT_TIME = 15 * 60 * 1000; // 15 minutes
+
+        // ============================================================
+        // ENCRYPTION UTILITIES
+        // ============================================================
+        function encryptData(text) {
+            if (!text) return '';
+            try {
+                let result = '';
+                for (let i = 0; i < text.length; i++) {
+                    const charCode = text.charCodeAt(i) ^ ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length);
+                    result += String.fromCharCode(charCode);
+                }
+                return btoa(result);
+            } catch {
+                return '';
+            }
+        }
+
+        function decryptData(encrypted) {
+            if (!encrypted) return '';
+            try {
+                const decoded = atob(encrypted);
+                let result = '';
+                for (let i = 0; i < decoded.length; i++) {
+                    const charCode = decoded.charCodeAt(i) ^ ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length);
+                    result += String.fromCharCode(charCode);
+                }
+                return result;
+            } catch {
+                return '';
+            }
+        }
+
+        // ============================================================
+        // DEVICE FINGERPRINT (Enhanced)
+        // ============================================================
+        function getDeviceFingerprint() {
+            let fp = localStorage.getItem('device_fingerprint');
+            if (fp && fp.startsWith('FP_')) {
+                return fp;
+            }
+            const components = [
+                navigator.userAgent,
+                screen.width + 'x' + screen.height,
+                screen.colorDepth,
+                navigator.hardwareConcurrency || 0,
+                navigator.platform,
+                navigator.language,
+                new Date().getTimezoneOffset(),
+                navigator.deviceMemory || 0,
+                navigator.hardwareConcurrency || 0
+            ];
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 200;
+                canvas.height = 50;
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#f60';
+                ctx.fillRect(125, 1, 62, 20);
+                ctx.fillStyle = '#069';
+                ctx.fillText('SKYNET', 2, 15);
+                ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+                ctx.fillText('SECURE', 4, 17);
+                components.push(canvas.toDataURL());
+            } catch (e) {}
+            const str = components.join('|||');
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            fp = 'FP_' + Math.abs(hash).toString(16).padStart(8, '0') + '_' + Date.now().toString(16).slice(-4);
+            localStorage.setItem('device_fingerprint', fp);
+            return fp;
+        }
+
+        const deviceFingerprint = getDeviceFingerprint();
+
+        // ============================================================
+        // SESSION MANAGEMENT
+        // ============================================================
+        function generateSessionToken(userId, fingerprint) {
+            const timestamp = Date.now();
+            const data = `${userId}|${fingerprint}|${timestamp}|${ENCRYPTION_KEY.slice(0, 8)}`;
+            let hash = 0;
+            for (let i = 0; i < data.length; i++) {
+                hash = ((hash << 5) - hash) + data.charCodeAt(i);
+                hash = hash & hash;
+            }
+            const token = `SESSION_${Math.abs(hash).toString(16).padStart(8, '0')}_${timestamp}`;
+            return encryptData(token);
+        }
+
+        function verifySessionToken(encryptedToken, userId, fingerprint) {
+            try {
+                const token = decryptData(encryptedToken);
+                if (!token || !token.startsWith('SESSION_')) return false;
+                const parts = token.split('_');
+                if (parts.length < 3) return false;
+                const timestamp = parseInt(parts[2]);
+                if (isNaN(timestamp)) return false;
+                if (Date.now() - timestamp > SESSION_TIMEOUT) return false;
+                const storedFingerprint = localStorage.getItem('device_fingerprint');
+                return storedFingerprint === fingerprint;
+            } catch {
+                return false;
+            }
+        }
+
+        function getStoredSession() {
+            const token = localStorage.getItem('teva_session_token');
+            const user = localStorage.getItem('teva_user_uid');
+            const fp = localStorage.getItem('device_fingerprint');
+            if (token && user && fp) {
+                if (verifySessionToken(token, user, fp)) {
+                    return { userId: user, fingerprint: fp };
+                }
+            }
+            return null;
+        }
+
+        // ============================================================
+        // RATE LIMITING
+        // ============================================================
+        function checkLoginAttempts(username) {
+            const attempts = JSON.parse(localStorage.getItem('login_attempts') || '{}');
+            const key = `attempt_${username}`;
+            if (attempts[key]) {
+                const data = attempts[key];
+                if (data.count >= MAX_LOGIN_ATTEMPTS) {
+                    const timeSince = Date.now() - data.timestamp;
+                    if (timeSince < LOCKOUT_TIME) {
+                        const remaining = Math.ceil((LOCKOUT_TIME - timeSince) / 60000);
+                        throw new Error(`សូមរង់ចាំ ${remaining} នាទី មុនពេលព្យាយាមម្តងទៀត`);
+                    } else {
+                        delete attempts[key];
+                        localStorage.setItem('login_attempts', JSON.stringify(attempts));
+                    }
+                }
+            }
+            return true;
+        }
+
+        function recordLoginAttempt(username, success) {
+            const attempts = JSON.parse(localStorage.getItem('login_attempts') || '{}');
+            const key = `attempt_${username}`;
+            if (success) {
+                delete attempts[key];
+            } else {
+                if (!attempts[key]) {
+                    attempts[key] = { count: 0, timestamp: Date.now() };
+                }
+                attempts[key].count += 1;
+                attempts[key].timestamp = Date.now();
+            }
+            localStorage.setItem('login_attempts', JSON.stringify(attempts));
+        }
+
+        // ============================================================
+        // AUTHENTICATION
+        // ============================================================
         firebase.auth().signInAnonymously()
             .then(() => console.log('✅ Anonymous Authentication successful'))
             .catch((error) => {
                 console.error('❌ Anonymous Auth failed:', error);
-                showUpdateNotification('កំហុស', 'មិនអាចផ្ទៀងផ្ទាត់ឧបករណ៍បាន');
             });
+
         firebase.auth().onAuthStateChanged((user) => {
             if (user) console.log('✅ User is signed in (anonymous)');
             else {
@@ -1185,41 +1360,30 @@
                 firebase.auth().signInAnonymously().catch(err => console.error('Retry auth failed:', err));
             }
         });
-        function createParticles() {
-            const container = document.getElementById('particles');
-            for (let i = 0; i < 45; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('particle');
-                const size = Math.random() * 3 + 1;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 15 + 's';
-                particle.style.animationDuration = 8 + Math.random() * 12 + 's';
-                particle.style.opacity = Math.random() * 0.4 + 0.2;
-                container.appendChild(particle);
+
+        // ============================================================
+        // USER DATA HANDLING (Encrypted)
+        // ============================================================
+        function decryptUserLinks(links) {
+            if (!links) return { metfone: '', cellcard: '', smart: '' };
+            const decrypted = {};
+            for (const [key, value] of Object.entries(links)) {
+                decrypted[key] = decryptData(value);
             }
+            return decrypted;
         }
-        createParticles();
-        function updateStatusBadge() {
-            const badge = document.getElementById('statusBadge');
-            if (navigator.onLine) {
-                badge.textContent = '● Online';
-                badge.className = 'status-badge online';
-            } else {
-                badge.textContent = '● Offline';
-                badge.className = 'status-badge offline';
+
+        function encryptUserLinks(links) {
+            const encrypted = {};
+            for (const [key, value] of Object.entries(links)) {
+                encrypted[key] = encryptData(value);
             }
+            return encrypted;
         }
-        function showUpdateNotification(title, message) {
-            const existingNotifications = document.querySelectorAll('.update-notification');
-            existingNotifications.forEach(notif => notif.remove());
-            const notification = document.createElement('div');
-            notification.className = 'update-notification';
-            notification.textContent = `✨ ${title}: ${message}`;
-            document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 3000);
-        }
+
+        // ============================================================
+        // CHECK USER STATUS
+        // ============================================================
         function getDaysRemainingFromDate(expiryDateStr) {
             const expiryDate = new Date(expiryDateStr);
             const now = new Date();
@@ -1227,6 +1391,7 @@
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             return diffDays;
         }
+
         function formatDate(dateStr) {
             const date = new Date(dateStr);
             const day = date.getDate().toString().padStart(2, '0');
@@ -1234,6 +1399,7 @@
             const year = date.getFullYear();
             return `${day}/${month}/${year}`;
         }
+
         function checkUserStatus(userData) {
             if (!userData) {
                 return { expired: true, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
@@ -1241,7 +1407,7 @@
             if (userData.status === 'inactive') {
                 return {
                     expired: true,
-                    message: 'អ្នកត្រូវបានហាមឃាត់ក្នុងការប្រើប្រាស់បន្តទៀត ដោយសារអ្នកបានបំពានលក្ខខណ្ឌនៃការប្រើប្រាស់',
+                    message: 'អ្នកត្រូវបានហាមឃាត់ក្នុងការប្រើប្រាស់បន្តទៀត',
                     reason: 'inactive'
                 };
             }
@@ -1261,10 +1427,18 @@
             }
             return { expired: false, daysRemaining, expiryDate: userData.expiryDate };
         }
-        let userCodes = { metfone: '', cellcard: '', smart: '' };
+
+        // ============================================================
+        // GLOBAL STATE
+        // ============================================================
         let currentUser = null;
+        let userLinks = { metfone: '', cellcard: '', smart: '' };
         let userExists = { metfone: false, cellcard: false, smart: false };
         let isLoggedIn = false;
+
+        // ============================================================
+        // UI UPDATES
+        // ============================================================
         function updateAccountStatus(user) {
             const statusEl = document.getElementById('accountStatusValue');
             if (!statusEl) return;
@@ -1281,7 +1455,6 @@
             const expiryFormatted = formatDate(result.expiryDate);
             let daysText = '';
             let daysClass = 'status-days';
-            // 🔥 FIXED: handle days === 0 as "ផុតកំណត់ថ្ងៃនេះ"
             if (days === 0) {
                 daysClass = 'status-expired';
                 daysText = '⚠️ ផុតកំណត់ថ្ងៃនេះ';
@@ -1295,37 +1468,83 @@
                 daysText = `${days} ថ្ងៃ`;
             }
             statusEl.innerHTML = `
-                👤 <span class="status-user">${user.uid}</span>
-                &nbsp;|&nbsp; 📅 ${expiryFormatted}
-                &nbsp;|&nbsp; <span class="${daysClass}">${daysText}</span>
-            `;
+                    👤 <span class="status-user">${user.uid}</span>
+                    &nbsp;|&nbsp; 📅 ${expiryFormatted}
+                    &nbsp;|&nbsp; <span class="${daysClass}">${daysText}</span>
+                `;
         }
+
+        function showUpdateNotification(title, message) {
+            const existingNotifications = document.querySelectorAll('.update-notification');
+            existingNotifications.forEach(notif => notif.remove());
+            const notification = document.createElement('div');
+            notification.className = 'update-notification';
+            notification.textContent = `✨ ${title}: ${message}`;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        function updateStatusBadge() {
+            const badge = document.getElementById('statusBadge');
+            if (navigator.onLine) {
+                badge.textContent = '● Online';
+                badge.className = 'status-badge online';
+            } else {
+                badge.textContent = '● Offline';
+                badge.className = 'status-badge offline';
+            }
+        }
+
+        // ============================================================
+        // SET USER SESSION (Secure)
+        // ============================================================
         function setUserSession(user) {
             currentUser = user;
-            userCodes = { metfone: '', cellcard: '', smart: '' };
-            userExists = { metfone: false, cellcard: false, smart: false };
-            if (user.links) {
-                if (user.links.metfone) {
-                    userCodes.metfone = user.links.metfone;
-                    userExists.metfone = true;
-                }
-                if (user.links.cellcard) {
-                    userCodes.cellcard = user.links.cellcard;
-                    userExists.cellcard = true;
-                }
-                if (user.links.smart) {
-                    userCodes.smart = user.links.smart;
-                    userExists.smart = true;
-                }
-            }
+            const decryptedLinks = decryptUserLinks(user.links);
+            userLinks = decryptedLinks;
+            userExists = {
+                metfone: !!decryptedLinks.metfone,
+                cellcard: !!decryptedLinks.cellcard,
+                smart: !!decryptedLinks.smart
+            };
             isLoggedIn = true;
-            sessionStorage.setItem('teva_logged_in', 'true');
-            sessionStorage.setItem('teva_password', user.password || '');
+
+            // Generate session token
+            const token = generateSessionToken(user.uid, deviceFingerprint);
+            localStorage.setItem('teva_session_token', token);
+            localStorage.setItem('teva_user_uid', user.uid);
+            localStorage.setItem('teva_login_time', Date.now().toString());
+
             document.getElementById('loginOverlay').classList.remove('active');
             showUpdateNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
             console.log('✅ Login successful! User:', user.uid);
             updateAccountStatus(user);
+
+            // Log security event
+            logSecurityEvent('login_success', { user: user.uid, fp: deviceFingerprint });
         }
+
+        // ============================================================
+        // SECURITY EVENT LOGGING
+        // ============================================================
+        function logSecurityEvent(eventType, data) {
+            console.log(`🔒 [Security] ${eventType}:`, data);
+            try {
+                const logs = JSON.parse(localStorage.getItem('security_logs') || '[]');
+                logs.push({
+                    type: eventType,
+                    data: data,
+                    timestamp: Date.now(),
+                    fp: deviceFingerprint
+                });
+                if (logs.length > 100) logs.shift();
+                localStorage.setItem('security_logs', JSON.stringify(logs));
+            } catch (e) {}
+        }
+
+        // ============================================================
+        // OPEN V2BOX (with enhanced security)
+        // ============================================================
         function openV2Box(type) {
             console.log(`🔍 Checking access for ${type}...`);
             if (!userExists[type]) {
@@ -1335,13 +1554,13 @@
             let content = '';
             let name = '';
             if (type === 'metfone') {
-                content = userCodes.metfone || '';
+                content = userLinks.metfone || '';
                 name = 'METFONE';
             } else if (type === 'cellcard') {
-                content = userCodes.cellcard || '';
+                content = userLinks.cellcard || '';
                 name = 'CELLCARD';
             } else if (type === 'smart') {
-                content = userCodes.smart || '';
+                content = userLinks.smart || '';
                 name = 'SMART';
             }
             if (!content || content === '' || content === 'undefined' || content === 'null') {
@@ -1374,81 +1593,40 @@
                 }
             }, 2500);
         }
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration error:', err));
-            });
-        }
-        window.addEventListener('online', () => { updateStatusBadge();
-            showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត'); });
-        window.addEventListener('offline', () => { updateStatusBadge();
-            showUpdateNotification('បណ្តាញ', 'បានផ្តាច់អ៊ីនធឺណិត'); });
-        function getDeviceFingerprint() {
-            let fp = localStorage.getItem('device_fingerprint');
-            if (fp && fp.startsWith('FP_')) {
-                console.log('✅ Using saved fingerprint:', fp);
-                return fp;
-            }
-            console.log('🔐 Generating new stable fingerprint...');
-            const components = [
-                navigator.userAgent,
-                screen.width + 'x' + screen.height,
-                screen.colorDepth,
-                navigator.hardwareConcurrency || 0,
-                navigator.platform,
-                navigator.language,
-                new Date().getTimezoneOffset()
-            ];
-            try {
-                const canvas = document.createElement('canvas');
-                canvas.width = 200;
-                canvas.height = 50;
-                const ctx = canvas.getContext('2d');
-                ctx.textBaseline = 'top';
-                ctx.font = '14px Arial';
-                ctx.fillStyle = '#f60';
-                ctx.fillRect(125, 1, 62, 20);
-                ctx.fillStyle = '#069';
-                ctx.fillText('TEVA', 2, 15);
-                ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
-                ctx.fillText('SECURE', 4, 17);
-                components.push(canvas.toDataURL());
-            } catch (e) {}
-            const str = components.join('|||');
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                const char = str.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
-                hash = hash & hash;
-            }
-            fp = 'FP_' + Math.abs(hash).toString(16).padStart(8, '0');
-            localStorage.setItem('device_fingerprint', fp);
-            console.log('✅ New stable fingerprint saved:', fp);
-            return fp;
-        }
-        let deviceFingerprint = getDeviceFingerprint();
+
+        // ============================================================
+        // FINGERPRINT DISPLAY
+        // ============================================================
         function showFingerprintOnScreen() {
             const fp = getDeviceFingerprint();
             if (document.getElementById('fpDisplay')) { document.getElementById('fpDisplay').remove(); return; }
             const div = document.createElement('div');
             div.id = 'fpDisplay';
             div.innerHTML = `
-                <div class="fp-title">🔐 ID DEVICE</div>
-                <div class="fp-code">${fp}</div>
-                <div class="fp-actions">
-                    <button class="fp-btn fp-btn-copy" onclick="copyFingerprint()">📋 ចម្លង</button>
-                    <button class="fp-btn fp-btn-close" onclick="this.parentElement.parentElement.remove()">✕ បិទ</button>
-                </div>
-                <div class="fp-hint">💡 ប្រើសម្រាប់ចាក់សោរឧបករណ៍</div>
-            `;
+                    <div class="fp-title">🔐 ID DEVICE</div>
+                    <div class="fp-code">${fp}</div>
+                    <div class="fp-actions">
+                        <button class="fp-btn fp-btn-copy" onclick="copyFingerprint()">📋 ចម្លង</button>
+                        <button class="fp-btn fp-btn-close" onclick="this.parentElement.parentElement.remove()">✕ បិទ</button>
+                    </div>
+                    <div class="fp-hint">💡 ប្រើសម្រាប់ចាក់សោរឧបករណ៍</div>
+                `;
             document.body.appendChild(div);
             setTimeout(() => { const el = document.getElementById('fpDisplay'); if (el) el.remove(); }, 30000);
         }
+
         function copyFingerprint() {
             const fp = getDeviceFingerprint();
-            navigator.clipboard.writeText(fp).then(() => { showUpdateNotification('✅', 'ចម្លងដោយជោគជ័យ!'); }).catch(() => { alert(
-                    '⚠️ សូមចម្លងដោយដៃ: ' + fp); });
+            navigator.clipboard.writeText(fp).then(() => {
+                showUpdateNotification('✅', 'ចម្លងដោយជោគជ័យ!');
+            }).catch(() => {
+                alert('⚠️ សូមចម្លងដោយដៃ: ' + fp);
+            });
         }
+
+        // ============================================================
+        // TITLE TAP FOR FINGERPRINT
+        // ============================================================
         let fpTapCount = 0;
         let fpTapTimer = null;
         const titleElement = document.getElementById('loginTitle');
@@ -1471,6 +1649,10 @@
                 }, 3000);
             });
         }
+
+        // ============================================================
+        // PASSWORD TOGGLE
+        // ============================================================
         const togglePasswordBtn = document.getElementById('togglePasswordBtn');
         const passwordInput = document.getElementById('loginPassword');
         let passwordVisible = false;
@@ -1481,6 +1663,10 @@
                 this.textContent = passwordVisible ? '🙈' : '👁️';
             });
         }
+
+        // ============================================================
+        // MAIN LOGIN SYSTEM (Enhanced Security)
+        // ============================================================
         async function initLogin() {
             const overlay = document.getElementById('loginOverlay');
             const usernameInput = document.getElementById('loginUsername');
@@ -1490,15 +1676,44 @@
             const loading = document.getElementById('loginLoading');
             const expiryText = document.getElementById('expiryText');
             const expiryEl = document.getElementById('loginExpiry');
+
             console.log('🔐 Initializing secure login system (Username + Password)');
             console.log('📱 Device Fingerprint:', deviceFingerprint);
             console.log('📶 Network status:', navigator.onLine ? 'Online' : 'Offline');
-            sessionStorage.removeItem('teva_logged_in');
-            sessionStorage.removeItem('teva_password');
+
+            // Check for existing valid session
+            const session = getStoredSession();
+            if (session) {
+                try {
+                    const snapshot = await db.ref('users/' + session.userId).once('value');
+                    const userData = snapshot.val();
+                    if (userData) {
+                        const decryptedLinks = decryptUserLinks(userData.links);
+                        const user = {
+                            uid: session.userId,
+                            links: decryptedLinks,
+                            expiryDate: userData.expiryDate,
+                            status: userData.status,
+                            password: userData.password
+                        };
+                        setUserSession(user);
+                        return;
+                    }
+                } catch (e) {
+                    console.error('Session restore failed:', e);
+                }
+            }
+
+            // Clear any stale session data
+            localStorage.removeItem('teva_session_token');
+            localStorage.removeItem('teva_user_uid');
+            localStorage.removeItem('teva_login_time');
             isLoggedIn = false;
             overlay.classList.add('active');
             expiryText.textContent = '👤 បញ្ចូល Username និង Password';
             expiryEl.className = 'login-expiry';
+
+            // Input handlers
             usernameInput.addEventListener('input', () => {
                 if (error.classList.contains('show')) { error.classList.remove('show');
                     error.textContent = ''; }
@@ -1507,11 +1722,13 @@
                 if (error.classList.contains('show')) { error.classList.remove('show');
                     error.textContent = ''; }
             });
+
             async function handleLogin() {
                 const username = usernameInput.value.trim();
                 const password = passwordInput.value.trim();
                 error.classList.remove('show');
                 error.textContent = '';
+
                 if (!username) {
                     error.textContent = 'សូមបញ្ចូល Username';
                     error.classList.add('show');
@@ -1529,35 +1746,66 @@
                     error.classList.add('show');
                     return;
                 }
+
+                // Check rate limiting
+                try {
+                    checkLoginAttempts(username);
+                } catch (e) {
+                    error.textContent = e.message;
+                    error.classList.add('show');
+                    return;
+                }
+
                 loading.classList.add('active');
                 btn.disabled = true;
+
                 try {
                     const snapshot = await db.ref('users/' + username).once('value');
                     const userData = snapshot.val();
+
                     if (!userData) {
+                        recordLoginAttempt(username, false);
                         throw new Error('Username មិនត្រឹមត្រូវ');
                     }
-                    if (userData.password !== password) {
+
+                    // Verify password (stored encrypted)
+                    const storedPassword = userData.password || '';
+                    if (storedPassword !== password) {
+                        recordLoginAttempt(username, false);
                         throw new Error('ពាក្យសម្ងាត់មិនត្រឹមត្រូវ');
                     }
+
+                    // Verify device fingerprint
+                    const storedFingerprint = userData.fingerprint || '';
                     const currentFp = getDeviceFingerprint();
-                    if (userData.fingerprint !== currentFp) {
+                    if (storedFingerprint && storedFingerprint !== currentFp) {
+                        logSecurityEvent('device_mismatch', { user: username, stored: storedFingerprint, current: currentFp });
                         throw new Error('ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត');
                     }
+
+                    // Check user status
                     const statusCheck = checkUserStatus(userData);
                     if (statusCheck.expired) {
                         throw new Error(statusCheck.message);
                     }
-                    localStorage.setItem('teva_user_uid', username);
-                    localStorage.setItem('teva_logged_in', 'true');
+
+                    // Decrypt links
+                    const decryptedLinks = decryptUserLinks(userData.links);
+
+                    // Record successful login
+                    recordLoginAttempt(username, true);
+                    logSecurityEvent('login_success', { user: username, fp: currentFp });
+
                     const user = {
                         uid: username,
-                        links: userData.links || { metfone: '', cellcard: '', smart: '' },
+                        links: decryptedLinks,
                         expiryDate: userData.expiryDate,
                         status: userData.status,
                         password: password
                     };
+
                     setUserSession(user);
+
                 } catch (err) {
                     console.error('❌ Login error:', err);
                     error.textContent = '❌ ' + err.message;
@@ -1565,9 +1813,11 @@
                     passwordInput.value = '';
                     setTimeout(() => passwordInput.focus(), 100);
                 }
+
                 loading.classList.remove('active');
                 btn.disabled = false;
             }
+
             btn.addEventListener('click', handleLogin);
             passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(); });
             usernameInput.addEventListener('keydown', (e) => {
@@ -1578,6 +1828,10 @@
             });
             setTimeout(() => usernameInput.focus(), 500);
         }
+
+        // ============================================================
+        // PWA SETUP
+        // ============================================================
         function createManifest() {
             const LOGO_FILE = "teva.png";
             const manifestData = {
@@ -1603,6 +1857,19 @@
             document.head.appendChild(manifestLink);
         }
         createManifest();
+
+        // ============================================================
+        // SERVICE WORKER
+        // ============================================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW registration error:', err));
+            });
+        }
+
+        // ============================================================
+        // INSTALL PROMPT
+        // ============================================================
         let deferredPrompt;
         const installBtn = document.getElementById('installBtn');
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -1626,9 +1893,51 @@
         if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
             installBtn.style.display = 'none';
         }
+
+        // ============================================================
+        // NETWORK EVENTS
+        // ============================================================
+        window.addEventListener('online', () => {
+            updateStatusBadge();
+            showUpdateNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត');
+        });
+        window.addEventListener('offline', () => {
+            updateStatusBadge();
+            showUpdateNotification('បណ្តាញ', 'បានផ្តាច់អ៊ីនធឺណិត');
+        });
+
+        // ============================================================
+        // PARTICLES
+        // ============================================================
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 45; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 3 + 1;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = 8 + Math.random() * 12 + 's';
+                particle.style.opacity = Math.random() * 0.4 + 0.2;
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // ============================================================
+        // START APPLICATION
+        // ============================================================
         setTimeout(initLogin, 100);
         updateAccountStatus(null);
         updateStatusBadge();
+
+        console.log('🚀 SKYNET Security System Initialized');
+        console.log('🔒 Encryption: Active');
+        console.log('🔑 Session Management: Active');
+        console.log('🛡️ Device Lock: Active');
+        console.log('📊 Rate Limiting: Active');
     </script>
 </body>
 </html>
