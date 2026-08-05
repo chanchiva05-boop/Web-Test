@@ -3,260 +3,654 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>| 𝕊𝕂𝕐ℕ𝔼𝕋 | Premium Cyber Access</title>
+    <title>𝕊𝕂𝕐ℕ𝔼𝕋</title>
     <link rel="apple-touch-icon" href="teva.png">
     <link rel="icon" type="image/png" sizes="32x32" href="teva.png">
     <link rel="icon" type="image/png" sizes="192x192" href="teva.png">
-    <meta name="theme-color" content="#030712">
+    <meta name="theme-color" content="#0a0a2a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="TEVA">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="TEVA">
-    <meta name="msapplication-TileColor" content="#030712">
-    
-    <!-- Google Fonts for Modern Khmer Typography -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,300..700;1,300..700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
+    <meta name="msapplication-TileColor" content="#0a0a2a">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js">
+    </script>
     <style>
-        :root {
-            --primary-gold: #f3c623;
-            --gold-glow: rgba(243, 198, 35, 0.4);
-            --bg-dark: #030712;
-            --card-bg: rgba(15, 23, 42, 0.65);
-            --border-glow: rgba(243, 198, 35, 0.25);
-            --text-main: #f8fafc;
-            --font-km: 'Kantumruy Pro', sans-serif;
-            --font-en: 'Outfit', sans-serif;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            height: 100vh;
+            min-height: 100vh;
+            background: #0a0a1a;
+            font-family: 'Inter', 'Khmer OS Battambang', sans-serif;
             overflow: hidden;
-            background-color: var(--bg-dark);
-            font-family: var(--font-km);
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Futuristic Background Background Elements */
-        .cyber-bg {
-            position: fixed;
-            inset: 0;
-            background: radial-gradient(circle at 50% 30%, #0f172a 0%, #030712 100%);
-            z-index: 0;
-        }
-
-        .cyber-grid {
-            position: fixed;
-            inset: 0;
-            background-image: 
-                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-            z-index: 1;
-            pointer-events: none;
-            mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
-        }
-
-        /* Animated Glowing Orbs */
-        .orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(90px);
-            opacity: 0.35;
-            z-index: 0;
-            animation: floatOrb 18s ease-in-out infinite alternate;
-        }
-
-        .orb-1 {
-            width: 350px;
-            height: 350px;
-            background: #d4af37;
-            top: -100px;
-            right: -80px;
-        }
-
-        .orb-2 {
-            width: 450px;
-            height: 450px;
-            background: #3b82f6;
-            bottom: -150px;
-            left: -100px;
-            animation-delay: -5s;
-        }
-
-        @keyframes floatOrb {
-            0% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(40px, 50px) scale(1.1); }
-            100% { transform: translate(-30px, -20px) scale(0.95); }
-        }
-
-        /* Main Container */
-        .glass-panel {
-            position: relative;
-            z-index: 20;
-            width: 100%;
-            max-width: 440px;
-            padding: 0 20px;
-            text-align: center;
-        }
-
-        /* Status Header Badge */
-        .header-badge {
-            margin-bottom: 24px;
-            animation: fadeSlideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 12px 24px;
-            border-radius: 100px;
-            border: 1px solid var(--border-glow);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        }
-
-        .badge-icon {
-            width: 8px;
-            height: 8px;
-            background: var(--primary-gold);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--primary-gold);
-            animation: pulseGlow 1.5s infinite;
-        }
-
-        @keyframes pulseGlow {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.5); opacity: 0.5; }
-        }
-
-        .badge-text {
-            font-size: 13.5px;
-            font-weight: 500;
-            color: #e2e8f0;
-        }
-
-        .badge-text .status-user { color: var(--primary-gold); font-weight: 700; }
-        .badge-text .status-days { color: #4ade80; font-weight: 700; }
-        .badge-text .status-expired { color: #f87171; font-weight: 700; }
-        .badge-text .status-inactive { color: #ef4444; font-weight: 700; }
-
-        /* Main Action Card */
-        .card {
-            background: var(--card-bg);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-radius: 32px;
-            padding: 36px 28px;
-            border: 1px solid var(--border-glow);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-            animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-            transition: transform 0.3s ease, border-color 0.3s ease;
-        }
-
-        .card:hover {
-            border-color: rgba(243, 198, 35, 0.45);
-        }
-
-        /* Modern Futuristic Buttons */
-        .button-group {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .btn {
-            position: relative;
-            width: 100%;
-            padding: 16px 20px;
-            border: 1px solid rgba(243, 198, 35, 0.25);
-            border-radius: 20px;
-            font-size: 16px;
-            font-weight: 600;
-            font-family: var(--font-km);
-            cursor: pointer;
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
-            color: #f1f5f9;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, transparent, rgba(243, 198, 35, 0.15), transparent);
-            transform: translateX(-100%);
-            transition: transform 0.6s ease;
-        }
-
-        .btn:hover::after {
-            transform: translateX(100%);
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            border-color: var(--primary-gold);
-            box-shadow: 0 8px 25px rgba(243, 198, 35, 0.25);
             color: #fff;
         }
 
-        .btn:active {
-            transform: translateY(1px);
+        /* Base Layers */
+        .bg-layer {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
         }
 
-        /* Status Top Badge */
+        .bg-layer .gradient {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at 20% 50%, rgba(25, 35, 80, 0.9), rgba(5, 5, 20, 0.98));
+        }
+
+        .bg-layer .grid-pattern {
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(circle at 1px 1px, rgba(212, 175, 55, 0.05) 1px, transparent 0);
+            background-size: 40px 40px;
+            opacity: 0.5;
+        }
+
+        .bg-layer .glow-orbs {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+
+        .glow-orbs .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+            animation: floatOrb 25s ease-in-out infinite alternate;
+        }
+
+        .glow-orbs .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.3), transparent 70%);
+            top: -200px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .glow-orbs .orb-2 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(80, 120, 255, 0.2), transparent 70%);
+            bottom: -250px;
+            left: -150px;
+            animation-delay: -8s;
+        }
+
+        .glow-orbs .orb-3 {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(245, 220, 120, 0.2), transparent 70%);
+            top: 40%;
+            left: 10%;
+            animation-delay: -15s;
+        }
+
+        @keyframes floatOrb {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                transform: translate(40px, -30px) scale(1.1);
+            }
+        }
+
+        /* Particles */
+        .particles {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: rgba(212, 175, 55, 0.2);
+            border-radius: 50%;
+            animation: floatParticle 15s linear infinite;
+        }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(100vh) translateX(0) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(90vh) translateX(10px) scale(1);
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) translateX(-20px) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Birds */
+        .birds {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .bird {
+            position: absolute;
+            width: 50px;
+            height: 30px;
+            opacity: 0.5;
+            animation: flyBird 30s linear infinite;
+        }
+
+        .bird::before,
+        .bird::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 20px;
+            height: 12px;
+            background: rgba(255, 245, 200, 0.7);
+            border-radius: 50%;
+            transform-origin: center;
+            animation: wingFlap 0.6s ease-in-out infinite alternate;
+        }
+
+        .bird::before {
+            left: 5px;
+            transform: rotate(-20deg);
+        }
+        .bird::after {
+            right: 5px;
+            transform: rotate(20deg);
+            animation-delay: 0.3s;
+        }
+
+        .bird .body {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 25px;
+            height: 12px;
+            background: rgba(255, 245, 200, 0.8);
+            border-radius: 50%;
+        }
+
+        .bird .tail {
+            position: absolute;
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 8px;
+            background: rgba(255, 235, 180, 0.7);
+            border-radius: 50% 0 0 50%;
+            transform: rotate(15deg);
+        }
+
+        @keyframes wingFlap {
+            0% {
+                transform: rotate(-30deg) scaleY(1);
+            }
+            100% {
+                transform: rotate(-60deg) scaleY(0.7);
+            }
+        }
+
+        @keyframes flyBird {
+            0% {
+                transform: translateX(-20vw) translateY(0);
+            }
+            100% {
+                transform: translateX(120vw) translateY(-20px);
+            }
+        }
+
+        .bird:nth-child(1) {
+            top: 15%;
+            animation-duration: 28s;
+            animation-delay: 0s;
+        }
+        .bird:nth-child(2) {
+            top: 25%;
+            animation-duration: 32s;
+            animation-delay: 4s;
+        }
+        .bird:nth-child(3) {
+            top: 10%;
+            animation-duration: 25s;
+            animation-delay: 8s;
+        }
+        .bird:nth-child(4) {
+            top: 20%;
+            animation-duration: 35s;
+            animation-delay: 2s;
+        }
+        .bird:nth-child(5) {
+            top: 30%;
+            animation-duration: 30s;
+            animation-delay: 6s;
+        }
+
+        /* Mountains */
+        .mountains {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .mountain {
+            position: absolute;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(10, 12, 30, 0.9), rgba(0, 0, 0, 0.8));
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+
+        .mountain-1 {
+            left: 0%;
+            width: 30%;
+            height: 80%;
+            opacity: 0.4;
+        }
+        .mountain-2 {
+            left: 20%;
+            width: 35%;
+            height: 95%;
+            opacity: 0.5;
+        }
+        .mountain-3 {
+            left: 50%;
+            width: 28%;
+            height: 70%;
+            opacity: 0.35;
+        }
+        .mountain-4 {
+            left: 72%;
+            width: 30%;
+            height: 85%;
+            opacity: 0.45;
+        }
+
+        .mist {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: linear-gradient(to top, rgba(255, 255, 245, 0.06), transparent);
+            filter: blur(60px);
+            animation: mistMove 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes mistMove {
+            0% {
+                opacity: 0.4;
+                transform: translateX(-3%);
+            }
+            100% {
+                opacity: 0.8;
+                transform: translateX(3%);
+            }
+        }
+
+        /* Status Badge */
         .status-badge {
             position: fixed;
             top: 16px;
             right: 16px;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 6px 14px;
+            z-index: 100;
+            padding: 6px 16px;
             border-radius: 30px;
             font-size: 11px;
             font-weight: 600;
-            font-family: var(--font-en);
+            letter-spacing: 0.5px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .status-badge.online {
+            color: #4ade80;
+            border-color: rgba(74, 222, 128, 0.2);
+        }
+        .status-badge.offline {
+            color: #fbbf24;
+            border-color: rgba(251, 191, 36, 0.2);
+        }
+
+        /* Main Content */
+        .main-container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .content {
+            width: 100%;
+            max-width: 440px;
+            text-align: center;
+        }
+
+        /* Header Badge */
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 28px;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(20px);
+            border-radius: 100px;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            margin-bottom: 32px;
+            transition: all 0.3s ease;
+            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .header-badge:hover {
+            border-color: rgba(212, 175, 55, 0.3);
+            transform: scale(1.02);
+        }
+
+        .badge-dot {
+            width: 8px;
+            height: 8px;
+            background: #d4af37;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+            animation: pulseDot 2s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes pulseDot {
+            0%,
+            100% {
+                opacity: 0.6;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.3);
+            }
+        }
+
+        .badge-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+            letter-spacing: 0.3px;
+        }
+
+        .badge-text .user {
+            color: #d4af37;
+            font-weight: 700;
+        }
+        .badge-text .days {
+            color: #4ade80;
+            font-weight: 700;
+        }
+        .badge-text .expired {
+            color: #ff6b6b;
+            font-weight: 700;
+        }
+        .badge-text .inactive {
+            color: #ff4444;
+            font-weight: 700;
+        }
+
+        /* Main Card */
+        .card {
+            background: rgba(10, 15, 30, 0.6);
+            backdrop-filter: blur(30px);
+            border-radius: 48px;
+            padding: 40px 28px;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+            animation-delay: 0.15s;
+            transition: all 0.4s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(212, 175, 55, 0.2);
+            box-shadow: 0 50px 90px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            transform: translateY(-4px);
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-title {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: rgba(212, 175, 55, 0.5);
+            margin-bottom: 24px;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .btn {
+            position: relative;
+            padding: 18px 24px;
+            border: none;
+            border-radius: 40px;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 600;
+            color: #e8e2c7;
+            background: linear-gradient(135deg, rgba(30, 40, 60, 0.8), rgba(15, 20, 35, 0.9));
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+            letter-spacing: 0.5px;
+        }
+
+        .btn .shine {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.08), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn:hover .shine {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px) scale(1.01);
+            border-color: rgba(212, 175, 55, 0.4);
+            box-shadow: 0 12px 30px rgba(212, 175, 55, 0.1);
+            background: linear-gradient(135deg, rgba(40, 50, 70, 0.9), rgba(20, 28, 45, 0.95));
+        }
+
+        .btn:active {
+            transform: translateY(1px) scale(0.99);
+        }
+
+        .btn .glow {
+            position: absolute;
+            inset: 0;
+            border-radius: 40px;
+            background: radial-gradient(circle at 30% 50%, rgba(212, 175, 55, 0.1), transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .btn:hover .glow {
+            opacity: 1;
+        }
+
+        .btn .icon {
+            margin-right: 10px;
+            font-size: 18px;
+            display: inline-block;
+        }
+
+        /* Card Footer */
+        .card-footer {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .card-footer .dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: rgba(212, 175, 55, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover .dot {
+            background: rgba(212, 175, 55, 0.5);
+        }
+
+        /* Install Button */
+        .install-btn {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 100;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 60px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            color: #0a0a1a;
+            background: linear-gradient(135deg, #d4af37, #b8922a);
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(212, 175, 55, 0.3);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 0.3px;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .status-badge.online { color: #4ade80; border-color: rgba(74, 222, 128, 0.3); }
-        .status-badge.offline { color: #fbbf24; border-color: rgba(251, 191, 36, 0.3); }
+        .install-btn:hover {
+            transform: translateX(-50%) translateY(-3px);
+            box-shadow: 0 12px 40px rgba(212, 175, 55, 0.4);
+            background: linear-gradient(135deg, #e5c458, #d4af37);
+        }
 
-        /* Login Overlay Modern Redesign */
+        .install-btn:active {
+            transform: translateX(-50%) translateY(1px);
+        }
+
+        .install-btn .icon {
+            font-size: 18px;
+            animation: bounceIcon 1.5s ease-in-out infinite;
+        }
+
+        @keyframes bounceIcon {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-3px);
+            }
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            background: linear-gradient(135deg, #d4af37, #b8922a);
+            color: #0a0a1a;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            animation: notifFade 3s ease forwards;
+            white-space: nowrap;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes notifFade {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(10px);
+            }
+            15% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            85% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-10px);
+            }
+        }
+
+        /* Login Overlay */
         .login-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(3, 7, 18, 0.85);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
             z-index: 9999;
+            background: rgba(5, 5, 20, 0.97);
+            backdrop-filter: blur(30px);
             display: none;
             align-items: center;
             justify-content: center;
@@ -268,333 +662,529 @@
         }
 
         .login-box {
-            background: rgba(15, 23, 42, 0.8);
-            border-radius: 36px;
-            padding: 40px 28px;
-            border: 1px solid var(--border-glow);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            max-width: 380px;
             width: 100%;
+            max-width: 400px;
+            padding: 44px 32px;
+            background: rgba(10, 15, 30, 0.8);
+            backdrop-filter: blur(30px);
+            border-radius: 48px;
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+            animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
             text-align: center;
-            animation: zoomIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .login-logo {
-            width: 70px;
-            height: 70px;
+            width: 72px;
+            height: 72px;
             margin: 0 auto 16px;
-            background: radial-gradient(circle, rgba(243, 198, 35, 0.15) 0%, transparent 70%);
-            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
-            border: 1px solid var(--border-glow);
-            cursor: pointer;
-            transition: transform 0.3s ease;
+            font-size: 36px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.1), transparent 70%);
+            border: 2px solid rgba(212, 175, 55, 0.1);
+            transition: all 0.3s ease;
+            cursor: default;
         }
 
-        .login-logo:active { transform: scale(0.9); }
-
         .login-title {
-            color: var(--text-main);
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 800;
-            font-family: var(--font-en);
+            color: #f0e9cf;
             letter-spacing: 2px;
             margin-bottom: 2px;
         }
 
         .login-subtitle {
-            color: var(--primary-gold);
-            font-size: 11px;
-            font-family: var(--font-en);
-            letter-spacing: 2px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 3px;
             text-transform: uppercase;
-            margin-bottom: 16px;
-            opacity: 0.8;
+            color: rgba(212, 175, 55, 0.4);
+            margin-bottom: 20px;
         }
 
-        .login-expiry {
-            font-size: 13px;
-            color: #94a3b8;
-            margin-bottom: 20px;
+        .login-status {
             padding: 10px 14px;
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            min-height: 42px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 20px;
+            min-height: 44px;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .login-status.loading {
+            color: rgba(212, 175, 55, 0.6);
+            animation: pulseLoading 1s ease-in-out infinite;
+        }
+        .login-status.warning {
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.06);
+            border-color: rgba(251, 191, 36, 0.1);
+        }
+        .login-status.success {
+            color: #4ade80;
+            background: rgba(74, 222, 128, 0.05);
+            border-color: rgba(74, 222, 128, 0.08);
+        }
+        .login-status.error {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.06);
+            border-color: rgba(255, 107, 107, 0.1);
+        }
+        .login-status.denied {
+            color: #ff4444;
+            background: rgba(255, 68, 68, 0.08);
+            border-color: rgba(255, 68, 68, 0.15);
+        }
+
+        @keyframes pulseLoading {
+            0%,
+            100% {
+                opacity: 0.6;
+            }
+            50% {
+                opacity: 1;
+            }
         }
 
         .login-input-group {
             position: relative;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
         }
 
         .login-input {
             width: 100%;
-            padding: 14px 18px;
-            padding-right: 48px;
+            padding: 16px 20px;
+            padding-right: 50px;
             background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            color: var(--text-main);
-            font-size: 14px;
-            font-family: var(--font-km);
-            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 30px;
+            color: #f0e9cf;
+            font-size: 15px;
+            font-family: inherit;
             outline: none;
+            transition: all 0.3s ease;
         }
 
         .login-input:focus {
-            border-color: var(--primary-gold);
-            background: rgba(255, 255, 255, 0.07);
-            box-shadow: 0 0 15px rgba(243, 198, 35, 0.15);
+            border-color: rgba(212, 175, 55, 0.3);
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.05);
+        }
+
+        .login-input::placeholder {
+            color: rgba(255, 255, 255, 0.2);
         }
 
         .toggle-password {
             position: absolute;
-            right: 14px;
+            right: 16px;
             top: 50%;
             transform: translateY(-50%);
-            background: transparent;
+            background: none;
             border: none;
-            color: #64748b;
+            color: rgba(255, 255, 255, 0.3);
             font-size: 18px;
             cursor: pointer;
+            padding: 4px;
             transition: color 0.3s ease;
         }
 
-        .toggle-password:hover { color: var(--primary-gold); }
+        .toggle-password:hover {
+            color: #d4af37;
+        }
 
         .login-btn {
             width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, var(--primary-gold), #d97706);
+            padding: 16px;
             border: none;
-            border-radius: 16px;
-            color: #030712;
-            font-size: 15px;
+            border-radius: 30px;
+            font-family: inherit;
+            font-size: 16px;
             font-weight: 700;
-            font-family: var(--font-km);
+            color: #0a0a1a;
+            background: linear-gradient(135deg, #d4af37, #b8922a);
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(243, 198, 35, 0.3);
-            margin-top: 6px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.2);
+            letter-spacing: 0.5px;
         }
 
-        .login-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(243, 198, 35, 0.45);
+        .login-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(212, 175, 55, 0.3);
         }
 
-        .login-telegram-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(56, 189, 248, 0.1);
-            border: 1px solid rgba(56, 189, 248, 0.25);
-            border-radius: 20px;
-            color: #38bdf8;
-            font-size: 12px;
-            font-family: var(--font-en);
-            cursor: pointer;
-            margin-top: 16px;
-            transition: all 0.3s ease;
-            text-decoration: none;
+        .login-btn:active:not(:disabled) {
+            transform: translateY(1px);
         }
 
-        .login-telegram-btn:hover {
-            background: rgba(56, 189, 248, 0.2);
-            border-color: rgba(56, 189, 248, 0.5);
-            transform: translateY(-1px);
-        }
-
-        .login-device-info {
-            color: #64748b;
-            font-size: 11px;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .login-error {
-            color: #f87171;
-            font-size: 13px;
-            margin-top: 10px;
-            display: none;
-            padding: 8px;
-            border-radius: 10px;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-
-        .login-error.show { display: block; }
-
-        .install-prompt {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, var(--primary-gold), #d97706);
-            color: #030712;
-            padding: 12px 24px;
-            border-radius: 50px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            z-index: 100;
-            border: none;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-            display: none;
-            white-space: nowrap;
-        }
-
-        /* Animations */
-        @keyframes fadeSlideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fadeSlideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes zoomIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+        .login-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .login-loading {
             display: none;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            margin-top: 10px;
-            color: var(--primary-gold);
+            gap: 12px;
+            margin-top: 14px;
+            color: rgba(255, 255, 255, 0.4);
             font-size: 13px;
         }
 
-        .login-loading.active { display: flex; }
+        .login-loading.active {
+            display: flex;
+        }
 
         .spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(243, 198, 35, 0.2);
-            border-top-color: var(--primary-gold);
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(212, 175, 55, 0.15);
+            border-top-color: #d4af37;
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+            animation: spin 0.7s linear infinite;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
-        /* Notification Popup */
-        .update-notification {
+        .login-error {
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.06);
+            border: 1px solid rgba(255, 107, 107, 0.1);
+            opacity: 0;
+            transform: translateY(-4px);
+            transition: all 0.3s ease;
+            min-height: 42px;
+        }
+
+        .login-error.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .login-telegram {
+            margin: 8px auto 4px;
+            padding: 6px 18px;
+            border: 1px solid rgba(0, 136, 204, 0.15);
+            border-radius: 30px;
+            background: rgba(0, 136, 204, 0.05);
+            color: rgba(255, 255, 255, 0.6);
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .login-telegram:hover {
+            background: rgba(0, 136, 204, 0.12);
+            border-color: rgba(0, 136, 204, 0.3);
+            color: #fff;
+        }
+
+        .login-telegram img {
+            width: 18px;
+            height: 18px;
+        }
+
+        .login-device-info {
+            margin-top: 16px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.15);
+            letter-spacing: 0.5px;
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+            padding-top: 16px;
+        }
+
+        .login-shield {
+            font-size: 11px;
+            color: rgba(212, 175, 55, 0.2);
+            margin-top: 6px;
+            letter-spacing: 1px;
+        }
+
+        /* Fingerprint Display */
+        #fpDisplay {
             position: fixed;
-            bottom: 80px;
+            bottom: 100px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(15, 23, 42, 0.9);
-            border: 1px solid var(--primary-gold);
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 12px;
-            z-index: 1000;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-            animation: fadeInOut 3s ease forwards;
-            white-space: nowrap;
+            z-index: 99999;
+            padding: 20px 24px;
+            background: rgba(5, 5, 20, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+            text-align: center;
+            max-width: 90%;
+            width: 360px;
+            animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translate(-50%, 10px); }
-            15%, 85% { opacity: 1; transform: translate(-50%, 0); }
-            100% { opacity: 0; transform: translate(-50%, -10px); }
+        #fpDisplay .fp-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 6px;
+        }
+
+        #fpDisplay .fp-code {
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            font-weight: 700;
+            color: #d4af37;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            margin: 8px 0 14px;
+            word-break: break-all;
+            letter-spacing: 1px;
+        }
+
+        #fpDisplay .fp-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        #fpDisplay .fp-btn {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 20px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        #fpDisplay .fp-btn-copy {
+            background: #d4af37;
+            color: #0a0a1a;
+        }
+        #fpDisplay .fp-btn-copy:hover {
+            transform: scale(1.04);
+        }
+
+        #fpDisplay .fp-btn-close {
+            background: rgba(255, 255, 255, 0.06);
+            color: rgba(255, 255, 255, 0.5);
+        }
+        #fpDisplay .fp-btn-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .content {
+                max-width: 100%;
+            }
+            .card {
+                padding: 32px 20px;
+                border-radius: 36px;
+            }
+            .login-box {
+                padding: 32px 20px;
+                border-radius: 36px;
+            }
+            .login-title {
+                font-size: 24px;
+            }
+            .btn {
+                font-size: 15px;
+                padding: 16px 20px;
+            }
+            .badge-text {
+                font-size: 13px;
+            }
+            .header-badge {
+                padding: 10px 20px;
+            }
+            .install-btn {
+                padding: 10px 22px;
+                font-size: 13px;
+                bottom: 16px;
+            }
+            .notification {
+                font-size: 12px;
+                padding: 8px 18px;
+                bottom: 80px;
+            }
+            #fpDisplay {
+                width: 92%;
+                padding: 16px 18px;
+                bottom: 80px;
+            }
+            #fpDisplay .fp-code {
+                font-size: 17px;
+            }
+            .login-status {
+                font-size: 12px;
+                min-height: 38px;
+                padding: 8px 12px;
+            }
+            .login-error {
+                font-size: 13px;
+                min-height: 36px;
+            }
+            .status-badge {
+                top: 12px;
+                right: 12px;
+                font-size: 10px;
+                padding: 4px 12px;
+            }
+        }
+
+        @supports (display: standalone) {
+            body {
+                background: #0a0a1a;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- Dynamic Cyber Background -->
-    <div class="cyber-bg"></div>
-    <div class="cyber-grid"></div>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-
-    <div class="status-badge online" id="statusBadge">● Online</div>
-
-    <!-- Login Modal -->
-    <div class="login-overlay active" id="loginOverlay">
-        <div class="login-box">
-            <div class="login-logo" id="loginLogo">🔐</div>
-            <div class="login-title" id="loginTitle">𝕊𝕂𝕐ℕ𝔼𝕋</div>
-            <div class="login-subtitle">Secure Access Portal</div>
-            
-            <div class="login-expiry" id="loginExpiry">
-                <span id="expiryText">👤 បញ្ចូល Username និង Password</span>
-            </div>
-
-            <div class="login-input-group">
-                <input type="text" class="login-input" id="loginUsername" placeholder="បញ្ចូល Username" autocomplete="username">
-            </div>
-
-            <div class="login-input-group">
-                <input type="password" class="login-input" id="loginPassword" placeholder="បញ្ចូលពាក្យសម្ងាត់..." autocomplete="current-password">
-                <button class="toggle-password" id="togglePasswordBtn" type="button">👁️</button>
-            </div>
-
-            <button class="login-btn" id="loginBtn">ចូលប្រើប្រាស់</button>
-
-            <div class="login-loading" id="loginLoading">
-                <div class="spinner"></div>
-                <span>កំពុងផ្ទៀងផ្ទាត់...</span>
-            </div>
-
-            <div class="login-error" id="loginError"></div>
-
-            <a class="login-telegram-btn" href="https://t.me/matin_9999" target="_blank">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.69-.52.36-1 .53-1.42.52-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.24.38-.49 1.07-.75 4.19-1.82 6.98-3.02 8.38-3.6 3.99-1.66 4.83-1.95 5.37-1.96.12 0 .38.03.55.17.14.12.18.28.2.45-.02.07-.02.13-.03.22z"/></svg>
-                <span>Contact Support</span>
-            </a>
-
-            <div class="login-device-info">⚡ គណនីនេះត្រូវបានការពារដោយ Device Lock</div>
+    <!-- Background Layers -->
+    <div class="bg-layer">
+        <div class="gradient"></div>
+        <div class="grid-pattern"></div>
+        <div class="glow-orbs">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+            <div class="orb orb-3"></div>
         </div>
     </div>
 
-    <!-- Main Content Panel -->
-    <div class="glass-panel">
-        <div class="header-badge">
-            <div class="badge">
-                <div class="badge-icon"></div>
+    <!-- Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Birds -->
+    <div class="birds">
+        <div class="bird"><div class="body"></div><div class="tail"></div></div>
+        <div class="bird"><div class="body"></div><div class="tail"></div></div>
+        <div class="bird"><div class="body"></div><div class="tail"></div></div>
+        <div class="bird"><div class="body"></div><div class="tail"></div></div>
+        <div class="bird"><div class="body"></div><div class="tail"></div></div>
+    </div>
+
+    <!-- Mountains -->
+    <div class="mountains">
+        <div class="mountain mountain-1"></div>
+        <div class="mountain mountain-2"></div>
+        <div class="mountain mountain-3"></div>
+        <div class="mountain mountain-4"></div>
+        <div class="mist"></div>
+    </div>
+
+    <!-- Status Badge -->
+    <div class="status-badge online" id="statusBadge">● Online</div>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <div class="content">
+            <!-- Header Badge -->
+            <div class="header-badge">
+                <div class="badge-dot"></div>
                 <div class="badge-text" id="accountStatus">
                     <span id="accountStatusValue">👤 សូមចូលប្រើ</span>
                 </div>
             </div>
-        </div>
 
-        <div class="card">
-            <div class="button-group">
-                <button class="btn" onclick="openV2Box('metfone')">
-                    <span>មេតហ្វូន (Metfone)</span>
-                </button>
-                <button class="btn" onclick="openV2Box('cellcard')">
-                    <span>សែលកាត (Cellcard)</span>
-                </button>
-                <button class="btn" onclick="openV2Box('smart')">
-                    <span>ស្មាត (Smart)</span>
-                </button>
+            <!-- Card -->
+            <div class="card">
+                <div class="card-title">✦ INTERNET PACKAGES</div>
+                <div class="btn-group">
+                    <button class="btn" onclick="openV2Box('metfone')">
+                        <span class="shine"></span>
+                        <span class="glow"></span>
+                        <span class="icon">📡</span> មេតហ្វូន
+                    </button>
+                    <button class="btn" onclick="openV2Box('cellcard')">
+                        <span class="shine"></span>
+                        <span class="glow"></span>
+                        <span class="icon">📱</span> សែលកាត
+                    </button>
+                    <button class="btn" onclick="openV2Box('smart')">
+                        <span class="shine"></span>
+                        <span class="glow"></span>
+                        <span class="icon">⚡</span> ស្មាត
+                    </button>
+                </div>
+                <div class="card-footer">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
             </div>
         </div>
     </div>
 
-    <button id="installBtn" class="install-prompt">📥 ដំឡើងកម្មវិធី</button>
+    <!-- Install Button -->
+    <button id="installBtn" class="install-btn">
+        <span class="icon">📥</span> ដំឡើងកម្មវិធី
+    </button>
+
+    <!-- Login Overlay -->
+    <div class="login-overlay active" id="loginOverlay">
+        <div class="login-box">
+            <div class="login-logo" id="loginLogo">🔐</div>
+            <div class="login-title" id="loginTitle">𝕊𝕂𝕐ℕ𝔼𝕋</div>
+            <div class="login-subtitle">• Secure Access •</div>
+            <div class="login-status" id="loginStatus">
+                <span id="statusText">👤 បញ្ចូល Username និង Password</span>
+            </div>
+            <div class="login-input-group">
+                <input type="text" class="login-input" id="loginUsername" placeholder="បញ្ចូល Username" autocomplete="username">
+            </div>
+            <div class="login-input-group">
+                <input type="password" class="login-input" id="loginPassword" placeholder="បញ្ចូលពាក្យសម្ងាត់..." autocomplete="current-password">
+                <button class="toggle-password" id="togglePasswordBtn" type="button" aria-label="Toggle password visibility">👁️</button>
+            </div>
+            <button class="login-btn" id="loginBtn">ចូលប្រើប្រាស់</button>
+            <div class="login-loading" id="loginLoading">
+                <div class="spinner"></div>
+                <span>កំពុងផ្ទៀងផ្ទាត់...</span>
+            </div>
+            <div class="login-error" id="loginError"></div>
+            <button class="login-telegram" onclick="window.open('https://t.me/matin_9999', '_blank')">
+                <img src="https://img.icons8.com/?size=24&id=5mIvDYZUWDCF&format=png&color=FFFFFF" alt="Telegram">
+                Contact Telegram
+            </button>
+            <div class="login-device-info">⚡ ពាក្យសម្ងាត់របស់អ្នកមិនអាចប្រើនៅលើឧបករណ៍ផ្សេងបានទេ 🤫</div>
+            <div class="login-shield">🛡️ SECURE DEVICE LOCK</div>
+        </div>
+    </div>
 
     <script>
+        // ============================================================
+        // FIREBASE CONFIG
+        // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyA-RvOzR03Ic4HefKdBycXYIK7AZyjcVn4",
             authDomain: "skynet-dec0e.firebaseapp.com",
@@ -605,195 +1195,412 @@
             appId: "1:771361401451:web:ad0389550229089003df2e",
             measurementId: "G-QRQ8QB3ME0"
         };
-        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        firebase.auth().signInAnonymously().catch((error) => console.error('Auth error:', error));
+        // Anonymous Auth
+        firebase.auth().signInAnonymously()
+            .then(() => console.log('✅ Anonymous Auth OK'))
+            .catch(err => console.error('❌ Auth failed:', err));
 
-        function updateStatusBadge() {
-            const badge = document.getElementById('statusBadge');
-            if (navigator.onLine) {
-                badge.textContent = '● Online';
-                badge.className = 'status-badge online';
-            } else {
-                badge.textContent = '● Offline';
-                badge.className = 'status-badge offline';
-            }
-        }
+        // ============================================================
+        // STATE
+        // ============================================================
+        let userCodes = { metfone: '', cellcard: '', smart: '' };
+        let userExists = { metfone: false, cellcard: false, smart: false };
+        let currentUser = null;
+        let isLoggedIn = false;
 
-        function showUpdateNotification(title, message) {
-            const oldNotif = document.querySelector('.update-notification');
-            if (oldNotif) oldNotif.remove();
-            
-            const notification = document.createElement('div');
-            notification.className = 'update-notification';
-            notification.textContent = `✨ ${title}: ${message}`;
-            document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 3000);
-        }
-
-        function getDaysRemainingFromDate(expiryDateStr) {
-            const expiryDate = new Date(expiryDateStr);
-            const now = new Date();
-            const diffTime = expiryDate.getTime() - now.getTime();
-            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        // ============================================================
+        // HELPERS
+        // ============================================================
+        function showNotification(title, message) {
+            document.querySelectorAll('.notification').forEach(el => el.remove());
+            const el = document.createElement('div');
+            el.className = 'notification';
+            el.textContent = `✨ ${title}: ${message}`;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 3000);
         }
 
         function formatDate(dateStr) {
-            const date = new Date(dateStr);
-            const day = date.getDate().toString().padStart(2, '0');
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            return `${day}/${month}/${date.getFullYear()}`;
+            const d = new Date(dateStr);
+            return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
         }
 
-        function checkUserStatus(userData) {
-            if (!userData) return { expired: true, message: 'អ្នកគ្មានគណនីសម្រាប់ប្រើប្រាស់ទេ!' };
-            if (userData.status === 'inactive') return { expired: true, message: 'គណនីត្រូវបានហាមឃាត់!' };
-            if (userData.status === 'expired' || !userData.expiryDate) return { expired: true, message: 'គណនីផុតកំណត់!' };
-            
-            const daysRemaining = getDaysRemainingFromDate(userData.expiryDate);
-            if (daysRemaining < 0) return { expired: true, message: 'គណនីផុតកំណត់!' };
-            
-            return { expired: false, daysRemaining, expiryDate: userData.expiryDate };
+        function getDaysRemaining(expiryDateStr) {
+            const diff = new Date(expiryDateStr).getTime() - Date.now();
+            return Math.ceil(diff / (1000 * 60 * 60 * 24));
         }
 
-        let userCodes = { metfone: '', cellcard: '', smart: '' };
-        let userExists = { metfone: false, cellcard: false, smart: false };
+        function checkUserStatus(user) {
+            if (!user) return { expired: true, message: 'គ្មានគណនី' };
+            if (user.status === 'inactive') return { expired: true, message: 'ត្រូវបានហាមឃាត់', reason: 'inactive' };
+            if (user.status === 'expired') return { expired: true, message: 'គណនីបានផុតកំណត់', reason: 'expired' };
+            if (!user.expiryDate) return { expired: true, message: 'គណនីបានផុតកំណត់' };
+            const days = getDaysRemaining(user.expiryDate);
+            if (days < 0) return { expired: true, message: 'គណនីបានផុតកំណត់' };
+            return { expired: false, daysRemaining: days, expiryDate: user.expiryDate };
+        }
 
         function updateAccountStatus(user) {
-            const statusEl = document.getElementById('accountStatusValue');
-            if (!statusEl) return;
-            if (!user) {
-                statusEl.textContent = '👤 សូមចូលប្រើ';
-                return;
-            }
-            
+            const el = document.getElementById('accountStatusValue');
+            if (!el) return;
+            if (!user) { el.textContent = '👤 សូមចូលប្រើ'; return; }
             const result = checkUserStatus(user);
             if (result.expired) {
-                statusEl.innerHTML = `⛔ <span class="status-inactive">${result.message}</span>`;
+                el.innerHTML = `⛔ <span class="inactive">${result.message}</span>`;
                 return;
             }
-
             const days = result.daysRemaining;
-            const expiryFormatted = formatDate(result.expiryDate);
-            let daysClass = days <= 3 ? 'status-expired' : 'status-days';
-            let daysText = days === 0 ? '⚠️ ផុតកំណត់ថ្ងៃនេះ' : `${days} ថ្ងៃ`;
-
-            statusEl.innerHTML = `
-                👤 <span class="status-user">${user.uid}</span> | 
-                📅 ${expiryFormatted} | 
-                <span class="${daysClass}">${daysText}</span>
-            `;
+            const expiry = formatDate(result.expiryDate);
+            let daysHtml = '';
+            if (days === 0) daysHtml = `<span class="expired">⚠️ ផុតកំណត់ថ្ងៃនេះ</span>`;
+            else if (days <= 3) daysHtml = `<span class="expired">⚠️ ${days} ថ្ងៃ</span>`;
+            else if (days <= 7) daysHtml = `<span class="expired">⚠️ ${days} ថ្ងៃ</span>`;
+            else daysHtml = `<span class="days">${days} ថ្ងៃ</span>`;
+            el.innerHTML = `👤 <span class="user">${user.uid}</span> &nbsp;|&nbsp; 📅 ${expiry} &nbsp;|&nbsp; ${daysHtml}`;
         }
 
         function setUserSession(user) {
+            currentUser = user;
             userCodes = { metfone: '', cellcard: '', smart: '' };
             userExists = { metfone: false, cellcard: false, smart: false };
-
             if (user.links) {
-                ['metfone', 'cellcard', 'smart'].forEach(type => {
-                    if (user.links[type]) {
-                        userCodes[type] = user.links[type];
-                        userExists[type] = true;
-                    }
-                });
+                if (user.links.metfone) { userCodes.metfone = user.links.metfone;
+                    userExists.metfone = true; }
+                if (user.links.cellcard) { userCodes.cellcard = user.links.cellcard;
+                    userExists.cellcard = true; }
+                if (user.links.smart) { userCodes.smart = user.links.smart;
+                    userExists.smart = true; }
             }
-
+            isLoggedIn = true;
+            sessionStorage.setItem('teva_logged_in', 'true');
+            sessionStorage.setItem('teva_password', user.password || '');
             document.getElementById('loginOverlay').classList.remove('active');
-            showUpdateNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
+            showNotification('ជោគជ័យ', 'បានចូលប្រើប្រាស់ដោយជោគជ័យ');
             updateAccountStatus(user);
         }
 
+        // ============================================================
+        // OPEN V2BOX
+        // ============================================================
         function openV2Box(type) {
-            if (!userExists[type] || !userCodes[type]) {
-                showUpdateNotification('កំហុស', 'អ្នកមិនបានទិញគម្រោងនេះទេ');
+            if (!userExists[type]) {
+                showNotification('កំហុស', 'អ្នកមិនបានទិញគម្រោង INTERNET នេះទេ');
                 return;
             }
-            const content = userCodes[type];
+            let content = userCodes[type] || '';
+            const nameMap = { metfone: 'METFONE', cellcard: 'CELLCARD', smart: 'SMART' };
+            const name = nameMap[type] || type.toUpperCase();
+            if (!content || content === '' || content === 'undefined' || content === 'null') {
+                showNotification('កំហុស', 'អ្នកមិនបានទិញគម្រោង INTERNET នេះទេ');
+                return;
+            }
             if (!content.startsWith('http://') && !content.startsWith('https://')) {
-                showUpdateNotification('កំហុស', 'កូដមិនត្រឹមត្រូវ');
+                showNotification('កំហុស', 'កូដមិនត្រឹមត្រូវ (ត្រូវការ URL)');
                 return;
             }
-            const v2boxUrl = `v2box://install-sub?url=${encodeURIComponent(content)}&name=${encodeURIComponent(type.toUpperCase())}`;
-            window.location.href = v2boxUrl;
+            const url = `v2box://install-sub?url=${encodeURIComponent(content)}&name=${encodeURIComponent(name)}`;
+            window.location.href = url;
+            let opened = false;
+            const onOpen = () => { opened = true;
+                document.removeEventListener('visibilitychange', onOpen);
+                window.removeEventListener('blur', onOpen); };
+            document.addEventListener('visibilitychange', onOpen);
+            window.addEventListener('blur', onOpen);
+            setTimeout(() => {
+                if (!opened) {
+                    const isAndroid = /android/i.test(navigator.userAgent);
+                    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+                    if (isAndroid) window.location.href =
+                    'https://play.google.com/store/apps/details?id=dev.hexasoftware.v2box';
+                    else if (isIOS) window.location.href = 'https://apps.apple.com/app/v2box/id6446814670';
+                }
+            }, 2500);
         }
 
+        // ============================================================
+        // PARTICLES
+        // ============================================================
+        (function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                const size = Math.random() * 3 + 1;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.animationDelay = Math.random() * 15 + 's';
+                p.style.animationDuration = 10 + Math.random() * 12 + 's';
+                p.style.opacity = Math.random() * 0.3 + 0.1;
+                container.appendChild(p);
+            }
+        })();
+
+        // ============================================================
+        // STATUS BADGE
+        // ============================================================
+        function updateStatusBadge() {
+            const el = document.getElementById('statusBadge');
+            if (navigator.onLine) { el.textContent = '● Online';
+                el.className = 'status-badge online'; } else { el.textContent = '● Offline';
+                el.className = 'status-badge offline'; }
+        }
+        window.addEventListener('online', () => { updateStatusBadge();
+            showNotification('បណ្តាញ', 'កំពុងភ្ជាប់អ៊ីនធឺណិត'); });
+        window.addEventListener('offline', () => { updateStatusBadge();
+            showNotification('បណ្តាញ', 'បានផ្តាច់អ៊ីនធឺណិត'); });
+
+        // ============================================================
+        // DEVICE FINGERPRINT
+        // ============================================================
         function getDeviceFingerprint() {
             let fp = localStorage.getItem('device_fingerprint');
             if (fp && fp.startsWith('FP_')) return fp;
-
-            const str = [navigator.userAgent, screen.width + 'x' + screen.height, navigator.language].join('|||');
+            const components = [
+                navigator.userAgent,
+                screen.width + 'x' + screen.height,
+                screen.colorDepth,
+                navigator.hardwareConcurrency || 0,
+                navigator.platform,
+                navigator.language,
+                new Date().getTimezoneOffset()
+            ];
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 200;
+                canvas.height = 50;
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#f60';
+                ctx.fillRect(125, 1, 62, 20);
+                ctx.fillStyle = '#069';
+                ctx.fillText('TEVA', 2, 15);
+                ctx.fillStyle = 'rgba(102,204,0,0.7)';
+                ctx.fillText('SECURE', 4, 17);
+                components.push(canvas.toDataURL());
+            } catch (_) {}
             let hash = 0;
-            for (let i = 0; i < str.length; i++) hash = ((hash << 5) - hash) + str.charCodeAt(i);
+            const str = components.join('|||');
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash = hash & hash;
+            }
             fp = 'FP_' + Math.abs(hash).toString(16).padStart(8, '0');
             localStorage.setItem('device_fingerprint', fp);
             return fp;
         }
+        const deviceFingerprint = getDeviceFingerprint();
 
+        // ============================================================
+        // FINGERPRINT DISPLAY (tap title 3x)
+        // ============================================================
+        let fpTapCount = 0,
+            fpTapTimer = null;
+        const titleEl = document.getElementById('loginTitle');
+        titleEl.addEventListener('click', function() {
+            fpTapCount++;
+            clearTimeout(fpTapTimer);
+            this.textContent = '𝕊𝕂𝕐ℕ𝔼𝕋 (' + fpTapCount + '/3)';
+            if (fpTapCount >= 3) {
+                fpTapCount = 0;
+                showFingerprintDisplay();
+                this.textContent = '𝕊𝕂𝕐ℕ𝔼𝕋';
+            }
+            fpTapTimer = setTimeout(() => { fpTapCount = 0;
+                this.textContent = '𝕊𝕂𝕐ℕ𝔼𝕋'; }, 3000);
+        });
+
+        function showFingerprintDisplay() {
+            const existing = document.getElementById('fpDisplay');
+            if (existing) { existing.remove(); return; }
+            const fp = getDeviceFingerprint();
+            const div = document.createElement('div');
+            div.id = 'fpDisplay';
+            div.innerHTML = `
+                <div class="fp-title">🔐 DEVICE ID</div>
+                <div class="fp-code">${fp}</div>
+                <div class="fp-actions">
+                    <button class="fp-btn fp-btn-copy" onclick="copyFingerprint()">📋 ចម្លង</button>
+                    <button class="fp-btn fp-btn-close" onclick="this.closest('#fpDisplay').remove()">✕ បិទ</button>
+                </div>
+            `;
+            document.body.appendChild(div);
+            setTimeout(() => { const el = document.getElementById('fpDisplay'); if (el) el.remove(); }, 30000);
+        }
+
+        function copyFingerprint() {
+            const fp = getDeviceFingerprint();
+            navigator.clipboard.writeText(fp).then(() => showNotification('✅', 'ចម្លងដោយជោគជ័យ!'))
+                .catch(() => alert('⚠️ សូមចម្លងដោយដៃ: ' + fp));
+        }
+
+        // ============================================================
+        // PASSWORD TOGGLE
+        // ============================================================
+        const toggleBtn = document.getElementById('togglePasswordBtn');
+        const passInput = document.getElementById('loginPassword');
+        let passVisible = false;
+        toggleBtn.addEventListener('click', () => {
+            passVisible = !passVisible;
+            passInput.type = passVisible ? 'text' : 'password';
+            toggleBtn.textContent = passVisible ? '🙈' : '👁️';
+        });
+
+        // ============================================================
+        // LOGIN SYSTEM
+        // ============================================================
         async function initLogin() {
+            const overlay = document.getElementById('loginOverlay');
             const usernameInput = document.getElementById('loginUsername');
             const passwordInput = document.getElementById('loginPassword');
             const btn = document.getElementById('loginBtn');
-            const error = document.getElementById('loginError');
-            const loading = document.getElementById('loginLoading');
+            const errorEl = document.getElementById('loginError');
+            const loadingEl = document.getElementById('loginLoading');
+            const statusEl = document.getElementById('loginStatus');
+            const statusText = document.getElementById('statusText');
+
+            // Clear session
+            sessionStorage.removeItem('teva_logged_in');
+            sessionStorage.removeItem('teva_password');
+            isLoggedIn = false;
+            overlay.classList.add('active');
+            statusText.textContent = '👤 បញ្ចូល Username និង Password';
+            statusEl.className = 'login-status';
+
+            // Clear errors on input
+            usernameInput.addEventListener('input', () => {
+                errorEl.classList.remove('show');
+                errorEl.textContent = '';
+            });
+            passwordInput.addEventListener('input', () => {
+                errorEl.classList.remove('show');
+                errorEl.textContent = '';
+            });
 
             async function handleLogin() {
                 const username = usernameInput.value.trim();
                 const password = passwordInput.value.trim();
+                errorEl.classList.remove('show');
+                errorEl.textContent = '';
 
-                error.classList.remove('show');
-                if (!username || !password) {
-                    error.textContent = 'សូមបញ្ចូល Username និង ពាក្យសម្ងាត់';
-                    error.classList.add('show');
-                    return;
-                }
+                if (!username) { errorEl.textContent = 'សូមបញ្ចូល Username';
+                    errorEl.classList.add('show');
+                    usernameInput.focus(); return; }
+                if (!password) { errorEl.textContent = 'សូមបញ្ចូលពាក្យសម្ងាត់';
+                    errorEl.classList.add('show');
+                    passwordInput.focus(); return; }
+                if (!navigator.onLine) { errorEl.textContent = '❌ ត្រូវការអ៊ីនធឺណិត';
+                    errorEl.classList.add('show'); return; }
 
-                loading.classList.add('active');
+                loadingEl.classList.add('active');
                 btn.disabled = true;
+                statusText.textContent = '⏳ កំពុងផ្ទៀងផ្ទាត់...';
+                statusEl.className = 'login-status loading';
 
                 try {
                     const snapshot = await db.ref('users/' + username).once('value');
                     const userData = snapshot.val();
-
-                    if (!userData || userData.password !== password) throw new Error('Username ឬ ពាក្យសម្ងាត់មិនត្រឹមត្រូវ');
-                    if (userData.fingerprint !== getDeviceFingerprint()) throw new Error('ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត');
-
+                    if (!userData) throw new Error('Username មិនត្រឹមត្រូវ');
+                    if (userData.password !== password) throw new Error('ពាក្យសម្ងាត់មិនត្រឹមត្រូវ');
+                    const currentFp = getDeviceFingerprint();
+                    if (userData.fingerprint !== currentFp) throw new Error('ឧបករណ៍នេះមិនត្រូវបានអនុញ្ញាត');
                     const statusCheck = checkUserStatus(userData);
                     if (statusCheck.expired) throw new Error(statusCheck.message);
-
-                    setUserSession({
+                    localStorage.setItem('teva_user_uid', username);
+                    localStorage.setItem('teva_logged_in', 'true');
+                    const user = {
                         uid: username,
-                        links: userData.links || {},
+                        links: userData.links || { metfone: '', cellcard: '', smart: '' },
                         expiryDate: userData.expiryDate,
-                        status: userData.status
-                    });
+                        status: userData.status,
+                        password: password
+                    };
+                    setUserSession(user);
                 } catch (err) {
-                    error.textContent = '❌ ' + err.message;
-                    error.classList.add('show');
+                    errorEl.textContent = '❌ ' + err.message;
+                    errorEl.classList.add('show');
+                    statusText.textContent = '❌ ' + err.message;
+                    statusEl.className = 'login-status error';
+                    passwordInput.value = '';
+                    setTimeout(() => passwordInput.focus(), 100);
                 }
-
-                loading.classList.remove('active');
+                loadingEl.classList.remove('active');
                 btn.disabled = false;
             }
 
             btn.addEventListener('click', handleLogin);
             passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(); });
+            usernameInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault();
+                    passwordInput.focus(); } });
+            setTimeout(() => usernameInput.focus(), 400);
         }
 
-        // Toggle Password Visibility
-        document.getElementById('togglePasswordBtn').addEventListener('click', function() {
-            const input = document.getElementById('loginPassword');
-            input.type = input.type === 'password' ? 'text' : 'password';
-            this.textContent = input.type === 'password' ? '👁️' : '🙈';
-        });
+        // ============================================================
+        // PWA MANIFEST
+        // ============================================================
+        (function createManifest() {
+            const LOGO = "teva.png";
+            const data = {
+                name: "𝕊𝕂𝕐ℕ𝔼𝕋",
+                short_name: "𝕊𝕂𝕐ℕ𝔼𝕋",
+                description: "𝕊𝕂𝕐ℕ𝔼𝕋🟢",
+                start_url: ".",
+                display: "standalone",
+                orientation: "portrait",
+                theme_color: "#0a0a2a",
+                background_color: "#0a0a2a",
+                icons: [
+                    { src: LOGO, sizes: "192x192", type: "image/png", purpose: "any maskable" },
+                    { src: LOGO, sizes: "512x512", type: "image/png", purpose: "any maskable" }
+                ]
+            };
+            const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = url;
+            document.head.appendChild(link);
+        })();
 
-        window.addEventListener('online', updateStatusBadge);
-        window.addEventListener('offline', updateStatusBadge);
-        
+        // ============================================================
+        // INSTALL PWA
+        // ============================================================
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'flex';
+        });
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                installBtn.style.display = 'none';
+            }
+        });
+        window.addEventListener('appinstalled', () => {
+            installBtn.style.display = 'none';
+            deferredPrompt = null;
+            showNotification('ជោគជ័យ', 'បានដំឡើងកម្មវិធី');
+        });
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            installBtn.style.display = 'none';
+        }
+
+        // ============================================================
+        // INIT
+        // ============================================================
         setTimeout(initLogin, 100);
         updateAccountStatus(null);
         updateStatusBadge();
+
+        console.log('🚀 SKYNET v3 - Redesigned with elegance');
     </script>
 </body>
 </html>
